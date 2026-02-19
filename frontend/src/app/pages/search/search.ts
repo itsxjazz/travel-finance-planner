@@ -1,63 +1,64 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; 
-import { CountryService } from '../../services/country.service';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-search',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './search.html',
-  styleUrl: './search.scss'
+  templateUrl: './search.html'
 })
 export class Search {
-  searchTerm: string = '';
-  
-  countryData = signal<any>(null);
-  errorMessage = signal<string>('');
-  private router = inject(Router); 
-  
-  private countryService = inject(CountryService);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+
+  searchQuery = signal<string>('');
+  searchResults = signal<any[]>([]); 
+  isSearching = signal<boolean>(false);
+  hasSearched = signal<boolean>(false);
 
   searchCountry() {
-    console.log('Botão clicado! Buscando por:', this.searchTerm);
-
-    if (!this.searchTerm) return;
+    if (!this.searchQuery().trim()) return;
     
-    this.errorMessage.set('');
-    this.countryData.set(null);
+    this.isSearching.set(true);
+    this.hasSearched.set(false);
 
-    this.countryService.getCountry(this.searchTerm).subscribe({
+    const url = `https://restcountries.com/v3.1/translation/${this.searchQuery()}`;
+
+    this.http.get<any[]>(url).subscribe({
       next: (data) => {
         console.log('Sucesso! Dados recebidos da API:', data);
-        this.countryData.set(data[0]); 
+        this.searchResults.set(data);
+        this.isSearching.set(false);
+        this.hasSearched.set(true);
       },
       error: (err) => {
-        console.error('Ops, deu erro na API:', err);
-        this.errorMessage.set('País não encontrado. Tente outro nome.');
+        console.error('Erro na busca ou país não encontrado', err);
+        this.searchResults.set([]);
+        this.isSearching.set(false);
+        this.hasSearched.set(true);
       }
     });
   }
 
-  getCurrencyCode(): string {
-    const data = this.countryData(); 
-    if (data?.currencies) {
-      return Object.keys(data.currencies)[0]; 
-    }
-    return 'N/A';
-  }
+  selectCountry(apiCountry: any) {
+    const currencyCode = this.getCurrencyCode(apiCountry); // Usa a nova função segura
+    const countryName = apiCountry.translations?.por?.common || apiCountry.name.common;
 
-  goToPlanner() {
-    const data = this.countryData();
-    if (!data) return;
-
-    const tripPayload = {
-      destination: data.name.common,
-      countryCode: this.getCurrencyCode(),
-      flagUrl: data.flags.svg
+    const tripData = {
+      destination: countryName,
+      countryCode: currencyCode,
+      flagUrl: apiCountry.flags.svg
     };
 
-    this.router.navigate(['/planner'], { state: { tripData: tripPayload } });
+    this.router.navigate(['/planner'], { state: { tripData: tripData } });
+  }
+
+  getCurrencyCode(country: any): string {
+    if (!country || !country.currencies) return 'N/A';
+    const keys = Object.keys(country.currencies);
+    return keys.length > 0 ? keys[0] : 'N/A';
   }
 }
