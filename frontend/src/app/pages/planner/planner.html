@@ -1,4 +1,19 @@
-<div *ngIf="tripDetails" style="max-width: 500px; padding: 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
+<div *ngIf="!tripDetails" style="max-width: 500px; margin: 80px auto; text-align: center; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;">
+  
+  <div style="font-size: 4rem; margin-bottom: 10px;">🌍</div>
+  <h2 style="color: #2c3e50; margin-bottom: 10px;">Nenhum destino selecionado</h2>
+  <p style="color: #777; margin-bottom: 25px; line-height: 1.5;">
+    Para fazer o seu planejamento financeiro, você precisa escolher para qual país deseja viajar primeiro!
+  </p>
+  
+  <button 
+    (click)="goToSearch()" 
+    style="padding: 12px 25px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%;">
+    🔍 Buscar um Destino
+  </button>
+</div>
+
+<div *ngIf="tripDetails" style="max-width: 500px; margin: 0 auto; padding: 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
   
   <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
     <img [src]="tripDetails.flagUrl" style="width: 50px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -64,10 +79,8 @@
         </div>
       </div>
 
-      <div *ngIf="monthsToGoal() !== Infinity && monthsToGoal() > 0" style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
-      
       <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Viaje em <strong>{{ monthsToGoal() }} meses</strong>!</h4>
-      <p style="margin: 5px 0 15px; color: #555;">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy' }}</strong></p>
+      <p style="margin: 5px 0 15px; color: #555;">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy':'':'pt-BR' }}</strong></p>
 
       <div style="border-top: 1px dashed #d4edda; padding-top: 15px;">
         <button 
@@ -84,3 +97,5 @@
       </div>
 
     </div>
+  </div>
+</div>

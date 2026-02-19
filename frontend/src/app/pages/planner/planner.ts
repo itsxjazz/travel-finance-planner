@@ -5,6 +5,7 @@ import { CurrencyService } from '../../services/currency.service';
 import { TaxService } from '../../services/tax.service';
 import { TripService } from '../../services/trip.service';
 import { Chart, registerables } from 'chart.js';
+import { Router } from '@angular/router';
 
 Chart.register(...registerables);
 
@@ -22,6 +23,7 @@ export class Planner implements OnInit {
   private taxService = inject(TaxService);
   private tripService = inject(TripService);
   private platformId = inject(PLATFORM_ID);
+  private router = inject(Router);
   
   readonly Infinity = Infinity;
   tripDetails: any = null;
@@ -236,5 +238,9 @@ export class Planner implements OnInit {
     console.error('Erro ao salvar no banco de dados:', err);
     this.isSaving.set(false);
     alert('Ocorreu um erro ao processar sua solicitação. Verifique se o backend está rodando.');
+  }
+
+  goToSearch() {
+    this.router.navigate(['/search']); 
   }
 }

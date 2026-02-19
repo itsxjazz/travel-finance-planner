@@ -1,7 +1,12 @@
-<nav style="padding: 1rem; background-color: #f8f9fa; margin-bottom: 20px;">
-  <a routerLink="/" style="margin-right: 15px;">Dashboard</a>
-  <a routerLink="/search" style="margin-right: 15px;">Buscar Destino</a>
-  <a routerLink="/planner">Planejamento</a>
+<nav style="padding: 15px 20px; background-color: #ffffff; margin-bottom: 20px; border-bottom: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; gap: 20px; align-items: center;">
+  
+  <span style="font-size: 1.5rem; margin-right: 10px;">✈️</span>
+
+  <a routerLink="/" style="text-decoration: none; color: #2c3e50; font-weight: 600; font-size: 0.95rem; transition: color 0.2s;">Início</a>
+  <a routerLink="/dashboard" style="text-decoration: none; color: #2c3e50; font-weight: 600; font-size: 0.95rem; transition: color 0.2s;">Minhas Viagens</a>
+  <a routerLink="/search" style="text-decoration: none; color: #2c3e50; font-weight: 600; font-size: 0.95rem; transition: color 0.2s;">Buscar Destino</a>
+  <a routerLink="/planner" style="text-decoration: none; color: #2c3e50; font-weight: 600; font-size: 0.95rem; transition: color 0.2s;">Planejamento</a>
+
 </nav>
 
 <router-outlet></router-outlet>

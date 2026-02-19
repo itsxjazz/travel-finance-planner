@@ -1,0 +1,47 @@
+<div style="font-family: sans-serif; background: #fdfdfd; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+  
+  <div style="text-align: center; max-width: 850px; padding: 60px 20px;">
+    <div style="font-size: 4.5rem; margin-bottom: 20px; animation: float 3s ease-in-out infinite;">✈️🌍</div>
+    
+    <h1 style="color: #2c3e50; font-size: 2.8rem; margin-bottom: 20px; font-weight: 800; line-height: 1.2;">
+      Viaje pelo mundo na sua próxima conquista financeira.
+    </h1>
+    
+    <p style="color: #555; font-size: 1.15rem; line-height: 1.6; margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto;">
+      O <strong>Country Bucket List</strong> é o seu planejador de viagens inteligente. Descubra o custo do seu destino, acompanhe gráficos de câmbio e saiba exatamente quanto guardar por mês rendendo no CDI para embarcar na data certa.
+    </p>
+    
+    <button 
+      (click)="startPlanning()"
+      style="padding: 16px 40px; background: #27ae60; color: white; border: none; border-radius: 50px; font-size: 1.15rem; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);">
+        Começar meu Planejamento
+    </button>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1100px; width: 100%; padding: 20px; margin-top: 20px;">
+    
+    <div style="background: white; padding: 35px 25px; border-radius: 16px; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.03); text-align: center; transition: transform 0.3s;">
+      <div style="font-size: 2.5rem; margin-bottom: 20px;">🔍</div>
+      <h3 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.3rem;">Busca Global</h3>
+      <p style="color: #777; font-size: 0.95rem; line-height: 1.6;">Encontre qualquer destino e conecte-se instantaneamente aos dados oficiais de moeda e bandeira via API.</p>
+    </div>
+
+    <div style="background: white; padding: 35px 25px; border-radius: 16px; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.03); text-align: center; transition: transform 0.3s;">
+      <div style="font-size: 2.5rem; margin-bottom: 20px;">📈</div>
+      <h3 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.3rem;">Matemática Real</h3>
+      <p style="color: #777; font-size: 0.95rem; line-height: 1.6;">Simule o desconto do Imposto de Renda e acompanhe gráficos de flutuação de moedas usando dados históricos.</p>
+    </div>
+
+    <div style="background: white; padding: 35px 25px; border-radius: 16px; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.03); text-align: center; transition: transform 0.3s;">
+      <div style="font-size: 2.5rem; margin-bottom: 20px;">☁️</div>
+      <h3 style="color: #2c3e50; margin-bottom: 12px; font-size: 1.3rem;">Sincronização na Nuvem</h3>
+      <p style="color: #777; font-size: 0.95rem; line-height: 1.6;">Salve suas metas em um banco de dados seguro, acompanhe sua barra de progresso e edite seus planos de qualquer lugar.</p>
+    </div>
+
+  </div>
+  
+  <div style="margin-top: 60px; padding: 20px; color: #aaa; font-size: 0.85rem; text-align: center;">
+    Desenvolvido com Angular, Node.js e MongoDB por Jessica.
+  </div>
+
+</div>
