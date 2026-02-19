@@ -1,0 +1,22 @@
+@apiUrl = http://localhost:5000/api/trips
+
+### 1. Criar um novo planeamento de viagem (POST)
+POST {{apiUrl}}
+Content-Type: application/json
+
+{
+  "destination": "Japão",
+  "countryCode": "JPY",
+  "flagUrl": "https://flagcdn.com/jp.svg",
+  "financialGoalLocal": 500000,
+  "financialGoalBrl": 18000,
+  "currentSavingsBrl": 5000,
+  "monthlyContributionBrl": 500
+}
+
+### 2. Listar todas as viagens (GET)
+GET {{apiUrl}}
+
+### 3. Eliminar uma viagem (DELETE)
+# Substitua o ID_AQUI por um _id real gerado no passo anterior
+DELETE {{apiUrl}}/ID_AQUI
