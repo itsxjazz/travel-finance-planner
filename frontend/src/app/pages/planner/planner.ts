@@ -3,6 +3,7 @@ import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrencyService } from '../../services/currency.service';
 import { TaxService } from '../../services/tax.service';
+import { TripService } from '../../services/trip.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -19,18 +20,21 @@ export class Planner implements OnInit {
   
   private currencyService = inject(CurrencyService);
   private taxService = inject(TaxService);
+  private tripService = inject(TripService);
   private platformId = inject(PLATFORM_ID); // Injeção necessária para detectar o ambiente
   
   readonly Infinity = Infinity;
   tripDetails: any = null;
   chart: any;
-  
+
   localGoal = signal<number>(0); 
   exchangeRate = signal<number>(0); 
   currentSavings = signal<number>(0);
   monthlyContribution = signal<number>(0);
   cdiRate = signal<number>(0);
   indexPercentage = signal<number>(100); 
+  isSaving = signal<boolean>(false); 
+  saveSuccess = signal<boolean>(false);
 
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
@@ -180,5 +184,37 @@ export class Planner implements OnInit {
     if (!value) { signalRef.set(0); return; }
     let cleanValue = value.replace(/\./g, '').replace(/,/g, '.');
     signalRef.set(parseFloat(cleanValue) || 0);
+  }
+
+  saveTrip() {
+    if (this.monthsToGoal() === Infinity || this.monthsToGoal() === 0) return;
+
+    this.isSaving.set(true);
+
+    const payload = {
+      destination: this.tripDetails.destination,
+      countryCode: this.tripDetails.countryCode,
+      flagUrl: this.tripDetails.flagUrl,
+      financialGoalLocal: this.localGoal(),
+      financialGoalBrl: this.brlGoal(),
+      currentSavingsBrl: this.currentSavings(),
+      monthlyContributionBrl: this.monthlyContribution(),
+      estimatedTravelDate: this.travelDate()
+    };
+
+    this.tripService.saveTripPlan(payload).subscribe({
+      next: (response) => {
+        console.log('Planejamento salvo com sucesso no MongoDB!', response);
+        this.isSaving.set(false);
+        this.saveSuccess.set(true);
+        
+        setTimeout(() => this.saveSuccess.set(false), 3000);
+      },
+      error: (err) => {
+        console.error('Erro ao salvar no banco de dados:', err);
+        this.isSaving.set(false);
+        alert('Ocorreu um erro ao salvar o planejamento. Verifique se o backend está rodando.');
+      }
+    });
   }
 }
