@@ -31,6 +31,21 @@ router.delete('/:id', async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
+}); 
+
+// PUT /api/trips/:id - Atualizar um planejamento existente
+router.put('/:id', async (req, res) => {
+    try {
+        // O { new: true } garante que o Mongoose devolva o documento já atualizado
+        const updatedTrip = await Trip.findByIdAndUpdate(
+            req.params.id, 
+            req.body, 
+            { new: true } 
+        );
+        res.json(updatedTrip);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
 });
 
 module.exports = router;

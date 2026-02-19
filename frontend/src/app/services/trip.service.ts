@@ -7,14 +7,21 @@ import { Observable } from 'rxjs';
 })
 export class TripService {
   private http = inject(HttpClient);
-  // URL base do servidor Node.js (ajuste a porta se o seu backend estiver rodando em uma diferente)
-    private apiUrl = 'https://ideal-barnacle-694w6v5p76w7h4qwj-5000.app.github.dev/api/trips';
+  private apiUrl = 'https://ideal-barnacle-694w6v5p76w7h4qwj-5000.app.github.dev/api/trips';
 
   saveTripPlan(tripData: any): Observable<any> {
     return this.http.post(this.apiUrl, tripData);
   }
 
-    getTrips(): Observable<any[]> {
-     return this.http.get<any[]>(this.apiUrl);
-    }
+  getTrips(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
+  }
+
+  updateTrip(id: string, tripData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, tripData);
+  }
+
+  deleteTrip(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
 }

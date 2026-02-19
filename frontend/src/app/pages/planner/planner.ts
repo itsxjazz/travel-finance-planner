@@ -21,7 +21,7 @@ export class Planner implements OnInit {
   private currencyService = inject(CurrencyService);
   private taxService = inject(TaxService);
   private tripService = inject(TripService);
-  private platformId = inject(PLATFORM_ID); // Injeção necessária para detectar o ambiente
+  private platformId = inject(PLATFORM_ID);
   
   readonly Infinity = Infinity;
   tripDetails: any = null;
@@ -38,6 +38,9 @@ export class Planner implements OnInit {
 
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
+
+  isEditing = signal<boolean>(false);
+  tripId = signal<string | null>(null);  
 
   private getIRRate(months: number): number {
     if (months <= 6) return 0.225;
@@ -110,10 +113,18 @@ export class Planner implements OnInit {
   });
 
   ngOnInit() {
-    // Protegemos o acesso ao 'history' e outras APIs de browser
     if (isPlatformBrowser(this.platformId)) {
       if (history.state && history.state.tripData) {
         this.tripDetails = history.state.tripData;
+        
+        if (history.state.isEditing) {
+          this.isEditing.set(true);
+          this.tripId.set(this.tripDetails._id);
+          this.localGoal.set(this.tripDetails.financialGoalLocal);
+          this.currentSavings.set(this.tripDetails.currentSavingsBrl);
+          this.monthlyContribution.set(this.tripDetails.monthlyContributionBrl);
+        }
+
         this.fetchRate();    
         this.fetchCDI(); 
         this.loadHistoricalData();
@@ -134,7 +145,6 @@ export class Planner implements OnInit {
   }
 
   loadHistoricalData() {
-    // Gráficos dependem do DOM, então só rodam no browser
     if (isPlatformBrowser(this.platformId)) {
       this.currencyService.getHistoricalRates(this.tripDetails.countryCode).subscribe(data => {
         const historyData = [...data].reverse();
@@ -202,19 +212,29 @@ export class Planner implements OnInit {
       estimatedTravelDate: this.travelDate()
     };
 
-    this.tripService.saveTripPlan(payload).subscribe({
-      next: (response) => {
-        console.log('Planejamento salvo com sucesso no MongoDB!', response);
-        this.isSaving.set(false);
-        this.saveSuccess.set(true);
-        
-        setTimeout(() => this.saveSuccess.set(false), 3000);
-      },
-      error: (err) => {
-        console.error('Erro ao salvar no banco de dados:', err);
-        this.isSaving.set(false);
-        alert('Ocorreu um erro ao salvar o planejamento. Verifique se o backend está rodando.');
-      }
-    });
+    if (this.isEditing() && this.tripId()) {
+      this.tripService.updateTrip(this.tripId()!, payload).subscribe({
+        next: (response) => this.handleSaveSuccess(),
+        error: (err) => this.handleSaveError(err)
+      });
+    } else {
+      this.tripService.saveTripPlan(payload).subscribe({
+        next: (response) => this.handleSaveSuccess(),
+        error: (err) => this.handleSaveError(err)
+      });
+    }
+  }
+
+  handleSaveSuccess() {
+    console.log('Operação realizada com sucesso!');
+    this.isSaving.set(false);
+    this.saveSuccess.set(true);
+    setTimeout(() => this.saveSuccess.set(false), 3000);
+  }
+
+  handleSaveError(err: any) {
+    console.error('Erro ao salvar no banco de dados:', err);
+    this.isSaving.set(false);
+    alert('Ocorreu um erro ao processar sua solicitação. Verifique se o backend está rodando.');
   }
 }
