@@ -1,22 +1,31 @@
 <div *ngIf="tripDetails" style="max-width: 500px; padding: 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
   
-  <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+  <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
     <img [src]="tripDetails.flagUrl" style="width: 50px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
     <h2 style="margin: 0; color: #2c3e50;">Meta: {{ tripDetails.destination }}</h2>
   </div>
 
-  <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
+  <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+    <p style="font-size: 0.75rem; color: #999; margin: 0 0 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">
+      Histórico da Moeda (Últimos 12 meses)
+    </p>
+    <div style="height: 160px; position: relative;">
+      <canvas #currencyChart></canvas>
+    </div>
+  </div>
+
+  <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
     <h3 style="margin: 0 0 15px; font-size: 1rem; color: #555;">Objetivo da Viagem</h3>
-    <label style="font-size: 0.8rem; color: #999;">Valor em <strong>{{ tripDetails.countryCode }}</strong>:</label>
+    <label style="font-size: 0.8rem; color: #999;">Valor total em <strong>{{ tripDetails.countryCode }}</strong>:</label>
     <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)" placeholder="Ex: 1000" style="display: block; width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; outline: none; box-sizing: border-box;">
     
     <div style="margin-top: 15px; display: flex; justify-content: space-between; border-top: 1px dashed #eee; padding-top: 15px;">
-      <span style="font-size: 0.9rem; color: #777;">Cotação: <strong>{{ exchangeRate() | currency:'BRL' }}</strong></span>
+      <span style="font-size: 0.9rem; color: #777;">Cotação Atual: <strong>{{ exchangeRate() | currency:'BRL':'symbol':'1.2-2' }}</strong></span>
       <span style="font-weight: bold; color: #27ae60;">Total: {{ brlGoal() | currency:'BRL' }}</span>
     </div>
   </div>
 
-  <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee;">
+  <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <h3 style="margin: 0; font-size: 1rem; color: #555;">Minha Caixinha</h3>
       <div style="font-size: 0.85rem; color: #666; background: #f8f9fa; padding: 4px 8px; border-radius: 6px; border: 1px solid #eee;">
@@ -30,7 +39,7 @@
         <input type="text" [value]="currentSavings()" (input)="handleInput($event, currentSavings)" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
       </div>
       <div>
-        <label style="font-size: 0.8rem; color: #999;">Vou guardar/mês (R$)</label>
+        <label style="font-size: 0.8rem; color: #999;">Guardar/mês (R$)</label>
         <input type="text" [value]="monthlyContribution()" (input)="handleInput($event, monthlyContribution)" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
       </div>
     </div>
@@ -38,15 +47,15 @@
     <div *ngIf="monthsToGoal() !== Infinity && monthsToGoal() > 0" style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
       
       <div *ngIf="redemptionDetails()" style="margin-bottom: 15px; border-bottom: 1px solid #d4edda; padding-bottom: 12px;">
-        <span style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 12px;">PROJEÇÃO LÍQUIDA:</span>
-        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; color: #444;">
+        <span style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 10px;">PROJEÇÃO NO RESGATE:</span>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.95rem; color: #444;">
           <div style="display: flex; justify-content: space-between;">
-            <span>Saldo Final Resgatado:</span>
+            <span>Saldo Líquido (Final):</span>
             <strong style="color: #27ae60;">{{ redemptionDetails()?.netRedemption | currency:'BRL' }}</strong>
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #888;">
-            <span>Rendimento Bruto:</span>
-            <span>+ {{ redemptionDetails()?.grossInterest | currency:'BRL' }}</span>
+            <span>Lucro Real (pós-IR):</span>
+            <span>+ {{ (redemptionDetails()?.netRedemption! - redemptionDetails()?.totalInvested!) | currency:'BRL' }}</span>
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #888;">
             <span>IR Pago ({{ redemptionDetails()?.irRatePercentage }}%):</span>
@@ -56,7 +65,7 @@
       </div>
 
       <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Em <strong>{{ monthsToGoal() }} meses</strong> você viaja!</h4>
-      <p style="margin: 5px 0 0; color: #555;">Estimativa: <strong>{{ travelDate() | date:'MMMM / yyyy' }}</strong></p>
+      <p style="margin: 5px 0 0; color: #555;">Estimativa de chegada: <strong>{{ travelDate() | date:'MMMM / yyyy' }}</strong></p>
     </div>
   </div>
 

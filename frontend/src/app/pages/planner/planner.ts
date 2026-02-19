@@ -1,8 +1,11 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, signal, computed, ElementRef, ViewChild, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrencyService } from '../../services/currency.service';
 import { TaxService } from '../../services/tax.service';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-planner',
@@ -12,31 +15,31 @@ import { TaxService } from '../../services/tax.service';
   styleUrl: './planner.scss'
 })
 export class Planner implements OnInit {
+  @ViewChild('currencyChart') chartCanvas!: ElementRef;
+  
   private currencyService = inject(CurrencyService);
   private taxService = inject(TaxService);
+  private platformId = inject(PLATFORM_ID); // Injeção necessária para detectar o ambiente
+  
   readonly Infinity = Infinity;
   tripDetails: any = null;
+  chart: any;
   
-  // Inputs Financeiros
   localGoal = signal<number>(0); 
   exchangeRate = signal<number>(0); 
   currentSavings = signal<number>(0);
   monthlyContribution = signal<number>(0);
-
-  // Configuração da Caixinha
   cdiRate = signal<number>(0);
-  indexPercentage = signal<number>(100); // O usuário define (ex: 100%, 110%)
+  indexPercentage = signal<number>(100); 
 
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
-
-  // Taxa Anual Final (CDI * %)
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
 
   private getIRRate(months: number): number {
     if (months <= 6) return 0.225;
     if (months <= 12) return 0.20;
     if (months <= 24) return 0.175;
-    return 0.15; // Tabela Regressiva
+    return 0.15;
   }
 
   monthsToGoal = computed(() => {
@@ -50,18 +53,15 @@ export class Planner implements OnInit {
     let months = 0;
     let balanceGross = initial;
     const annualRate = this.finalAnnualTax() / 100;
-    const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1; // Taxa Geométrica
+    const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
 
     while (months < 600) {
       months++;
-      // Saldo rende -> Depois entra o aporte
       balanceGross = (balanceGross * (1 + monthlyRate)) + monthlyAdd;
-
-      const totalInvested = initial + (monthlyAdd * months);
-      const profit = balanceGross - totalInvested;
+      const totalInvestedSoFar = initial + (monthlyAdd * months);
+      const profit = balanceGross - totalInvestedSoFar;
       const ir = this.getIRRate(months);
-      const netBalance = totalInvested + (profit * (1 - ir));
-
+      const netBalance = totalInvestedSoFar + (profit * (1 - ir));
       if (netBalance >= target) return months;
     }
     return Infinity;
@@ -106,10 +106,14 @@ export class Planner implements OnInit {
   });
 
   ngOnInit() {
-    if (history.state && history.state.tripData) {
-      this.tripDetails = history.state.tripData;
-      this.fetchRate();    
-      this.fetchCDI(); 
+    // Protegemos o acesso ao 'history' e outras APIs de browser
+    if (isPlatformBrowser(this.platformId)) {
+      if (history.state && history.state.tripData) {
+        this.tripDetails = history.state.tripData;
+        this.fetchRate();    
+        this.fetchCDI(); 
+        this.loadHistoricalData();
+      }
     }
   }
 
@@ -120,7 +124,55 @@ export class Planner implements OnInit {
   }
 
   fetchCDI() {
-    this.taxService.getRate('CDI').subscribe(rate => this.cdiRate.set(rate));
+    this.taxService.getRate('CDI').subscribe((rate: number) => {
+      this.cdiRate.set(rate);
+    });
+  }
+
+  loadHistoricalData() {
+    // Gráficos dependem do DOM, então só rodam no browser
+    if (isPlatformBrowser(this.platformId)) {
+      this.currencyService.getHistoricalRates(this.tripDetails.countryCode).subscribe(data => {
+        const historyData = [...data].reverse();
+        const labels = historyData.map(d => {
+          const date = new Date(parseInt(d.timestamp) * 1000);
+          return date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+        });
+        const values = historyData.map(d => parseFloat(d.bid));
+        const filteredLabels = labels.filter((_, i) => i % 30 === 0);
+        const filteredValues = values.filter((_, i) => i % 30 === 0);
+        this.createChart(filteredLabels, filteredValues);
+      });
+    }
+  }
+
+  createChart(labels: string[], data: number[]) {
+    if (this.chart) this.chart.destroy();
+    this.chart = new Chart(this.chartCanvas.nativeElement, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: `${this.tripDetails.countryCode}/BRL`,
+          data: data,
+          borderColor: '#27ae60',
+          backgroundColor: 'rgba(39, 174, 96, 0.05)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: false, grid: { display: false }, ticks: { font: { size: 10 } } },
+          x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+        }
+      }
+    });
   }
 
   handleInput(event: any, signalRef: any) {

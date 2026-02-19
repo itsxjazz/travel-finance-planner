@@ -20,4 +20,9 @@ export class CurrencyService {
       })
     );
   }
+  getHistoricalRates(countryCode: string): Observable<any[]> {
+  // O endpoint /daily/ traz o histórico. 360 é o número de dias.
+  const url = `https://economia.awesomeapi.com.br/json/daily/${countryCode}-BRL/360`;
+  return this.http.get<any[]>(url);
+}
 }
