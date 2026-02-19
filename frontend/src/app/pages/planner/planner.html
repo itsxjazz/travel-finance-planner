@@ -1,1 +1,16 @@
-<p>planner works!</p>
+<div style="padding: 20px;">
+  
+  <div *ngIf="tripDetails" style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+    <img [src]="tripDetails.flagUrl" alt="Bandeira" style="width: 80px; border-radius: 5px; border: 1px solid #ddd;">
+    <div>
+      <h2 style="margin: 0;">Planejamento: {{ tripDetails.destination }}</h2>
+      <p style="margin: 0; color: #666;">Moeda de destino: <strong>{{ tripDetails.countryCode }}</strong></p>
+    </div>
+  </div>
+
+  <div *ngIf="!tripDetails" style="text-align: center; margin-top: 50px;">
+    <h3>Nenhum destino selecionado.</h3>
+    <a routerLink="/search" style="color: #007bff; text-decoration: none;">← Voltar para a Busca</a>
+  </div>
+
+</div>

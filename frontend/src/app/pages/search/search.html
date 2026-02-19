@@ -1,1 +1,31 @@
-<p>search works!</p>
+<div style="padding: 20px;">
+  <h2>Para onde você quer viajar?</h2>
+  
+  <div style="margin-bottom: 20px;">
+    <input 
+      type="text" 
+      id="countrySearch"
+      name="countrySearch"
+      [(ngModel)]="searchTerm" 
+      placeholder="Ex: Japão, França, Canada..." 
+      style="padding: 10px; width: 250px; border-radius: 5px; border: 1px solid #ccc;">
+    
+      <button (click)="searchCountry()" style="padding: 10px 20px; margin-left: 10px; cursor: pointer;">
+      Buscar
+    </button>
+  </div>
+
+  <p *ngIf="errorMessage()" style="color: red;">{{ errorMessage() }}</p>
+
+  <div *ngIf="countryData()" style="border: 1px solid #ddd; padding: 20px; width: 300px; border-radius: 10px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+    <h3>{{ countryData().name.common }}</h3>
+    
+    <img [src]="countryData().flags.svg" alt="Bandeira" style="width: 150px; border: 1px solid #eee; margin: 10px 0;">
+    
+    <p><strong>Moeda Local:</strong> {{ getCurrencyCode() }}</p>
+    
+    <button (click)="goToPlanner()" style="background-color: #007bff; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px;">
+      Continuar Planejamento
+    </button>
+  </div>
+</div>
