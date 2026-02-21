@@ -7,8 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class TripService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://ideal-barnacle-694w6v5p76w7h4qwj-5000.app.github.dev/api/trips';
-
+  private apiUrl = 'http://localhost:5000/api/trips';
   saveTripPlan(tripData: any): Observable<any> {
     return this.http.post(this.apiUrl, tripData);
   }
@@ -26,11 +25,11 @@ export class TripService {
   }
 
   calculateSmartBudget(preferences: any): Observable<any> {
-    
+
     const cleanBaseUrl = this.apiUrl.replace('/trips', '');
     const endpoint = `${cleanBaseUrl}/budget/calculate`;
-    console.log('Testando URL corrigida:', endpoint); 
-    
+    console.log('Testando URL corrigida:', endpoint);
+
     return this.http.post(endpoint, preferences);
   }
 }

@@ -3,7 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const tripRoutes = require('./routes/tripRoutes');
-const budgetRoutes = require('./routes/budgetRoutes'); 
+const budgetRoutes = require('./routes/budgetRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
@@ -13,7 +14,8 @@ app.use(express.json());
 
 // Rotas
 app.use('/api/trips', tripRoutes);
-app.use('/api/budget', budgetRoutes); 
+app.use('/api/budget', budgetRoutes);
+app.use('/api/auth', authRoutes);
 
 
 // Conexão com o MongoDB
