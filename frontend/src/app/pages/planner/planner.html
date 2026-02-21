@@ -40,6 +40,24 @@
     </div>
   </div>
 
+<app-budget-estimator 
+  [destinationName]="tripDetails?.destination" 
+  (estimateRequested)="generateBudget($event)">
+</app-budget-estimator>
+
+  <div class="budget-visualizer" *ngIf="budgetResult()">
+  <h3>Divisão Estimada do Investimento</h3>
+  <div class="chart-container" style="position: relative; height:250px; width:100%">
+    <canvas #budgetChartCanvas></canvas>
+  </div>
+  
+  <div class="budget-details">
+    <p>✈️ Passagens: <strong>{{ budgetResult().breakdown.flight | currency:tripDetails.countryCode }}</strong></p>
+    <p>🏨 Hotel: <strong>{{ budgetResult().breakdown.hotel | currency:tripDetails.countryCode }}</strong></p>
+    <p>🍱 Diárias: <strong>{{ budgetResult().breakdown.dailyExpenses | currency:tripDetails.countryCode }}</strong></p>
+  </div>
+</div>
+  
   <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <h3 style="margin: 0; font-size: 1rem; color: #555;">Minha Caixinha</h3>

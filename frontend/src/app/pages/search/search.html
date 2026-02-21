@@ -20,9 +20,30 @@
     </button>
   </div>
 
-  <div *ngIf="hasSearched() && searchResults().length === 0" style="color: #e74c3c; padding: 20px; background: #fff1f0; border-radius: 8px;">
-    Nenhum país encontrado. Tente buscar pelo nome em inglês ou verifique a ortografia!
+  <div *ngIf="hasSearched() && searchResults().length === 0" style="text-align: center; padding: 30px; background: #fff3f3; border-radius: 12px; border: 1px solid #ffcdd2; margin-top: 20px;">
+  
+  <span style="font-size: 2rem; display: block; margin-bottom: 10px;">🌍</span>
+  
+  <p style="color: #d32f2f; font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;">
+    Destino não encontrado ou fora da nossa área de cobertura atual.
+  </p>
+  
+  <p style="color: #666; font-size: 0.9rem; margin-bottom: 25px;">
+    Tente buscar pelo nome em inglês ou verifique a ortografia. Nossos motores buscam atualmente nos 27 principais destinos globais.
+  </p>
+
+  <div style="padding-top: 20px; border-top: 1px dashed #ffcdd2;">
+    <p style="color: #555; font-size: 0.9rem; margin-bottom: 15px; font-weight: 500;">
+      Quer muito planejar uma viagem para esse lugar? Me avise!
+    </p>
+    
+    <a href="mailto:devjessicarodrigues@gmail.com?subject=Sugestão de Destino - Travel Planner&body=Olá! Tentei buscar o país [ESCREVA O NOME DO PAÍS AQUI], mas ele não está disponível. Gostaria de sugerir a adição dele no sistema."
+       style="display: inline-flex; align-items: center; gap: 8px; background: #2c3e50; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 0.95rem; font-weight: bold; transition: background 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      ✉️ Sugerir Novo País
+    </a>
   </div>
+  
+</div>
 
   <div *ngIf="searchResults().length > 0" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; text-align: left;">
     

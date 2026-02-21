@@ -19,6 +19,18 @@ export class Search {
   isSearching = signal<boolean>(false);
   hasSearched = signal<boolean>(false);
 
+  // A LISTA DE OURO: Países que Amadeus e AwesomeAPI suportam perfeitamente
+  private verifiedCountries = [
+    // Américas
+    'BRA', 'USA', 'CAN', 'MEX', 'ARG', 'CHL', 'COL', 'PER', 'URY',
+    // Europa
+    'FRA', 'GBR', 'PRT', 'ESP', 'ITA', 'DEU', 'NLD', 'CHE', 'BEL', 'AUT',
+    // Ásia e Oceania
+    'JPN', 'KOR', 'SGP', 'THA', 'ARE', 'AUS', 'NZL',
+    // África
+    'EGY'
+  ];
+  
   searchCountry() {
     if (!this.searchQuery().trim()) return;
     
@@ -29,8 +41,15 @@ export class Search {
 
     this.http.get<any[]>(url).subscribe({
       next: (data) => {
-        console.log('Sucesso! Dados recebidos da API:', data);
-        this.searchResults.set(data);
+        // FILTRO ESTRATÉGICO: 
+        // Filtramos o array 'data' para manter apenas países cujos códigos (cca3) estão na nossa lista.
+        const filteredResults = data.filter(country => 
+          this.verifiedCountries.includes(country.cca3)
+        );
+
+        console.log('Países encontrados e filtrados:', filteredResults);
+        
+        this.searchResults.set(filteredResults);
         this.isSearching.set(false);
         this.hasSearched.set(true);
       },
@@ -44,7 +63,7 @@ export class Search {
   }
 
   selectCountry(apiCountry: any) {
-    const currencyCode = this.getCurrencyCode(apiCountry); // Usa a nova função segura
+    const currencyCode = this.getCurrencyCode(apiCountry);
     const countryName = apiCountry.translations?.por?.common || apiCountry.name.common;
 
     const tripData = {

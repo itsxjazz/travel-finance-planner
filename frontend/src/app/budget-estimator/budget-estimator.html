@@ -1,0 +1,78 @@
+<div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+  
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+    <span style="font-size: 1.5rem;">✈️</span>
+    <h3 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Gerador de Orçamento Inteligente</h3>
+  </div>
+  
+  <p style="font-size: 0.85rem; color: #777; margin-bottom: 20px; line-height: 1.5;">
+    Configure os detalhes da sua viagem. Nossos motores buscarão os valores reais.
+  </p>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+    <div>
+      <label style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase;">Origem (IATA)</label>
+      <input type="text" [ngModel]="originCode()" (ngModelChange)="originCode.set($event)" placeholder="Ex: GRU" maxlength="3" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; text-transform: uppercase; font-weight: bold; text-align: center;">
+    </div>
+    <div>
+      <label style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase;">Destino (IATA)</label>
+      <div style="width: 100%; padding: 10px; margin-top: 5px; background: #e9ecef; border: 1px solid #ddd; border-radius: 6px; text-transform: uppercase; font-weight: bold; text-align: center; color: #555;">
+        {{ destinationIata() }}
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+    <div>
+      <label style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase;">Data de Ida (Check-in)</label>
+      <input type="date" [ngModel]="departureDate()" (ngModelChange)="departureDate.set($event)" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit;">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <div>
+        <label style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase;">Dias</label>
+        <input type="number" [ngModel]="tripDays()" (ngModelChange)="tripDays.set($event)" min="1" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+      </div>
+      <div>
+        <label style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase;">Volta</label>
+        <div style="width: 100%; padding: 10px; margin-top: 5px; background: #f8f9fa; border: 1px dashed #ddd; border-radius: 8px; text-align: center; font-size: 0.85rem; color: #666; display: flex; align-items: center; justify-content: center; height: 38px; box-sizing: border-box;">
+          {{ checkoutDate() | date:'dd/MM' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 80px 1fr; gap: 15px; margin-bottom: 20px;">
+    <div>
+      <label style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase;">Adultos</label>
+      <input type="number" [ngModel]="adultsCount()" (ngModelChange)="adultsCount.set($event)" min="1" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+    </div>
+    <div>
+      <label style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase;">Classe do Voo</label>
+      <select [ngModel]="flightClass()" (ngModelChange)="flightClass.set($event)" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">
+        <option value="ECONOMY">Econômica</option>
+        <option value="PREMIUM_ECONOMY">Econômica Premium</option>
+        <option value="BUSINESS">Executiva</option>
+        <option value="FIRST">Primeira Classe</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 25px;">
+    <label style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between;">
+      Padrão de Hospedagem
+    </label>
+    <div style="display: flex; gap: 10px; margin-top: 8px;">
+      <button *ngFor="let star of [1, 2, 3, 4, 5]" (click)="setStars(star)"
+        [style.background]="hotelStars() >= star ? '#f1c40f' : '#f8f9fa'"
+        [style.color]="hotelStars() >= star ? 'white' : '#ccc'"
+        style="flex: 1; padding: 10px 0; border: 1px solid #eee; border-radius: 8px; font-size: 1.2rem; cursor: pointer; transition: 0.2s;">
+        ★
+      </button>
+    </div>
+  </div>
+
+  <button (click)="requestEstimate()" style="width: 100%; padding: 14px; background: #2c3e50; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;">
+   Buscar Preços na Amadeus
+  </button>
+
+</div>

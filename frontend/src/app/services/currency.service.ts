@@ -20,9 +20,20 @@ export class CurrencyService {
       })
     );
   }
+
   getHistoricalRates(countryCode: string): Observable<any[]> {
   // O endpoint /daily/ traz o histórico. 360 é o número de dias.
   const url = `https://economia.awesomeapi.com.br/json/daily/${countryCode}-BRL/360`;
   return this.http.get<any[]>(url);
+}
+  getExchangeRateFromUSD(currencyCode: string): Observable<number> {
+  if (currencyCode === 'USD') return new Observable(obs => obs.next(1));
+  
+  return this.http.get<any>(`https://economia.awesomeapi.com.br/last/USD-${currencyCode}`).pipe(
+    map(response => {
+      const key = `USD${currencyCode}`;
+      return parseFloat(response[key].bid);
+    })
+  );
 }
 }

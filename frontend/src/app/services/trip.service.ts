@@ -24,4 +24,13 @@ export class TripService {
   deleteTrip(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  calculateSmartBudget(preferences: any): Observable<any> {
+    
+    const cleanBaseUrl = this.apiUrl.replace('/trips', '');
+    const endpoint = `${cleanBaseUrl}/budget/calculate`;
+    console.log('Testando URL corrigida:', endpoint); 
+    
+    return this.http.post(endpoint, preferences);
+  }
 }

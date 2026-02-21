@@ -6,44 +6,55 @@ import { TaxService } from '../../services/tax.service';
 import { TripService } from '../../services/trip.service';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
+import { BudgetEstimator } from '../../budget-estimator/budget-estimator';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-planner',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BudgetEstimator],
   templateUrl: './planner.html',
   styleUrl: './planner.scss'
 })
 export class Planner implements OnInit {
   @ViewChild('currencyChart') chartCanvas!: ElementRef;
-  
+  @ViewChild('budgetChartCanvas') budgetChartCanvas!: ElementRef;
+  budgetChartInstance: any;
+
   private currencyService = inject(CurrencyService);
   private taxService = inject(TaxService);
   private tripService = inject(TripService);
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
-  
+
   readonly Infinity = Infinity;
   tripDetails: any = null;
   chart: any;
 
-  localGoal = signal<number>(0); 
-  exchangeRate = signal<number>(0); 
+  // --- SIGNALS ---
+  localGoal = signal<number>(0);
+  exchangeRate = signal<number>(0);
   currentSavings = signal<number>(0);
   monthlyContribution = signal<number>(0);
   cdiRate = signal<number>(0);
-  indexPercentage = signal<number>(100); 
-  isSaving = signal<boolean>(false); 
+  indexPercentage = signal<number>(100);
+  isSaving = signal<boolean>(false);
   saveSuccess = signal<boolean>(false);
+  
+  // CORREÇÃO 1: Adicionando o signal que faltava
+  originCode = signal<string>('GRU');
 
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
 
   isEditing = signal<boolean>(false);
-  tripId = signal<string | null>(null);  
+  tripId = signal<string | null>(null);
 
+  budgetResult = signal<any>(null);
+  isCalculating = signal<boolean>(false);
+
+  // --- LÓGICA FINANCEIRA ---
   private getIRRate(months: number): number {
     if (months <= 6) return 0.225;
     if (months <= 12) return 0.20;
@@ -55,7 +66,7 @@ export class Planner implements OnInit {
     const target = this.brlGoal();
     const initial = this.currentSavings();
     const monthlyAdd = this.monthlyContribution();
-    
+
     if (target <= 0 || (monthlyAdd <= 0 && initial < target)) return Infinity;
     if (initial >= target) return 0;
 
@@ -118,7 +129,7 @@ export class Planner implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       if (history.state && history.state.tripData) {
         this.tripDetails = history.state.tripData;
-        
+
         if (history.state.isEditing) {
           this.isEditing.set(true);
           this.tripId.set(this.tripDetails._id);
@@ -127,8 +138,8 @@ export class Planner implements OnInit {
           this.monthlyContribution.set(this.tripDetails.monthlyContributionBrl);
         }
 
-        this.fetchRate();    
-        this.fetchCDI(); 
+        this.fetchRate();
+        this.fetchCDI();
         this.loadHistoricalData();
       }
     }
@@ -228,19 +239,92 @@ export class Planner implements OnInit {
   }
 
   handleSaveSuccess() {
-    console.log('Operação realizada com sucesso!');
     this.isSaving.set(false);
     this.saveSuccess.set(true);
     setTimeout(() => this.saveSuccess.set(false), 3000);
   }
 
   handleSaveError(err: any) {
-    console.error('Erro ao salvar no banco de dados:', err);
+    console.error('Erro ao salvar:', err);
     this.isSaving.set(false);
-    alert('Ocorreu um erro ao processar sua solicitação. Verifique se o backend está rodando.');
+    alert('Ocorreu um erro ao processar sua solicitação.');
   }
 
   goToSearch() {
-    this.router.navigate(['/search']); 
+    this.router.navigate(['/search']);
   }
-}
+
+  // --- GERADOR DE ORÇAMENTO INTELIGENTE ---
+  generateBudget(preferences: any) {
+    this.isCalculating.set(true);
+    const destCurrency = this.tripDetails?.countryCode;
+
+    const payload = { 
+      ...preferences, 
+      cityName: this.tripDetails?.destination,
+      destinationCode: destCurrency,
+    };
+    
+    console.log('🚀 Enviando payload para o Node.js:', payload);
+
+    this.tripService.calculateSmartBudget(payload).subscribe({
+      next: (response) => {
+        const usdBreakdown = response.breakdown;
+
+        this.currencyService.getExchangeRateFromUSD(destCurrency).subscribe({
+          next: (rate) => {
+            const localBreakdown = {
+              flight: Math.round(usdBreakdown.flight * rate),
+              hotel: Math.round(usdBreakdown.hotel * rate),
+              dailyExpenses: Math.round(usdBreakdown.dailyExpenses * rate)
+            };
+
+            const totalLocal = localBreakdown.flight + localBreakdown.hotel + localBreakdown.dailyExpenses;
+
+            this.budgetResult.set({ breakdown: localBreakdown, estimatedTotalUsd: totalLocal });
+            this.localGoal.set(totalLocal);
+
+            // CORREÇÃO 2: Chamada segura do gráfico
+            setTimeout(() => this.createBudgetChart(localBreakdown), 0);
+            this.isCalculating.set(false);
+          },
+          error: (err) => {
+            console.error('Erro na conversão:', err);
+            this.isCalculating.set(false);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Erro no backend:', err);
+        this.isCalculating.set(false);
+      }
+    });
+  }
+
+  // CORREÇÃO 3: Método do Gráfico de Rosca reintroduzido (estava faltando no arquivo)
+  createBudgetChart(breakdown: any) {
+    if (this.budgetChartInstance) this.budgetChartInstance.destroy();
+
+    const ctx = this.budgetChartCanvas.nativeElement.getContext('2d');
+    this.budgetChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Aéreo', 'Hospedagem', 'Gastos Diários'],
+        datasets: [{
+          data: [breakdown.flight, breakdown.hotel, breakdown.dailyExpenses],
+          backgroundColor: ['#3498db', '#f1c40f', '#2ecc71'],
+          borderWidth: 0,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+        },
+        cutout: '70%'
+      }
+    });
+  }
+} 
