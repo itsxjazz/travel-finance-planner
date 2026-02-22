@@ -90,7 +90,6 @@
 
     <div *ngIf="monthsToGoal() !== Infinity && monthsToGoal() > 0"
       style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
-
       <div *ngIf="redemptionDetails()"
         style="margin-bottom: 15px; border-bottom: 1px solid #d4edda; padding-bottom: 12px;">
         <span
@@ -101,12 +100,10 @@
           <strong style="color: #27ae60;">{{ redemptionDetails()?.netRedemption | currency:'BRL' }}</strong>
         </div>
       </div>
-
       <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Viaje em <strong>{{ monthsToGoal() }} meses</strong>!
       </h4>
       <p style="margin: 5px 0 15px; color: #555;">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy':'':'pt-BR'
           }}</strong></p>
-
       <button (click)="saveTrip()" [disabled]="isSaving()"
         style="width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;"
         [style.opacity]="isSaving() ? '0.7' : '1'">
@@ -142,11 +139,9 @@
 
   <div
     style="background: white; padding: 30px; border-radius: 16px; margin-top: 30px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-
     <div
       style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
       <h3 style="color: #2c3e50; font-size: 1.3rem; margin: 0;">Descubra {{ tripDetails.destination }}</h3>
-
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <button class="filter-btn" (click)="setFilter('Todos')"
           [class.active]="activeFilter() === 'Todos'">Todos</button>
@@ -162,7 +157,7 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
       @for (poi of filteredPOIs(); track $index) {
       <div
-        style="background: #fdfdfd; border: 1px solid #eee; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s;">
+        style="background: #fdfdfd; border: 1px solid #eee; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
         <div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
             <span
@@ -172,19 +167,42 @@
             <span style="color: #f39c12; font-size: 0.85rem; font-weight: bold;">⭐ {{ poi.rank }}</span>
           </div>
           <h4 style="color: #2c3e50; margin: 0 0 8px 0; font-size: 1.1rem; line-height: 1.4;">{{ poi.name }}</h4>
+          <p
+            style="color: #888; font-size: 0.8rem; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 5px;">
+            <span style="font-size: 1rem;">📍</span> {{ poi.address }}
+          </p>
         </div>
 
-        <button (click)="addToItinerary(poi)"
-          style="margin-top: 15px; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;">
-          + Adicionar ao Roteiro
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <a [href]="poi.mapUrl" target="_blank"
+            style="flex: 1; text-align: center; background: #f0f7ff; color: #007bff; border: 1px solid #cce5ff; padding: 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: bold; transition: 0.2s;">
+            🗺️ Mapa
+          </a>
+          <button (click)="addToItinerary(poi)"
+            style="flex: 1.5; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;">
+            + Roteiro
+          </button>
+        </div>
       </div>
       }
     </div>
 
+    <div
+      style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+      @for (p of [1,2,3,4,5]; track p) {
+      <button (click)="setPage(p)" [style.background]="currentPage() === p ? '#27ae60' : 'white'"
+        [style.color]="currentPage() === p ? 'white' : '#777'"
+        [style.border]="currentPage() === p ? 'none' : '1px solid #ddd'"
+        style="width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s;">
+        {{ p }}
+      </button>
+      }
+      <span style="font-size: 0.8rem; color: #999; margin-left: 10px;">Página {{ currentPage() }} de 5</span>
+    </div>
+
     @if (filteredPOIs().length === 0) {
     <div style="text-align: center; padding: 40px; color: #999;">
-      <p>Buscando atrações incríveis para sua viagem...</p>
+      <p>Nenhuma atração encontrada nesta página com este filtro.</p>
     </div>
     }
   </div>

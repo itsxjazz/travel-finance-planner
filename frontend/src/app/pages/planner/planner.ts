@@ -61,20 +61,27 @@ export class Planner implements OnInit {
   rawPointsOfInterest = signal<any[]>([]);
   activeFilter = signal<string>('Todos');
 
+  currentPage = signal<number>(1);
+  itemsPerPage = 20;
+
   filteredPOIs = computed(() => {
     const filter = this.activeFilter();
+    const page = this.currentPage();
     const pois = this.rawPointsOfInterest();
 
-    if (filter === 'Todos') return pois;
+    let filtered = pois;
+    if (filter !== 'Todos') {
+      const filterMap: { [key: string]: string } = {
+        'Cultura': 'CULTURA',
+        'Gastronomia': 'RESTAURANT',
+        'Shopping': 'SHOPPING',
+        'Compras': 'SHOPPING'
+      };
+      filtered = pois.filter(poi => poi.category === filterMap[filter]);
+    }
 
-    const filterMap: { [key: string]: string } = {
-      'Cultura': 'CULTURA',
-      'Gastronomia': 'RESTAURANT',
-      'Shopping': 'SHOPPING',
-      'Compras': 'SHOPPING'
-    };
-
-    return pois.filter(poi => poi.category === filterMap[filter]);
+    const startIndex = (page - 1) * this.itemsPerPage;
+    return filtered.slice(startIndex, startIndex + this.itemsPerPage);
   });
 
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
@@ -207,6 +214,12 @@ export class Planner implements OnInit {
 
   setFilter(filterName: string) {
     this.activeFilter.set(filterName);
+    this.currentPage.set(1);
+  }
+
+  setPage(page: number) {
+    this.currentPage.set(page);
+    window.scrollTo({ top: 800, behavior: 'smooth' });
   }
 
   createChart(labels: string[], data: number[]) {
