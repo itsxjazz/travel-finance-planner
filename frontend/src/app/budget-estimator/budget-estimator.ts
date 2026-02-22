@@ -18,10 +18,22 @@ export class BudgetEstimator {
   flightClass = signal<string>('ECONOMY');
   hotelStars = signal<number>(3);
   adultsCount = signal<number>(1);
-  
-  // Define a data sugerida inicial para 30 dias no futuro (ideal para a API Amadeus)
+
+  // Define a data sugerida inicial para 30 dias no futuro
   defaultDate = new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0];
   departureDate = signal<string>(this.defaultDate);
+
+  // Escuta a chegada das preferências salvas e atualiza os Sinais
+  @Input() set savedPreferences(prefs: any) {
+    if (prefs) {
+      if (prefs.originCode) this.originCode.set(prefs.originCode);
+      if (prefs.days) this.tripDays.set(prefs.days);
+      if (prefs.flightClass) this.flightClass.set(prefs.flightClass);
+      if (prefs.hotelStars) this.hotelStars.set(prefs.hotelStars);
+      if (prefs.adults) this.adultsCount.set(prefs.adults);
+      if (prefs.departureDate) this.departureDate.set(prefs.departureDate);
+    }
+  }
 
   // Calcula a data de Check-out do hotel automaticamente
   checkoutDate = computed(() => {
@@ -32,12 +44,12 @@ export class BudgetEstimator {
 
   // Espelho do nosso dicionário do Backend para exibir a sigla na tela
   private iataMap: Record<string, string> = {
-    'Brasil': 'GRU', 'Estados Unidos': 'NYC', 'Canadá': 'YTO', 'México': 'MEX', 
+    'Brasil': 'GRU', 'Estados Unidos': 'NYC', 'Canadá': 'YTO', 'México': 'MEX',
     'Argentina': 'EZE', 'Chile': 'SCL', 'Colômbia': 'BOG', 'Peru': 'LIM', 'Uruguai': 'MVD',
-    'França': 'PAR', 'Reino Unido': 'LON', 'Portugal': 'LIS', 'Espanha': 'MAD', 
-    'Itália': 'ROM', 'Alemanha': 'BER', 'Países Baixos': 'AMS', 'Holanda': 'AMS', 
+    'França': 'PAR', 'Reino Unido': 'LON', 'Portugal': 'LIS', 'Espanha': 'MAD',
+    'Itália': 'ROM', 'Alemanha': 'BER', 'Países Baixos': 'AMS', 'Holanda': 'AMS',
     'Suíça': 'ZRH', 'Bélgica': 'BRU', 'Áustria': 'VIE',
-    'Japão': 'TYO', 'Coreia do Sul': 'SEL', 'Singapura': 'SIN', 'Tailândia': 'BKK', 
+    'Japão': 'TYO', 'Coreia do Sul': 'SEL', 'Singapura': 'SIN', 'Tailândia': 'BKK',
     'Emirados Árabes Unidos': 'DXB', 'Austrália': 'SYD', 'Nova Zelândia': 'AKL',
     'Egito': 'CAI'
   };
@@ -52,7 +64,7 @@ export class BudgetEstimator {
     hotelStars: number;
     originCode: string;
     departureDate: string;
-    adults: number;     
+    adults: number;
   }>();
 
   setStars(stars: number) {
@@ -64,7 +76,7 @@ export class BudgetEstimator {
       alert('Valores inválidos para dias ou passageiros.');
       return;
     }
-    
+
     this.estimateRequested.emit({
       days: this.tripDays(),
       flightClass: this.flightClass(),

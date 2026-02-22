@@ -11,6 +11,9 @@ const tripSchema = new mongoose.Schema({
     monthlyContributionBrl: { type: Number, required: true }, // Aporte mensal
     estimatedTravelDate: { type: Date }, // Data calculada pela lógica do front,
     itinerary: { type: Array, default: [] }, // Lista de atrações planejadas
+    budgetResult: { type: Object, default: null }, // Resultado detalhado do orçamento
+    budgetPreferences: { type: Object, default: null } // Preferências usadas para gerar o orçamento
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Trip', tripSchema);

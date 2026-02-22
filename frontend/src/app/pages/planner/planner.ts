@@ -52,6 +52,7 @@ export class Planner implements OnInit {
   isEditing = signal<boolean>(false);
   tripId = signal<string | null>(null);
   budgetResult = signal<any>(null);
+  budgetPreferences = signal<any>(null);
   isCalculating = signal<boolean>(false);
 
   itinerary = signal<any[]>([]);
@@ -218,6 +219,16 @@ export class Planner implements OnInit {
           this.itinerary.set(this.tripDetails.itinerary);
         }
 
+        if (this.tripDetails.budgetResult) {
+          this.budgetResult.set(this.tripDetails.budgetResult);
+          setTimeout(() => {
+            this.createBudgetChart(this.tripDetails.budgetResult.breakdown);
+          }, 0);
+        }
+        if (this.tripDetails.budgetPreferences) {
+          this.budgetPreferences.set(this.tripDetails.budgetPreferences);
+        }
+
         this.fetchRate();
         this.fetchCDI();
         this.loadHistoricalData();
@@ -299,7 +310,9 @@ export class Planner implements OnInit {
         const values = historyData.map(d => parseFloat(d.bid));
         const filteredLabels = labels.filter((_, i) => i % 30 === 0);
         const filteredValues = values.filter((_, i) => i % 30 === 0);
-        this.createChart(filteredLabels, filteredValues);
+        setTimeout(() => {
+          this.createChart(filteredLabels, filteredValues);
+        }, 0);
       });
     }
   }
@@ -388,7 +401,7 @@ export class Planner implements OnInit {
 
     this.isSaving.set(true);
     const payload = {
-      destination: this.tripDetails.destination, countryCode: this.tripDetails.countryCode, flagUrl: this.tripDetails.flagUrl, financialGoalLocal: this.localGoal(), financialGoalBrl: this.brlGoal(), currentSavingsBrl: this.currentSavings(), monthlyContributionBrl: this.monthlyContribution(), estimatedTravelDate: this.travelDate(), itinerary: this.itinerary()
+      destination: this.tripDetails.destination, countryCode: this.tripDetails.countryCode, flagUrl: this.tripDetails.flagUrl, financialGoalLocal: this.localGoal(), financialGoalBrl: this.brlGoal(), currentSavingsBrl: this.currentSavings(), monthlyContributionBrl: this.monthlyContribution(), estimatedTravelDate: this.travelDate(), itinerary: this.itinerary(), budgetResult: this.budgetResult(), budgetPreferences: this.budgetPreferences()
     };
 
     const action = this.isEditing() && this.tripId()
@@ -429,6 +442,7 @@ export class Planner implements OnInit {
   }
 
   generateBudget(preferences: any) {
+    this.budgetPreferences.set(preferences);
     this.isCalculating.set(true);
     const destCurrency = this.tripDetails?.countryCode;
     const payload = { ...preferences, cityName: this.tripDetails?.destination, destinationCode: destCurrency };

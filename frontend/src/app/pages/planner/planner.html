@@ -42,7 +42,8 @@
     </div>
   </div>
 
-  <app-budget-estimator [destinationName]="tripDetails?.destination" (estimateRequested)="generateBudget($event)">
+  <app-budget-estimator [destinationName]="tripDetails?.destination" [savedPreferences]="budgetPreferences()"
+    (estimateRequested)="generateBudget($event)">
   </app-budget-estimator>
 
   @if (budgetResult()) {

@@ -19,7 +19,7 @@ router.get('/pois', async (req, res) => {
         const response = await axios.get(`https://api.geoapify.com/v2/places`, {
             params: {
                 categories: categories,
-                filter: `circle:${lng},${lat},10000`, // Raio de 05km
+                filter: `circle:${lng},${lat},15000`, // Raio de 15km
                 bias: `proximity:${lng},${lat}`,
                 limit: 100, // Limite de 100 opções
                 apiKey: apiKey
