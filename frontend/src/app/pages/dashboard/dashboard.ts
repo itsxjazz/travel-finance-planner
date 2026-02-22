@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; 
+import { Component, OnInit, inject, signal, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 import { TripService } from '../../services/trip.service';
 
 @Component({
@@ -12,12 +12,21 @@ import { TripService } from '../../services/trip.service';
 export class Dashboard implements OnInit {
   private tripService = inject(TripService);
   private router = inject(Router);
-  
+
+  // 1. Injeta o identificador de plataforma
+  private platformId = inject(PLATFORM_ID);
+
   savedTrips = signal<any[]>([]);
   isLoading = signal<boolean>(true);
 
   ngOnInit() {
-    this.loadTrips();
+    // 2. Protege a requisição: só roda no Navegador
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadTrips();
+    } else {
+      // Se estiver no servidor, apenas desliga o loading para não travar a tela
+      this.isLoading.set(false);
+    }
   }
 
   loadTrips() {
@@ -35,8 +44,8 @@ export class Dashboard implements OnInit {
   }
 
   editTrip(trip: any) {
-    this.router.navigate(['/planner'], { 
-      state: { tripData: trip, isEditing: true } 
+    this.router.navigate(['/planner'], {
+      state: { tripData: trip, isEditing: true }
     });
   }
 
@@ -54,10 +63,10 @@ export class Dashboard implements OnInit {
   // Calcula a porcentagem de progresso da viagem
   getProgress(trip: any): number {
     if (!trip.financialGoalBrl || trip.financialGoalBrl === 0) return 0;
-    
+
     // (O que já tem / O que precisa) * 100
     const percentage = (trip.currentSavingsBrl / trip.financialGoalBrl) * 100;
-    
+
     return percentage > 100 ? 100 : percentage;
   }
 }

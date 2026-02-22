@@ -1,17 +1,13 @@
-<div *ngIf="!tripDetails"
-  style="max-width: 500px; margin: 80px auto; text-align: center; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;">
-  <div style="font-size: 4rem; margin-bottom: 10px;">🌍</div>
-  <h2 style="color: #2c3e50; margin-bottom: 10px;">Nenhum destino selecionado</h2>
-  <p style="color: #777; margin-bottom: 25px; line-height: 1.5;">
-    Para fazer o seu planejamento financeiro, você precisa escolher para qual país deseja viajar primeiro!
-  </p>
-  <button (click)="goToSearch()"
-    style="padding: 12px 25px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%;">
-    🔍 Buscar um Destino
-  </button>
+@if (isLoading()) {
+<div
+  style="text-align: center; padding: 100px; color: #999; font-family: sans-serif; min-height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+  <div style="font-size: 3rem; margin-bottom: 15px; animation: pulse 1.5s infinite;">🌍</div>
+  <p>Carregando seu planejamento...</p>
 </div>
+}
 
-<div *ngIf="tripDetails"
+@if (!isLoading() && tripDetails) {
+<div
   style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
 
   <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
@@ -49,7 +45,8 @@
   <app-budget-estimator [destinationName]="tripDetails?.destination" (estimateRequested)="generateBudget($event)">
   </app-budget-estimator>
 
-  <div class="budget-visualizer" *ngIf="budgetResult()"
+  @if (budgetResult()) {
+  <div class="budget-visualizer"
     style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
     <h3 style="font-size: 1rem; color: #555;">Divisão Estimada do Investimento</h3>
     <div class="chart-container" style="position: relative; height:200px; width:100%">
@@ -62,15 +59,17 @@
       </p>
     </div>
   </div>
+  }
 
   <div
     style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <h3 style="margin: 0; font-size: 1rem; color: #555;">Minha Caixinha</h3>
       <div
-        style="font-size: 0.85rem; color: #666; background: #f8f9fa; padding: 4px 8px; border-radius: 6px; border: 1px solid #eee;">
-        Rendendo <input type="number" [ngModel]="indexPercentage()" (ngModelChange)="indexPercentage.set($event)"
-          style="width: 45px; border: none; background: transparent; font-weight: bold; color: #27ae60; text-align: center; outline: none;">
+        style="font-size: 0.85rem; color: #666; background: #f8f9fa; padding: 4px 8px; border-radius: 6px; border: 1px solid #eee; display: flex; align-items: center; gap: 5px;">
+        Rendendo
+        <input type="number" [value]="indexPercentage()" (input)="handleInput($event, indexPercentage)"
+          style="width: 45px; border: none; background: transparent; font-weight: bold; color: #27ae60; text-align: center; outline: none; border-bottom: 1px dashed #27ae60;">
         % do CDI
       </div>
     </div>
@@ -88,18 +87,32 @@
       </div>
     </div>
 
-    <div *ngIf="monthsToGoal() !== Infinity && monthsToGoal() > 0"
-      style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
-      <div *ngIf="redemptionDetails()"
-        style="margin-bottom: 15px; border-bottom: 1px solid #d4edda; padding-bottom: 12px;">
+    @if (monthsToGoal() !== Infinity && monthsToGoal() > 0) {
+    <div style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
+      @if (redemptionDetails()) {
+      <div style="margin-bottom: 15px; border-bottom: 1px solid #d4edda; padding-bottom: 12px;">
         <span
           style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 10px;">PROJEÇÃO NO
           RESGATE:</span>
-        <div style="display: flex; justify-content: space-between; font-size: 0.95rem; color: #444;">
+
+        <div
+          style="display: flex; justify-content: space-between; font-size: 0.95rem; color: #444; margin-bottom: 8px;">
           <span>Saldo Líquido (Final):</span>
           <strong style="color: #27ae60;">{{ redemptionDetails()?.netRedemption | currency:'BRL' }}</strong>
         </div>
+
+        <div
+          style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #777; margin-bottom: 4px;">
+          <span>Lucro Real (pós-IR):</span>
+          <span>+ {{ (redemptionDetails()!.grossInterest - redemptionDetails()!.totalIR) | currency:'BRL' }}</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #777;">
+          <span>IR Pago ({{ redemptionDetails()?.irRatePercentage }}%):</span>
+          <span>- {{ redemptionDetails()?.totalIR | currency:'BRL' }}</span>
+        </div>
       </div>
+      }
       <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Viaje em <strong>{{ monthsToGoal() }} meses</strong>!
       </h4>
       <p style="margin: 5px 0 15px; color: #555;">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy':'':'pt-BR'
@@ -110,9 +123,11 @@
         {{ isSaving() ? 'Salvando...' : '💾 Salvar Planejamento' }}
       </button>
     </div>
+    }
   </div>
 
-  <div *ngIf="itinerary().length > 0"
+  @if (itinerary().length > 0) {
+  <div
     style="margin-top: 30px; background: #f0f9ff; border: 2px solid #007bff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);">
     <h3 style="color: #0056b3; margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3rem;">
       📍 Meu Roteiro Personalizado
@@ -136,6 +151,7 @@
       }
     </div>
   </div>
+  }
 
   <div
     style="margin-top: 30px; background: white; padding: 15px; border-radius: 16px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
@@ -207,16 +223,17 @@
     </div>
 
     <div
-      style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
-      @for (p of [1,2,3,4,5]; track p) {
+      style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0; flex-wrap: wrap;">
+      @for (p of [1,2,3,4,5,6,7,8,9,10]; track p) {
       <button (click)="setPage(p)" [style.background]="currentPage() === p ? '#27ae60' : 'white'"
         [style.color]="currentPage() === p ? 'white' : '#777'"
         [style.border]="currentPage() === p ? 'none' : '1px solid #ddd'"
-        style="width: 40px; height: 40px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s;">
+        style="width: 35px; height: 35px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.85rem;">
         {{ p }}
       </button>
       }
-      <span style="font-size: 0.8rem; color: #999; margin-left: 10px;">Página {{ currentPage() }} de 5</span>
+      <span style="font-size: 0.8rem; color: #999; margin-left: 10px; white-space: nowrap;">Página {{ currentPage() }}
+        de 10</span>
     </div>
 
     @if (filteredPOIs().length === 0) {
@@ -227,3 +244,4 @@
   </div>
 
 </div>
+}

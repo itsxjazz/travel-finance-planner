@@ -29,7 +29,6 @@ export class Planner implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
 
-  // Propriedades do Mapa
   private map: any;
   private markersLayer: any;
   private L: any;
@@ -38,7 +37,9 @@ export class Planner implements OnInit {
   tripDetails: any = null;
   chart: any;
 
-  // Signals de Estado Financeiro
+  // NOVO: Controle de Loading inicial
+  isLoading = signal<boolean>(true);
+
   localGoal = signal<number>(0);
   exchangeRate = signal<number>(0);
   currentSavings = signal<number>(0);
@@ -53,14 +54,11 @@ export class Planner implements OnInit {
   budgetResult = signal<any>(null);
   isCalculating = signal<boolean>(false);
 
-  // Signals de Roteiro e POIs
   itinerary = signal<any[]>([]);
   rawPointsOfInterest = signal<any[]>([]);
   activeFilter = signal<string>('Todos');
-
-  // Signals de Paginação
   currentPage = signal<number>(1);
-  itemsPerPage = 20;
+  itemsPerPage = 10;
 
   private bffDictionary: { [key: string]: string } = {
     'Brasil': 'GRU', 'Estados Unidos': 'NYC', 'Canadá': 'YTO', 'México': 'MEX',
@@ -74,7 +72,6 @@ export class Planner implements OnInit {
   };
 
   constructor() {
-    // Efeito para atualizar os marcadores do mapa sempre que os locais forem carregados ou filtrados
     effect(() => {
       const pois = this.rawPointsOfInterest();
       if (pois.length > 0 && isPlatformBrowser(this.platformId)) {
@@ -83,7 +80,6 @@ export class Planner implements OnInit {
     });
   }
 
-  // Lógica de Filtro e Paginação combinados
   filteredPOIs = computed(() => {
     const filter = this.activeFilter();
     const page = this.currentPage();
@@ -104,7 +100,6 @@ export class Planner implements OnInit {
     return filtered.slice(startIndex, startIndex + this.itemsPerPage);
   });
 
-  // Computed Signals Financeiros
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
 
@@ -178,63 +173,88 @@ export class Planner implements OnInit {
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
+      // Tenta pegar do history (navegação normal via Dashboard/Search)
       if (history.state && history.state.tripData) {
         this.tripDetails = history.state.tripData;
+        localStorage.setItem('activeTrip', JSON.stringify(this.tripDetails));
+
         if (history.state.isEditing) {
+          // Avisa os Signals do Angular que está editando
           this.isEditing.set(true);
           this.tripId.set(this.tripDetails._id);
-          this.localGoal.set(this.tripDetails.financialGoalLocal);
-          this.currentSavings.set(this.tripDetails.currentSavingsBrl);
-          this.monthlyContribution.set(this.tripDetails.monthlyContributionBrl);
-          if (this.tripDetails.itinerary) this.itinerary.set(this.tripDetails.itinerary);
+
+          localStorage.setItem('isEditing', 'true');
+          localStorage.setItem('tripId', this.tripDetails._id);
+        } else {
+          // Garante que não é edição
+          this.isEditing.set(false);
+          this.tripId.set(null);
+
+          localStorage.removeItem('isEditing');
+          localStorage.removeItem('tripId');
         }
+      } else {
+        // Tenta pegar do localStorage (Caso a pessoa dê F5 na página)
+        const savedTrip = localStorage.getItem('activeTrip');
+        if (savedTrip) {
+          this.tripDetails = JSON.parse(savedTrip);
+          const editMode = localStorage.getItem('isEditing') === 'true';
+          const savedId = localStorage.getItem('tripId');
+
+          if (editMode && savedId) {
+            this.isEditing.set(true);
+            this.tripId.set(savedId);
+          }
+        }
+      }
+
+      // Se achou dados (via history ou storage), carrega os serviços
+      if (this.tripDetails) {
+        this.localGoal.set(this.tripDetails.financialGoalLocal || 0);
+        this.currentSavings.set(this.tripDetails.currentSavingsBrl || 0);
+        this.monthlyContribution.set(this.tripDetails.monthlyContributionBrl || 0);
+
+        if (this.tripDetails.itinerary) {
+          this.itinerary.set(this.tripDetails.itinerary);
+        }
+
         this.fetchRate();
         this.fetchCDI();
         this.loadHistoricalData();
         this.loadPOIs();
+        this.isLoading.set(false);
+      } else {
+        // Se não tem dados nenhum, expulsa para a busca
+        this.router.navigate(['/search']);
       }
+
+    } else {
+      // Se for SSR (no servidor), apenas desliga o loading
+      this.isLoading.set(false);
     }
   }
 
-  // --- LÓGICA DE MAPA (LEAFLET) ---
   private async initMap(lat: number, lng: number) {
     if (this.map || !isPlatformBrowser(this.platformId)) return;
-
-    // Carrega o Leaflet apenas no momento da execução no Navegador
     this.L = await import('leaflet');
-
     this.map = this.L.map('map-container').setView([lat, lng], 13);
-
     this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
-
     this.markersLayer = this.L.layerGroup().addTo(this.map);
   }
 
   private async updateMapMarkers(pois: any[]) {
     if (!isPlatformBrowser(this.platformId)) return;
-
-    // Garante que o Leaflet esteja carregado
-    if (!this.L) {
-      this.L = await import('leaflet');
-    }
-
+    if (!this.L) this.L = await import('leaflet');
     if (!this.map) return;
 
     this.markersLayer.clearLayers();
-
     pois.forEach(poi => {
       const color = this.getCategoryColor(poi.category);
-
       const marker = this.L.circleMarker([poi.lat, poi.lon], {
-        radius: 8,
-        fillColor: color,
-        color: '#fff',
-        weight: 2,
-        fillOpacity: 0.8
+        radius: 8, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.8
       });
-
       marker.bindPopup(`
         <div style="font-family: sans-serif; min-width: 150px;">
           <strong style="color: #2c3e50; font-size: 1rem;">${poi.name}</strong><br>
@@ -242,7 +262,6 @@ export class Planner implements OnInit {
           <p style="font-size: 0.75rem; margin: 8px 0;">${poi.address}</p>
         </div>
       `);
-
       this.markersLayer.addLayer(marker);
     });
 
@@ -254,14 +273,11 @@ export class Planner implements OnInit {
 
   private getCategoryColor(category: string): string {
     const colors: { [key: string]: string } = {
-      'RESTAURANT': '#e67e22',
-      'SHOPPING': '#3498db',
-      'CULTURA': '#27ae60'
+      'RESTAURANT': '#e67e22', 'SHOPPING': '#3498db', 'CULTURA': '#27ae60'
     };
     return colors[category] || '#95a5a6';
   }
 
-  // --- MÉTODOS DE DADOS E UI ---
   fetchRate() {
     this.currencyService.getExchangeRate(this.tripDetails.countryCode).subscribe(rate => {
       this.exchangeRate.set(Math.round(rate * 100) / 100);
@@ -322,20 +338,11 @@ export class Planner implements OnInit {
       data: {
         labels: labels,
         datasets: [{
-          label: `${this.tripDetails.countryCode}/BRL`,
-          data: data,
-          borderColor: '#00d2ff',
-          backgroundColor: 'rgba(0, 210, 255, 0.05)',
-          fill: true,
-          tension: 0.4,
-          pointRadius: 0,
-          borderWidth: 2
+          label: `${this.tripDetails.countryCode}/BRL`, data: data, borderColor: '#00d2ff', backgroundColor: 'rgba(0, 210, 255, 0.05)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
         scales: {
           y: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#a0a0a0' } },
           x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#a0a0a0' } }
@@ -353,15 +360,11 @@ export class Planner implements OnInit {
         labels: ['Aéreo', 'Hospedagem', 'Gastos Diários'],
         datasets: [{
           data: [breakdown.flight, breakdown.hotel, breakdown.dailyExpenses],
-          backgroundColor: ['#00d2ff', '#f39c12', '#27ae60'],
-          borderWidth: 0
+          backgroundColor: ['#00d2ff', '#f39c12', '#27ae60'], borderWidth: 0
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { color: '#ffffff', boxWidth: 12 } } },
-        cutout: '70%'
+        responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#ffffff', boxWidth: 12 } } }, cutout: '70%'
       }
     });
   }
@@ -375,9 +378,7 @@ export class Planner implements OnInit {
 
   translateCategory(category: string): string {
     const categories: { [key: string]: string } = {
-      'CULTURA': '🏛️ Cultura',
-      'RESTAURANT': '🍴 Gastronomia',
-      'SHOPPING': '🛍️ Compras'
+      'CULTURA': '🏛️ Cultura', 'RESTAURANT': '🍴 Gastronomia', 'SHOPPING': '🛍️ Compras'
     };
     return categories[category] || category;
   }
@@ -387,15 +388,7 @@ export class Planner implements OnInit {
 
     this.isSaving.set(true);
     const payload = {
-      destination: this.tripDetails.destination,
-      countryCode: this.tripDetails.countryCode,
-      flagUrl: this.tripDetails.flagUrl,
-      financialGoalLocal: this.localGoal(),
-      financialGoalBrl: this.brlGoal(),
-      currentSavingsBrl: this.currentSavings(),
-      monthlyContributionBrl: this.monthlyContribution(),
-      estimatedTravelDate: this.travelDate(),
-      itinerary: this.itinerary()
+      destination: this.tripDetails.destination, countryCode: this.tripDetails.countryCode, flagUrl: this.tripDetails.flagUrl, financialGoalLocal: this.localGoal(), financialGoalBrl: this.brlGoal(), currentSavingsBrl: this.currentSavings(), monthlyContributionBrl: this.monthlyContribution(), estimatedTravelDate: this.travelDate(), itinerary: this.itinerary()
     };
 
     const action = this.isEditing() && this.tripId()
@@ -407,6 +400,8 @@ export class Planner implements OnInit {
         if (!this.isEditing() && response && response._id) {
           this.tripId.set(response._id);
           this.isEditing.set(true);
+          localStorage.setItem('isEditing', 'true'); // Atualiza o localStorage também
+          localStorage.setItem('tripId', response._id);
         }
         this.handleSaveSuccess();
       },
@@ -425,7 +420,13 @@ export class Planner implements OnInit {
     alert('Erro ao salvar no banco de dados.');
   }
 
-  goToSearch() { this.router.navigate(['/search']); }
+  goToSearch() {
+    // Limpa o localStorage ao sair da página de forma voluntária
+    localStorage.removeItem('activeTrip');
+    localStorage.removeItem('isEditing');
+    localStorage.removeItem('tripId');
+    this.router.navigate(['/search']);
+  }
 
   generateBudget(preferences: any) {
     this.isCalculating.set(true);
