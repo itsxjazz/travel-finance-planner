@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, ElementRef, ViewChild, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ElementRef, ViewChild, PLATFORM_ID, effect } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrencyService } from '../../services/currency.service';
@@ -8,6 +8,7 @@ import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
 import { BudgetEstimator } from '../../budget-estimator/budget-estimator';
 
+type Leaflet = any;
 Chart.register(...registerables);
 
 @Component({
@@ -28,10 +29,16 @@ export class Planner implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
 
+  // Propriedades do Mapa
+  private map: any;
+  private markersLayer: any;
+  private L: any;
+
   readonly Infinity = Infinity;
   tripDetails: any = null;
   chart: any;
 
+  // Signals de Estado Financeiro
   localGoal = signal<number>(0);
   exchangeRate = signal<number>(0);
   currentSavings = signal<number>(0);
@@ -45,7 +52,15 @@ export class Planner implements OnInit {
   tripId = signal<string | null>(null);
   budgetResult = signal<any>(null);
   isCalculating = signal<boolean>(false);
+
+  // Signals de Roteiro e POIs
   itinerary = signal<any[]>([]);
+  rawPointsOfInterest = signal<any[]>([]);
+  activeFilter = signal<string>('Todos');
+
+  // Signals de Paginação
+  currentPage = signal<number>(1);
+  itemsPerPage = 20;
 
   private bffDictionary: { [key: string]: string } = {
     'Brasil': 'GRU', 'Estados Unidos': 'NYC', 'Canadá': 'YTO', 'México': 'MEX',
@@ -58,12 +73,17 @@ export class Planner implements OnInit {
     'Egito': 'CAI'
   };
 
-  rawPointsOfInterest = signal<any[]>([]);
-  activeFilter = signal<string>('Todos');
+  constructor() {
+    // Efeito para atualizar os marcadores do mapa sempre que os locais forem carregados ou filtrados
+    effect(() => {
+      const pois = this.rawPointsOfInterest();
+      if (pois.length > 0 && isPlatformBrowser(this.platformId)) {
+        this.updateMapMarkers(pois);
+      }
+    });
+  }
 
-  currentPage = signal<number>(1);
-  itemsPerPage = 20;
-
+  // Lógica de Filtro e Paginação combinados
   filteredPOIs = computed(() => {
     const filter = this.activeFilter();
     const page = this.currentPage();
@@ -84,6 +104,7 @@ export class Planner implements OnInit {
     return filtered.slice(startIndex, startIndex + this.itemsPerPage);
   });
 
+  // Computed Signals Financeiros
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
 
@@ -175,6 +196,72 @@ export class Planner implements OnInit {
     }
   }
 
+  // --- LÓGICA DE MAPA (LEAFLET) ---
+  private async initMap(lat: number, lng: number) {
+    if (this.map || !isPlatformBrowser(this.platformId)) return;
+
+    // Carrega o Leaflet apenas no momento da execução no Navegador
+    this.L = await import('leaflet');
+
+    this.map = this.L.map('map-container').setView([lat, lng], 13);
+
+    this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    this.markersLayer = this.L.layerGroup().addTo(this.map);
+  }
+
+  private async updateMapMarkers(pois: any[]) {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Garante que o Leaflet esteja carregado
+    if (!this.L) {
+      this.L = await import('leaflet');
+    }
+
+    if (!this.map) return;
+
+    this.markersLayer.clearLayers();
+
+    pois.forEach(poi => {
+      const color = this.getCategoryColor(poi.category);
+
+      const marker = this.L.circleMarker([poi.lat, poi.lon], {
+        radius: 8,
+        fillColor: color,
+        color: '#fff',
+        weight: 2,
+        fillOpacity: 0.8
+      });
+
+      marker.bindPopup(`
+        <div style="font-family: sans-serif; min-width: 150px;">
+          <strong style="color: #2c3e50; font-size: 1rem;">${poi.name}</strong><br>
+          <span style="font-size: 0.8rem; color: #777;">${this.translateCategory(poi.category)}</span><br>
+          <p style="font-size: 0.75rem; margin: 8px 0;">${poi.address}</p>
+        </div>
+      `);
+
+      this.markersLayer.addLayer(marker);
+    });
+
+    if (pois.length > 0) {
+      const group = new this.L.FeatureGroup(this.markersLayer.getLayers());
+      this.map.fitBounds(group.getBounds().pad(0.1));
+    }
+  }
+
+  private getCategoryColor(category: string): string {
+    const colors: { [key: string]: string } = {
+      'RESTAURANT': '#e67e22',
+      'SHOPPING': '#3498db',
+      'CULTURA': '#27ae60'
+    };
+    return colors[category] || '#95a5a6';
+  }
+
+  // --- MÉTODOS DE DADOS E UI ---
   fetchRate() {
     this.currencyService.getExchangeRate(this.tripDetails.countryCode).subscribe(rate => {
       this.exchangeRate.set(Math.round(rate * 100) / 100);
@@ -207,7 +294,13 @@ export class Planner implements OnInit {
     const iataCode = this.bffDictionary[countryName] || 'PAR';
 
     this.tripService.getPointsOfInterest(iataCode).subscribe({
-      next: (response: any) => this.rawPointsOfInterest.set(response.data || []),
+      next: (response: any) => {
+        const data = response.data || [];
+        this.rawPointsOfInterest.set(data);
+        if (data.length > 0 && isPlatformBrowser(this.platformId)) {
+          this.initMap(data[0].lat, data[0].lon);
+        }
+      },
       error: (err) => console.error('Erro ao buscar Pontos de Interesse:', err)
     });
   }
