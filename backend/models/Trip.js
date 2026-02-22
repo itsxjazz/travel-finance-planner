@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const tripSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     destination: { type: String, required: true },
     countryCode: { type: String }, // Ex: JPY
     flagUrl: { type: String },

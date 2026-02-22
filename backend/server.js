@@ -9,7 +9,11 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:4200',
+    allowedHeaders: ['Content-Type', 'x-auth-token'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+}));
 app.use(express.json());
 
 // Rotas

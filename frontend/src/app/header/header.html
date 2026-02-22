@@ -1,0 +1,25 @@
+<nav
+  style="display: flex; justify-content: space-between; padding: 15px 20px; background: white; border-bottom: 1px solid #eee; align-items: center;">
+  <div style="display: flex; gap: 20px; align-items: center;">
+    <span style="font-size: 1.5rem;">✈️</span>
+    <a routerLink="/" style="text-decoration: none; color: #333; font-weight: bold;">Início</a>
+
+    @if (isLoggedIn()) {
+    <a routerLink="/dashboard" style="text-decoration: none; color: #333;">Minhas Viagens</a>
+    <a routerLink="/planner" style="text-decoration: none; color: #333;">Planejamento</a>
+    }
+  </div>
+
+  <div style="display: flex; gap: 20px; align-items: center;">
+    @if (!isLoggedIn()) {
+    <a routerLink="/login" style="text-decoration: none; color: #333;">Login</a>
+    <a routerLink="/register" style="text-decoration: none; color: #333;">Registrar</a>
+    } @else {
+    <span style="color: #666;">Olá, {{ getUserName() }}!</span>
+    <button (click)="logout()"
+      style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+      Sair
+    </button>
+    }
+  </div>
+</nav>
