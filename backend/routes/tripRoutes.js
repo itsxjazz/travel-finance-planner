@@ -6,7 +6,6 @@ const auth = require('../middleware/auth');
 // GET /api/trips - Busca apenas as viagens DO USUÁRIO logado
 router.get('/', auth, async (req, res) => {
     try {
-        // Filtra pelo userId que o middleware extraiu do token
         const trips = await Trip.find({ userId: req.user.id });
         res.json(trips);
     } catch (err) {
@@ -14,9 +13,8 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-// POST /api/trips - Salva a viagem vinculando ao ID do usuário
+// POST /api/trips - Salva a viagem vinculada ao usuário
 router.post('/', auth, async (req, res) => {
-    // Espalha o corpo da requisição e força o userId do dono do token
     const trip = new Trip({
         ...req.body,
         userId: req.user.id
@@ -30,12 +28,37 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// DELETE e PUT também precisam do middleware 'auth' para segurança
+// PUT /api/trips/:id - ATUALIZAÇÃO 
+router.put('/:id', auth, async (req, res) => {
+    try {
+        // Procura pelo ID da viagem e garante que ela pertença ao usuário logado
+        const updatedTrip = await Trip.findOneAndUpdate(
+            { _id: req.params.id, userId: req.user.id },
+            req.body,
+            { new: true } // Devolve o documento já atualizado
+        );
+
+        if (!updatedTrip) {
+            return res.status(404).json({ message: 'Viagem não encontrada ou sem permissão para editar.' });
+        }
+
+        res.json(updatedTrip);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// DELETE /api/trips/:id - Exclui apenas se for o dono
 router.delete('/:id', auth, async (req, res) => {
     try {
-        // Garante que o usuário só delete o que é dele
-        const removedTrip = await Trip.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
-        if (!removedTrip) return res.status(404).json({ message: 'Viagem não encontrada ou sem permissão.' });
+        const removedTrip = await Trip.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user.id
+        });
+
+        if (!removedTrip) {
+            return res.status(404).json({ message: 'Viagem não encontrada ou sem permissão.' });
+        }
         res.json(removedTrip);
     } catch (err) {
         res.status(500).json({ message: err.message });
