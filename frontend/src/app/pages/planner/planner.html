@@ -15,22 +15,14 @@
     <h2 style="margin: 0; color: #2c3e50;">Meta: {{ tripDetails.destination }}</h2>
   </div>
 
-  <div
-    style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-    <p
-      style="font-size: 0.75rem; color: #999; margin: 0 0 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">
-      Histórico da Moeda (Últimos 12 meses)
-    </p>
-    <div style="height: 160px; position: relative;">
-      <canvas #currencyChart></canvas>
-    </div>
-  </div>
+  <app-currency-chart [countryCode]="tripDetails.countryCode"></app-currency-chart>
 
   <div
     style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
     <h3 style="margin: 0 0 15px; font-size: 1rem; color: #555;">Objetivo da Viagem</h3>
     <label style="font-size: 0.8rem; color: #999;">Valor total em <strong>{{ tripDetails.countryCode
         }}</strong>:</label>
+
     <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)" placeholder="Ex: 1000"
       style="display: block; width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; outline: none; box-sizing: border-box;">
 
@@ -47,121 +39,32 @@
   </app-budget-estimator>
 
   @if (budgetResult()) {
-  <div class="budget-visualizer"
-    style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
-    <h3 style="font-size: 1rem; color: #555;">Divisão Estimada do Investimento</h3>
-    <div class="chart-container" style="position: relative; height:200px; width:100%">
-      <canvas #budgetChartCanvas></canvas>
-    </div>
-    <div style="margin-top: 15px; font-size: 0.9rem; color: #444;">
-      <p>✈️ Passagens: <strong>{{ budgetResult().breakdown.flight | currency:tripDetails.countryCode }}</strong></p>
-      <p>🏨 Hotel: <strong>{{ budgetResult().breakdown.hotel | currency:tripDetails.countryCode }}</strong></p>
-      <p>🍱 Diárias: <strong>{{ budgetResult().breakdown.dailyExpenses | currency:tripDetails.countryCode }}</strong>
-      </p>
-    </div>
-  </div>
+  <app-budget-visualizer [budgetBreakdown]="budgetResult().breakdown" [currencyCode]="tripDetails.countryCode">
+  </app-budget-visualizer>
   }
 
-  <div
-    style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-      <h3 style="margin: 0; font-size: 1rem; color: #555;">Minha Caixinha</h3>
-      <div
-        style="font-size: 0.85rem; color: #666; background: #f8f9fa; padding: 4px 8px; border-radius: 6px; border: 1px solid #eee; display: flex; align-items: center; gap: 5px;">
-        Rendendo
-        <input type="number" [value]="indexPercentage()" (input)="handleInput($event, indexPercentage)"
-          style="width: 45px; border: none; background: transparent; font-weight: bold; color: #27ae60; text-align: center; outline: none; border-bottom: 1px dashed #27ae60;">
-        % do CDI
-      </div>
-    </div>
+  <app-savings-calculator [targetAmountBrl]="brlGoal()" [cdiRate]="cdiRate()" [currentSavings]="currentSavings()"
+    [monthlyContribution]="monthlyContribution()" [indexPercentage]="indexPercentage()"
+    (savingsChange)="currentSavings.set($event)" (contributionChange)="monthlyContribution.set($event)"
+    (indexChange)="indexPercentage.set($event)">
+  </app-savings-calculator>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-      <div>
-        <label style="font-size: 0.8rem; color: #999;">Já guardei (R$)</label>
-        <input type="text" [value]="currentSavings()" (input)="handleInput($event, currentSavings)"
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
-      </div>
-      <div>
-        <label style="font-size: 0.8rem; color: #999;">Guardar/mês (R$)</label>
-        <input type="text" [value]="monthlyContribution()" (input)="handleInput($event, monthlyContribution)"
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
-      </div>
-    </div>
+  <button (click)="saveTrip()" [disabled]="isSaving()"
+    style="width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 30px; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.2);"
+    [style.opacity]="isSaving() ? '0.7' : '1'">
+    {{ isSaving() ? 'Salvando...' : '💾 Salvar Planejamento' }}
+  </button>
 
-    @if (monthsToGoal() !== Infinity && monthsToGoal() > 0) {
-    <div style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
-      @if (redemptionDetails()) {
-      <div style="margin-bottom: 15px; border-bottom: 1px solid #d4edda; padding-bottom: 12px;">
-        <span
-          style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 10px;">PROJEÇÃO NO
-          RESGATE:</span>
-
-        <div
-          style="display: flex; justify-content: space-between; font-size: 0.95rem; color: #444; margin-bottom: 8px;">
-          <span>Saldo Líquido (Final):</span>
-          <strong style="color: #27ae60;">{{ redemptionDetails()?.netRedemption | currency:'BRL' }}</strong>
-        </div>
-
-        <div
-          style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #777; margin-bottom: 4px;">
-          <span>Lucro Real (pós-IR):</span>
-          <span>+ {{ (redemptionDetails()!.grossInterest - redemptionDetails()!.totalIR) | currency:'BRL' }}</span>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #777;">
-          <span>IR Pago ({{ redemptionDetails()?.irRatePercentage }}%):</span>
-          <span>- {{ redemptionDetails()?.totalIR | currency:'BRL' }}</span>
-        </div>
-      </div>
-      }
-      <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Viaje em <strong>{{ monthsToGoal() }} meses</strong>!
-      </h4>
-      <p style="margin: 5px 0 15px; color: #555;">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy':'':'pt-BR'
-          }}</strong></p>
-      <button (click)="saveTrip()" [disabled]="isSaving()"
-        style="width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;"
-        [style.opacity]="isSaving() ? '0.7' : '1'">
-        {{ isSaving() ? 'Salvando...' : '💾 Salvar Planejamento' }}
-      </button>
-    </div>
-    }
-  </div>
-
-  @if (itinerary().length > 0) {
-  <div
-    style="margin-top: 30px; background: #f0f9ff; border: 2px solid #007bff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);">
-    <h3 style="color: #0056b3; margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3rem;">
-      📍 Meu Roteiro Personalizado
-      <span style="background: #007bff; color: white; font-size: 0.8rem; padding: 2px 8px; border-radius: 10px;">{{
-        itinerary().length }} itens</span>
-    </h3>
-
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      @for (item of itinerary(); track item.id) {
-      <div
-        style="background: white; padding: 12px 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d0e4ff;">
-        <div>
-          <span style="font-size: 0.8rem; color: #666; font-weight: bold;">{{ translateCategory(item.category) }}</span>
-          <p style="margin: 0; font-weight: bold; color: #2c3e50; font-size: 1rem;">{{ item.name }}</p>
-        </div>
-        <button (click)="removeFromItinerary(item.id)"
-          style="background: #fff5f5; border: 1px solid #ffe3e3; color: #ff4d4d; font-weight: bold; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: 0.2s;">
-          Remover
-        </button>
-      </div>
-      }
-    </div>
-  </div>
-  }
+  <app-trip-itinerary [items]="itinerary()" (removeRequested)="removeFromItinerary($event)">
+  </app-trip-itinerary>
 
   <div
     style="margin-top: 30px; background: white; padding: 15px; border-radius: 16px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
     <h3 style="color: #2c3e50; font-size: 1.1rem; margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px;">
-      🗺️ Mapa de Exploração <span style="font-size: 0.8rem; font-weight: normal; color: #999;">(Exibindo todos os 100
-        locais)</span>
+      🗺️ Mapa de Exploração <span style="font-size: 0.8rem; font-weight: normal; color: #999;">(Exibindo locais
+        sugeridos)</span>
     </h3>
-
-    <div id="map-container" style="height: 400px; width: 100%; border-radius: 12px; z-index: 1;"></div>
+    <app-interactive-map [pois]="rawPointsOfInterest()"></app-interactive-map>
 
     <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.75rem; color: #666;">
       <span style="display: flex; align-items: center; gap: 4px;"><span
@@ -173,76 +76,9 @@
     </div>
   </div>
 
-  <div
-    style="background: white; padding: 30px; border-radius: 16px; margin-top: 30px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-    <div
-      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
-      <h3 style="color: #2c3e50; font-size: 1.3rem; margin: 0;">Descubra {{ tripDetails.destination }}</h3>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button class="filter-btn" (click)="setFilter('Todos')"
-          [class.active]="activeFilter() === 'Todos'">Todos</button>
-        <button class="filter-btn" (click)="setFilter('Cultura')" [class.active]="activeFilter() === 'Cultura'">🏛️
-          Cultura</button>
-        <button class="filter-btn" (click)="setFilter('Gastronomia')"
-          [class.active]="activeFilter() === 'Gastronomia'">🍴 Gastronomia</button>
-        <button class="filter-btn" (click)="setFilter('Shopping')" [class.active]="activeFilter() === 'Shopping'">🛍️
-          Compras</button>
-      </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-      @for (poi of filteredPOIs(); track $index) {
-      <div
-        style="background: #fdfdfd; border: 1px solid #eee; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-        <div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-            <span
-              style="background: #eef9f2; color: #27ae60; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">
-              {{ translateCategory(poi.category) }}
-            </span>
-            <span style="color: #f39c12; font-size: 0.85rem; font-weight: bold;">⭐ {{ poi.rank }}</span>
-          </div>
-          <h4 style="color: #2c3e50; margin: 0 0 8px 0; font-size: 1.1rem; line-height: 1.4;">{{ poi.name }}</h4>
-          <p
-            style="color: #888; font-size: 0.8rem; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 5px;">
-            <span style="font-size: 1rem;">📍</span> {{ poi.address }}
-          </p>
-        </div>
-
-        <div style="display: flex; gap: 8px;">
-          <a [href]="poi.mapUrl" target="_blank"
-            style="flex: 1; text-align: center; background: #f0f7ff; color: #007bff; border: 1px solid #cce5ff; padding: 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: bold; transition: 0.2s;">
-            🗺️ Mapa
-          </a>
-          <button (click)="addToItinerary(poi)"
-            style="flex: 1.5; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;">
-            + Roteiro
-          </button>
-        </div>
-      </div>
-      }
-    </div>
-
-    <div
-      style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0; flex-wrap: wrap;">
-      @for (p of [1,2,3,4,5,6,7,8,9,10]; track p) {
-      <button (click)="setPage(p)" [style.background]="currentPage() === p ? '#27ae60' : 'white'"
-        [style.color]="currentPage() === p ? 'white' : '#777'"
-        [style.border]="currentPage() === p ? 'none' : '1px solid #ddd'"
-        style="width: 35px; height: 35px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.85rem;">
-        {{ p }}
-      </button>
-      }
-      <span style="font-size: 0.8rem; color: #999; margin-left: 10px; white-space: nowrap;">Página {{ currentPage() }}
-        de 10</span>
-    </div>
-
-    @if (filteredPOIs().length === 0) {
-    <div style="text-align: center; padding: 40px; color: #999;">
-      <p>Nenhuma atração encontrada nesta página com este filtro.</p>
-    </div>
-    }
-  </div>
+  <app-discovery-grid [destinationName]="tripDetails.destination" [rawPOIs]="rawPointsOfInterest()"
+    (addRequested)="addToItinerary($event)">
+  </app-discovery-grid>
 
 </div>
 }

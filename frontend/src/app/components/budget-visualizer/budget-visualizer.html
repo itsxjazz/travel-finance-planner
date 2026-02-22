@@ -1,0 +1,13 @@
+<div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
+  <h3 style="font-size: 1rem; color: #555;">Divisão Estimada do Investimento</h3>
+
+  <div class="chart-container" style="position: relative; height:200px; width:100%">
+    <canvas #budgetChartCanvas></canvas>
+  </div>
+
+  <div style="margin-top: 15px; font-size: 0.9rem; color: #444;">
+    <p>✈️ Passagens: <strong>{{ budgetBreakdown.flight | currency:currencyCode }}</strong></p>
+    <p>🏨 Hotel: <strong>{{ budgetBreakdown.hotel | currency:currencyCode }}</strong></p>
+    <p>🍱 Diárias: <strong>{{ budgetBreakdown.dailyExpenses | currency:currencyCode }}</strong></p>
+  </div>
+</div>

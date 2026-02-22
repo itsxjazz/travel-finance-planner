@@ -1,0 +1,31 @@
+@if (items().length > 0) {
+<div
+  style="margin-top: 30px; background: #f0f9ff; border: 2px solid #007bff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);">
+
+  <h3 style="color: #0056b3; margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3rem;">
+    📍 Meu Roteiro Personalizado
+    <span style="background: #007bff; color: white; font-size: 0.8rem; padding: 2px 8px; border-radius: 10px;">
+      {{ items().length }} itens
+    </span>
+  </h3>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    @for (item of items(); track item.id) {
+    <div
+      style="background: white; padding: 12px 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d0e4ff;">
+      <div>
+        <span style="font-size: 0.8rem; color: #666; font-weight: bold;">
+          {{ translateCategory(item.category) }}
+        </span>
+        <p style="margin: 0; font-weight: bold; color: #2c3e50; font-size: 1rem;">{{ item.name }}</p>
+      </div>
+
+      <button (click)="removeItem(item.id)"
+        style="background: #fff5f5; border: 1px solid #ffe3e3; color: #ff4d4d; font-weight: bold; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: 0.2s;">
+        Remover
+      </button>
+    </div>
+    }
+  </div>
+</div>
+}
