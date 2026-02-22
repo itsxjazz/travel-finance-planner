@@ -1,0 +1,19 @@
+.filter-btn {
+  background: transparent;
+  color: var(--text-gray, #888);
+  border: 1px solid var(--border, #ccc);
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 500;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+  background: var(--primary-neon, #00d2ff);
+  color: #000;
+  /* Texto preto para alto contraste com o neon */
+  border-color: var(--primary-neon, #00d2ff);
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+}

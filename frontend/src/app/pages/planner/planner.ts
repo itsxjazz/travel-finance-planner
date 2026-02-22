@@ -32,7 +32,6 @@ export class Planner implements OnInit {
   tripDetails: any = null;
   chart: any;
 
-  // --- SIGNALS ---
   localGoal = signal<number>(0);
   exchangeRate = signal<number>(0);
   currentSavings = signal<number>(0);
@@ -41,20 +40,46 @@ export class Planner implements OnInit {
   indexPercentage = signal<number>(100);
   isSaving = signal<boolean>(false);
   saveSuccess = signal<boolean>(false);
-  
-  // CORREÇÃO 1: Adicionando o signal que faltava
   originCode = signal<string>('GRU');
+  isEditing = signal<boolean>(false);
+  tripId = signal<string | null>(null);
+  budgetResult = signal<any>(null);
+  isCalculating = signal<boolean>(false);
+  itinerary = signal<any[]>([]);
+
+  private bffDictionary: { [key: string]: string } = {
+    'Brasil': 'GRU', 'Estados Unidos': 'NYC', 'Canadá': 'YTO', 'México': 'MEX',
+    'Argentina': 'EZE', 'Chile': 'SCL', 'Colômbia': 'BOG', 'Peru': 'LIM', 'Uruguai': 'MVD',
+    'França': 'PAR', 'Reino Unido': 'LON', 'Portugal': 'LIS', 'Espanha': 'MAD',
+    'Itália': 'ROM', 'Alemanha': 'BER', 'Países Baixos': 'AMS', 'Holanda': 'AMS',
+    'Suíça': 'ZRH', 'Bélgica': 'BRU', 'Áustria': 'VIE',
+    'Japão': 'TYO', 'Coreia do Sul': 'SEL', 'Singapura': 'SIN', 'Tailândia': 'BKK',
+    'Emirados Árabes Unidos': 'DXB', 'Austrália': 'SYD', 'Nova Zelândia': 'AKL',
+    'Egito': 'CAI'
+  };
+
+  rawPointsOfInterest = signal<any[]>([]);
+  activeFilter = signal<string>('Todos');
+
+  filteredPOIs = computed(() => {
+    const filter = this.activeFilter();
+    const pois = this.rawPointsOfInterest();
+
+    if (filter === 'Todos') return pois;
+
+    const filterMap: { [key: string]: string } = {
+      'Cultura': 'CULTURA',
+      'Gastronomia': 'RESTAURANT',
+      'Shopping': 'SHOPPING',
+      'Compras': 'SHOPPING'
+    };
+
+    return pois.filter(poi => poi.category === filterMap[filter]);
+  });
 
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
 
-  isEditing = signal<boolean>(false);
-  tripId = signal<string | null>(null);
-
-  budgetResult = signal<any>(null);
-  isCalculating = signal<boolean>(false);
-
-  // --- LÓGICA FINANCEIRA ---
   private getIRRate(months: number): number {
     if (months <= 6) return 0.225;
     if (months <= 12) return 0.20;
@@ -66,7 +91,6 @@ export class Planner implements OnInit {
     const target = this.brlGoal();
     const initial = this.currentSavings();
     const monthlyAdd = this.monthlyContribution();
-
     if (target <= 0 || (monthlyAdd <= 0 && initial < target)) return Infinity;
     if (initial >= target) return 0;
 
@@ -90,7 +114,6 @@ export class Planner implements OnInit {
   redemptionDetails = computed(() => {
     const months = this.monthsToGoal();
     if (months === Infinity || months === 0) return null;
-
     const initial = this.currentSavings();
     const monthlyAdd = this.monthlyContribution();
     const annualRate = this.finalAnnualTax() / 100;
@@ -129,18 +152,18 @@ export class Planner implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       if (history.state && history.state.tripData) {
         this.tripDetails = history.state.tripData;
-
         if (history.state.isEditing) {
           this.isEditing.set(true);
           this.tripId.set(this.tripDetails._id);
           this.localGoal.set(this.tripDetails.financialGoalLocal);
           this.currentSavings.set(this.tripDetails.currentSavingsBrl);
           this.monthlyContribution.set(this.tripDetails.monthlyContributionBrl);
+          if (this.tripDetails.itinerary) this.itinerary.set(this.tripDetails.itinerary);
         }
-
         this.fetchRate();
         this.fetchCDI();
         this.loadHistoricalData();
+        this.loadPOIs();
       }
     }
   }
@@ -152,9 +175,7 @@ export class Planner implements OnInit {
   }
 
   fetchCDI() {
-    this.taxService.getRate('CDI').subscribe((rate: number) => {
-      this.cdiRate.set(rate);
-    });
+    this.taxService.getRate('CDI').subscribe((rate: number) => this.cdiRate.set(rate));
   }
 
   loadHistoricalData() {
@@ -173,6 +194,21 @@ export class Planner implements OnInit {
     }
   }
 
+  loadPOIs() {
+    if (!this.tripDetails?.destination) return;
+    const countryName = this.tripDetails.destination;
+    const iataCode = this.bffDictionary[countryName] || 'PAR';
+
+    this.tripService.getPointsOfInterest(iataCode).subscribe({
+      next: (response: any) => this.rawPointsOfInterest.set(response.data || []),
+      error: (err) => console.error('Erro ao buscar Pontos de Interesse:', err)
+    });
+  }
+
+  setFilter(filterName: string) {
+    this.activeFilter.set(filterName);
+  }
+
   createChart(labels: string[], data: number[]) {
     if (this.chart) this.chart.destroy();
     this.chart = new Chart(this.chartCanvas.nativeElement, {
@@ -182,8 +218,8 @@ export class Planner implements OnInit {
         datasets: [{
           label: `${this.tripDetails.countryCode}/BRL`,
           data: data,
-          borderColor: '#27ae60',
-          backgroundColor: 'rgba(39, 174, 96, 0.05)',
+          borderColor: '#00d2ff',
+          backgroundColor: 'rgba(0, 210, 255, 0.05)',
           fill: true,
           tension: 0.4,
           pointRadius: 0,
@@ -195,9 +231,31 @@ export class Planner implements OnInit {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          y: { beginAtZero: false, grid: { display: false }, ticks: { font: { size: 10 } } },
-          x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+          y: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#a0a0a0' } },
+          x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#a0a0a0' } }
         }
+      }
+    });
+  }
+
+  createBudgetChart(breakdown: any) {
+    if (this.budgetChartInstance) this.budgetChartInstance.destroy();
+    const ctx = this.budgetChartCanvas.nativeElement.getContext('2d');
+    this.budgetChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Aéreo', 'Hospedagem', 'Gastos Diários'],
+        datasets: [{
+          data: [breakdown.flight, breakdown.hotel, breakdown.dailyExpenses],
+          backgroundColor: ['#00d2ff', '#f39c12', '#27ae60'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { color: '#ffffff', boxWidth: 12 } } },
+        cutout: '70%'
       }
     });
   }
@@ -209,11 +267,19 @@ export class Planner implements OnInit {
     signalRef.set(parseFloat(cleanValue) || 0);
   }
 
+  translateCategory(category: string): string {
+    const categories: { [key: string]: string } = {
+      'CULTURA': '🏛️ Cultura',
+      'RESTAURANT': '🍴 Gastronomia',
+      'SHOPPING': '🛍️ Compras'
+    };
+    return categories[category] || category;
+  }
+
   saveTrip() {
-    if (this.monthsToGoal() === Infinity || this.monthsToGoal() === 0) return;
+    if (this.isSaving() || this.monthsToGoal() === Infinity || this.monthsToGoal() === 0) return;
 
     this.isSaving.set(true);
-
     const payload = {
       destination: this.tripDetails.destination,
       countryCode: this.tripDetails.countryCode,
@@ -222,20 +288,24 @@ export class Planner implements OnInit {
       financialGoalBrl: this.brlGoal(),
       currentSavingsBrl: this.currentSavings(),
       monthlyContributionBrl: this.monthlyContribution(),
-      estimatedTravelDate: this.travelDate()
+      estimatedTravelDate: this.travelDate(),
+      itinerary: this.itinerary()
     };
 
-    if (this.isEditing() && this.tripId()) {
-      this.tripService.updateTrip(this.tripId()!, payload).subscribe({
-        next: (response) => this.handleSaveSuccess(),
-        error: (err) => this.handleSaveError(err)
-      });
-    } else {
-      this.tripService.saveTripPlan(payload).subscribe({
-        next: (response) => this.handleSaveSuccess(),
-        error: (err) => this.handleSaveError(err)
-      });
-    }
+    const action = this.isEditing() && this.tripId()
+      ? this.tripService.updateTrip(this.tripId()!, payload)
+      : this.tripService.saveTripPlan(payload);
+
+    action.subscribe({
+      next: (response: any) => {
+        if (!this.isEditing() && response && response._id) {
+          this.tripId.set(response._id);
+          this.isEditing.set(true);
+        }
+        this.handleSaveSuccess();
+      },
+      error: (err) => this.handleSaveError(err)
+    });
   }
 
   handleSaveSuccess() {
@@ -245,32 +315,19 @@ export class Planner implements OnInit {
   }
 
   handleSaveError(err: any) {
-    console.error('Erro ao salvar:', err);
     this.isSaving.set(false);
-    alert('Ocorreu um erro ao processar sua solicitação.');
+    alert('Erro ao salvar no banco de dados.');
   }
 
-  goToSearch() {
-    this.router.navigate(['/search']);
-  }
+  goToSearch() { this.router.navigate(['/search']); }
 
-  // --- GERADOR DE ORÇAMENTO INTELIGENTE ---
   generateBudget(preferences: any) {
     this.isCalculating.set(true);
     const destCurrency = this.tripDetails?.countryCode;
-
-    const payload = { 
-      ...preferences, 
-      cityName: this.tripDetails?.destination,
-      destinationCode: destCurrency,
-    };
-    
-    console.log('🚀 Enviando payload para o Node.js:', payload);
-
+    const payload = { ...preferences, cityName: this.tripDetails?.destination, destinationCode: destCurrency };
     this.tripService.calculateSmartBudget(payload).subscribe({
       next: (response) => {
         const usdBreakdown = response.breakdown;
-
         this.currencyService.getExchangeRateFromUSD(destCurrency).subscribe({
           next: (rate) => {
             const localBreakdown = {
@@ -278,53 +335,29 @@ export class Planner implements OnInit {
               hotel: Math.round(usdBreakdown.hotel * rate),
               dailyExpenses: Math.round(usdBreakdown.dailyExpenses * rate)
             };
-
             const totalLocal = localBreakdown.flight + localBreakdown.hotel + localBreakdown.dailyExpenses;
-
             this.budgetResult.set({ breakdown: localBreakdown, estimatedTotalUsd: totalLocal });
             this.localGoal.set(totalLocal);
-
-            // CORREÇÃO 2: Chamada segura do gráfico
             setTimeout(() => this.createBudgetChart(localBreakdown), 0);
             this.isCalculating.set(false);
           },
-          error: (err) => {
-            console.error('Erro na conversão:', err);
-            this.isCalculating.set(false);
-          }
+          error: () => this.isCalculating.set(false)
         });
       },
-      error: (err) => {
-        console.error('Erro no backend:', err);
-        this.isCalculating.set(false);
-      }
+      error: () => this.isCalculating.set(false)
     });
   }
 
-  // CORREÇÃO 3: Método do Gráfico de Rosca reintroduzido (estava faltando no arquivo)
-  createBudgetChart(breakdown: any) {
-    if (this.budgetChartInstance) this.budgetChartInstance.destroy();
-
-    const ctx = this.budgetChartCanvas.nativeElement.getContext('2d');
-    this.budgetChartInstance = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Aéreo', 'Hospedagem', 'Gastos Diários'],
-        datasets: [{
-          data: [breakdown.flight, breakdown.hotel, breakdown.dailyExpenses],
-          backgroundColor: ['#3498db', '#f1c40f', '#2ecc71'],
-          borderWidth: 0,
-          hoverOffset: 10
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
-        },
-        cutout: '70%'
-      }
-    });
+  addToItinerary(poi: any) {
+    const exists = this.itinerary().find(item => item.id === poi.id);
+    if (!exists) {
+      this.itinerary.update(current => [...current, poi]);
+    } else {
+      alert('Este local já está no seu roteiro.');
+    }
   }
-} 
+
+  removeFromItinerary(poiId: string) {
+    this.itinerary.update(current => current.filter(item => item.id !== poiId));
+  }
+}

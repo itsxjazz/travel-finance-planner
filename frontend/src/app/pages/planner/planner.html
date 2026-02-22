@@ -1,27 +1,28 @@
-<div *ngIf="!tripDetails" style="max-width: 500px; margin: 80px auto; text-align: center; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;">
-  
+<div *ngIf="!tripDetails"
+  style="max-width: 500px; margin: 80px auto; text-align: center; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;">
   <div style="font-size: 4rem; margin-bottom: 10px;">🌍</div>
   <h2 style="color: #2c3e50; margin-bottom: 10px;">Nenhum destino selecionado</h2>
   <p style="color: #777; margin-bottom: 25px; line-height: 1.5;">
     Para fazer o seu planejamento financeiro, você precisa escolher para qual país deseja viajar primeiro!
   </p>
-  
-  <button 
-    (click)="goToSearch()" 
+  <button (click)="goToSearch()"
     style="padding: 12px 25px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%;">
     🔍 Buscar um Destino
   </button>
 </div>
 
-<div *ngIf="tripDetails" style="max-width: 500px; margin: 0 auto; padding: 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
-  
+<div *ngIf="tripDetails"
+  style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
+
   <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
     <img [src]="tripDetails.flagUrl" style="width: 50px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
     <h2 style="margin: 0; color: #2c3e50;">Meta: {{ tripDetails.destination }}</h2>
   </div>
 
-  <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-    <p style="font-size: 0.75rem; color: #999; margin: 0 0 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">
+  <div
+    style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+    <p
+      style="font-size: 0.75rem; color: #999; margin: 0 0 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">
       Histórico da Moeda (Últimos 12 meses)
     </p>
     <div style="height: 160px; position: relative;">
@@ -29,91 +30,163 @@
     </div>
   </div>
 
-  <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+  <div
+    style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
     <h3 style="margin: 0 0 15px; font-size: 1rem; color: #555;">Objetivo da Viagem</h3>
-    <label style="font-size: 0.8rem; color: #999;">Valor total em <strong>{{ tripDetails.countryCode }}</strong>:</label>
-    <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)" placeholder="Ex: 1000" style="display: block; width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; outline: none; box-sizing: border-box;">
-    
-    <div style="margin-top: 15px; display: flex; justify-content: space-between; border-top: 1px dashed #eee; padding-top: 15px;">
-      <span style="font-size: 0.9rem; color: #777;">Cotação Atual: <strong>{{ exchangeRate() | currency:'BRL':'symbol':'1.2-2' }}</strong></span>
+    <label style="font-size: 0.8rem; color: #999;">Valor total em <strong>{{ tripDetails.countryCode
+        }}</strong>:</label>
+    <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)" placeholder="Ex: 1000"
+      style="display: block; width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; outline: none; box-sizing: border-box;">
+
+    <div
+      style="margin-top: 15px; display: flex; justify-content: space-between; border-top: 1px dashed #eee; padding-top: 15px;">
+      <span style="font-size: 0.9rem; color: #777;">Cotação Atual: <strong>{{ exchangeRate() |
+          currency:'BRL':'symbol':'1.2-2' }}</strong></span>
       <span style="font-weight: bold; color: #27ae60;">Total: {{ brlGoal() | currency:'BRL' }}</span>
     </div>
   </div>
 
-<app-budget-estimator 
-  [destinationName]="tripDetails?.destination" 
-  (estimateRequested)="generateBudget($event)">
-</app-budget-estimator>
+  <app-budget-estimator [destinationName]="tripDetails?.destination" (estimateRequested)="generateBudget($event)">
+  </app-budget-estimator>
 
-  <div class="budget-visualizer" *ngIf="budgetResult()">
-  <h3>Divisão Estimada do Investimento</h3>
-  <div class="chart-container" style="position: relative; height:250px; width:100%">
-    <canvas #budgetChartCanvas></canvas>
+  <div class="budget-visualizer" *ngIf="budgetResult()"
+    style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
+    <h3 style="font-size: 1rem; color: #555;">Divisão Estimada do Investimento</h3>
+    <div class="chart-container" style="position: relative; height:200px; width:100%">
+      <canvas #budgetChartCanvas></canvas>
+    </div>
+    <div style="margin-top: 15px; font-size: 0.9rem; color: #444;">
+      <p>✈️ Passagens: <strong>{{ budgetResult().breakdown.flight | currency:tripDetails.countryCode }}</strong></p>
+      <p>🏨 Hotel: <strong>{{ budgetResult().breakdown.hotel | currency:tripDetails.countryCode }}</strong></p>
+      <p>🍱 Diárias: <strong>{{ budgetResult().breakdown.dailyExpenses | currency:tripDetails.countryCode }}</strong>
+      </p>
+    </div>
   </div>
-  
-  <div class="budget-details">
-    <p>✈️ Passagens: <strong>{{ budgetResult().breakdown.flight | currency:tripDetails.countryCode }}</strong></p>
-    <p>🏨 Hotel: <strong>{{ budgetResult().breakdown.hotel | currency:tripDetails.countryCode }}</strong></p>
-    <p>🍱 Diárias: <strong>{{ budgetResult().breakdown.dailyExpenses | currency:tripDetails.countryCode }}</strong></p>
-  </div>
-</div>
-  
-  <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+
+  <div
+    style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <h3 style="margin: 0; font-size: 1rem; color: #555;">Minha Caixinha</h3>
-      <div style="font-size: 0.85rem; color: #666; background: #f8f9fa; padding: 4px 8px; border-radius: 6px; border: 1px solid #eee;">
-        Rendendo <input type="number" [ngModel]="indexPercentage()" (ngModelChange)="indexPercentage.set($event)" style="width: 45px; border: none; background: transparent; font-weight: bold; color: #27ae60; text-align: center; outline: none;"> % do CDI
+      <div
+        style="font-size: 0.85rem; color: #666; background: #f8f9fa; padding: 4px 8px; border-radius: 6px; border: 1px solid #eee;">
+        Rendendo <input type="number" [ngModel]="indexPercentage()" (ngModelChange)="indexPercentage.set($event)"
+          style="width: 45px; border: none; background: transparent; font-weight: bold; color: #27ae60; text-align: center; outline: none;">
+        % do CDI
       </div>
     </div>
-    
+
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
       <div>
         <label style="font-size: 0.8rem; color: #999;">Já guardei (R$)</label>
-        <input type="text" [value]="currentSavings()" (input)="handleInput($event, currentSavings)" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+        <input type="text" [value]="currentSavings()" (input)="handleInput($event, currentSavings)"
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
       </div>
       <div>
         <label style="font-size: 0.8rem; color: #999;">Guardar/mês (R$)</label>
-        <input type="text" [value]="monthlyContribution()" (input)="handleInput($event, monthlyContribution)" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+        <input type="text" [value]="monthlyContribution()" (input)="handleInput($event, monthlyContribution)"
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
       </div>
     </div>
 
-    <div *ngIf="monthsToGoal() !== Infinity && monthsToGoal() > 0" style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
-      
-      <div *ngIf="redemptionDetails()" style="margin-bottom: 15px; border-bottom: 1px solid #d4edda; padding-bottom: 12px;">
-        <span style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 10px;">PROJEÇÃO NO RESGATE:</span>
-        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.95rem; color: #444;">
-          <div style="display: flex; justify-content: space-between;">
-            <span>Saldo Líquido (Final):</span>
-            <strong style="color: #27ae60;">{{ redemptionDetails()?.netRedemption | currency:'BRL' }}</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #888;">
-            <span>Lucro Real (pós-IR):</span>
-            <span>+ {{ (redemptionDetails()?.netRedemption! - redemptionDetails()?.totalInvested!) | currency:'BRL' }}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #888;">
-            <span>IR Pago ({{ redemptionDetails()?.irRatePercentage }}%):</span>
-            <span>- {{ redemptionDetails()?.totalIR | currency:'BRL' }}</span>
-          </div>
+    <div *ngIf="monthsToGoal() !== Infinity && monthsToGoal() > 0"
+      style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
+
+      <div *ngIf="redemptionDetails()"
+        style="margin-bottom: 15px; border-bottom: 1px solid #d4edda; padding-bottom: 12px;">
+        <span
+          style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 10px;">PROJEÇÃO NO
+          RESGATE:</span>
+        <div style="display: flex; justify-content: space-between; font-size: 0.95rem; color: #444;">
+          <span>Saldo Líquido (Final):</span>
+          <strong style="color: #27ae60;">{{ redemptionDetails()?.netRedemption | currency:'BRL' }}</strong>
         </div>
       </div>
 
-      <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Viaje em <strong>{{ monthsToGoal() }} meses</strong>!</h4>
-      <p style="margin: 5px 0 15px; color: #555;">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy':'':'pt-BR' }}</strong></p>
+      <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Viaje em <strong>{{ monthsToGoal() }} meses</strong>!
+      </h4>
+      <p style="margin: 5px 0 15px; color: #555;">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy':'':'pt-BR'
+          }}</strong></p>
 
-      <div style="border-top: 1px dashed #d4edda; padding-top: 15px;">
-        <button 
-          (click)="saveTrip()" 
-          [disabled]="isSaving()"
-          style="width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;"
-          [style.opacity]="isSaving() ? '0.7' : '1'">
-          {{ isSaving() ? 'Salvando no banco de dados...' : '💾 Salvar Planejamento' }}
-        </button>
-
-        <p *ngIf="saveSuccess()" style="margin: 10px 0 0; color: #27ae60; font-size: 0.85rem; text-align: center; font-weight: bold;">
-          Viagem salva com sucesso!
-        </p>
-      </div>
-
+      <button (click)="saveTrip()" [disabled]="isSaving()"
+        style="width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;"
+        [style.opacity]="isSaving() ? '0.7' : '1'">
+        {{ isSaving() ? 'Salvando...' : '💾 Salvar Planejamento' }}
+      </button>
     </div>
   </div>
+
+  <div *ngIf="itinerary().length > 0"
+    style="margin-top: 30px; background: #f0f9ff; border: 2px solid #007bff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);">
+    <h3 style="color: #0056b3; margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3rem;">
+      📍 Meu Roteiro Personalizado
+      <span style="background: #007bff; color: white; font-size: 0.8rem; padding: 2px 8px; border-radius: 10px;">{{
+        itinerary().length }} itens</span>
+    </h3>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      @for (item of itinerary(); track item.id) {
+      <div
+        style="background: white; padding: 12px 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d0e4ff;">
+        <div>
+          <span style="font-size: 0.8rem; color: #666; font-weight: bold;">{{ translateCategory(item.category) }}</span>
+          <p style="margin: 0; font-weight: bold; color: #2c3e50; font-size: 1rem;">{{ item.name }}</p>
+        </div>
+        <button (click)="removeFromItinerary(item.id)"
+          style="background: #fff5f5; border: 1px solid #ffe3e3; color: #ff4d4d; font-weight: bold; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: 0.2s;">
+          Remover
+        </button>
+      </div>
+      }
+    </div>
+  </div>
+
+  <div
+    style="background: white; padding: 30px; border-radius: 16px; margin-top: 30px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+      <h3 style="color: #2c3e50; font-size: 1.3rem; margin: 0;">Descubra {{ tripDetails.destination }}</h3>
+
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="filter-btn" (click)="setFilter('Todos')"
+          [class.active]="activeFilter() === 'Todos'">Todos</button>
+        <button class="filter-btn" (click)="setFilter('Cultura')" [class.active]="activeFilter() === 'Cultura'">🏛️
+          Cultura</button>
+        <button class="filter-btn" (click)="setFilter('Gastronomia')"
+          [class.active]="activeFilter() === 'Gastronomia'">🍴 Gastronomia</button>
+        <button class="filter-btn" (click)="setFilter('Shopping')" [class.active]="activeFilter() === 'Shopping'">🛍️
+          Compras</button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+      @for (poi of filteredPOIs(); track $index) {
+      <div
+        style="background: #fdfdfd; border: 1px solid #eee; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s;">
+        <div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span
+              style="background: #eef9f2; color: #27ae60; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">
+              {{ translateCategory(poi.category) }}
+            </span>
+            <span style="color: #f39c12; font-size: 0.85rem; font-weight: bold;">⭐ {{ poi.rank }}</span>
+          </div>
+          <h4 style="color: #2c3e50; margin: 0 0 8px 0; font-size: 1.1rem; line-height: 1.4;">{{ poi.name }}</h4>
+        </div>
+
+        <button (click)="addToItinerary(poi)"
+          style="margin-top: 15px; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;">
+          + Adicionar ao Roteiro
+        </button>
+      </div>
+      }
+    </div>
+
+    @if (filteredPOIs().length === 0) {
+    <div style="text-align: center; padding: 40px; color: #999;">
+      <p>Buscando atrações incríveis para sua viagem...</p>
+    </div>
+    }
+  </div>
+
 </div>

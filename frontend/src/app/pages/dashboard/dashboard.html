@@ -1,5 +1,6 @@
-<div style="max-width: 800px; margin: 0 auto; padding: 30px 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
-  
+<div
+  style="max-width: 800px; margin: 0 auto; padding: 30px 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
+
   <h2 style="color: #2c3e50; margin-bottom: 5px;">Minhas Viagens</h2>
   <p style="color: #777; font-size: 0.9rem; margin-bottom: 30px;">Acompanhe o planejamento da sua Bucket List.</p>
 
@@ -7,15 +8,19 @@
     Buscando dados no MongoDB...
   </div>
 
-  <div *ngIf="!isLoading() && savedTrips().length === 0" style="text-align: center; padding: 40px; background: white; border-radius: 12px; border: 1px dashed #ccc;">
+  <div *ngIf="!isLoading() && savedTrips().length === 0"
+    style="text-align: center; padding: 40px; background: white; border-radius: 12px; border: 1px dashed #ccc;">
     <p style="color: #777; margin: 0;">Você ainda não tem nenhum planejamento salvo.</p>
   </div>
 
-  <div *ngIf="!isLoading() && savedTrips().length > 0" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
-    
-    <div *ngFor="let trip of savedTrips()" style="background: white; border-radius: 12px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s;">
-      
-      <div style="background: #f8f9fa; padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px;">
+  <div *ngIf="!isLoading() && savedTrips().length > 0"
+    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+
+    <div *ngFor="let trip of savedTrips()"
+      style="background: white; border-radius: 12px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s;">
+
+      <div
+        style="background: #f8f9fa; padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px;">
         <img [src]="trip.flagUrl" style="width: 40px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <div>
           <h3 style="margin: 0; font-size: 1.1rem; color: #2c3e50;">{{ trip.destination }}</h3>
@@ -24,14 +29,15 @@
       </div>
 
       <div style="padding: 15px;">
-        
+
         <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #eee;">
           <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px;">
             <span style="color: #777;">Progresso da Meta</span>
             <strong style="color: #27ae60;">{{ getProgress(trip) | number:'1.0-0' }}%</strong>
           </div>
           <div style="width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
-            <div [style.width.%]="getProgress(trip)" style="height: 100%; background: #27ae60; border-radius: 4px; transition: width 0.5s ease-in-out;"></div>
+            <div [style.width.%]="getProgress(trip)"
+              style="height: 100%; background: #27ae60; border-radius: 4px; transition: width 0.5s ease-in-out;"></div>
           </div>
         </div>
 
@@ -39,28 +45,37 @@
           <span style="color: #777;">Meta Total:</span>
           <strong style="color: #2c3e50;">{{ trip.financialGoalBrl | currency:'BRL' }}</strong>
         </div>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.9rem;">
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem;">
           <span style="color: #777;">Aporte Mensal:</span>
           <strong style="color: #27ae60;">{{ trip.monthlyContributionBrl | currency:'BRL' }}</strong>
         </div>
 
-        <div style="background: #eef9f2; padding: 10px; border-radius: 6px; text-align: center;">
-          <span style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 4px;">DATA ESTIMADA</span>
-          <span style="color: #2c3e50; font-weight: bold;">{{ trip.estimatedTravelDate | date:'MMMM / yyyy' }}</span>
+        <div *ngIf="trip.itinerary && trip.itinerary.length > 0"
+          style="display: flex; align-items: center; gap: 5px; margin-bottom: 15px; font-size: 0.85rem; color: #007bff; font-weight: 500;">
+          <span>📍</span> {{ trip.itinerary.length }} {{ trip.itinerary.length === 1 ? 'local' : 'locais' }} no roteiro
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-          <button (click)="editTrip(trip)" style="flex: 1; padding: 8px; background: #f8f9fa; color: #2c3e50; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">
+        <div style="background: #eef9f2; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px;">
+          <span style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 4px;">DATA
+            ESTIMADA</span>
+          <span style="color: #2c3e50; font-weight: bold;">{{ trip.estimatedTravelDate | date:'MMMM / yyyy':'':'pt-BR'
+            }}</span>
+        </div>
+
+        <div style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 15px;">
+          <button (click)="editTrip(trip)"
+            style="flex: 1; padding: 8px; background: #f8f9fa; color: #2c3e50; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">
             ✏️ Editar
           </button>
-          <button (click)="deleteTrip(trip._id)" style="flex: 1; padding: 8px; background: #fff1f0; color: #e74c3c; border: 1px solid #fadbd8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">
+          <button (click)="deleteTrip(trip._id)"
+            style="flex: 1; padding: 8px; background: #fff1f0; color: #e74c3c; border: 1px solid #fadbd8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">
             🗑️ Excluir
           </button>
         </div>
 
-      </div> 
-    </div> 
+      </div>
+    </div>
 
-  </div> 
+  </div>
 </div>

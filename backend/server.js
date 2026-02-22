@@ -5,6 +5,7 @@ const cors = require('cors');
 const tripRoutes = require('./routes/tripRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
 const authRoutes = require('./routes/authRoutes');
+const localsRoutes = require('./routes/localsRoutes');
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.use(express.json());
 app.use('/api/trips', tripRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/auth', authRoutes);
-
+app.use('/api/locals', localsRoutes);
 
 // Conexão com o MongoDB
 mongoose.connect(process.env.MONGO_URI)

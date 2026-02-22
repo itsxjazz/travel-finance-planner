@@ -35,7 +35,7 @@ router.put('/:id', auth, async (req, res) => {
         const updatedTrip = await Trip.findOneAndUpdate(
             { _id: req.params.id, userId: req.user.id },
             req.body,
-            { new: true } // Devolve o documento já atualizado
+            { returnDocument: 'after' }
         );
 
         if (!updatedTrip) {

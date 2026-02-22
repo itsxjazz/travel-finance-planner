@@ -10,13 +10,11 @@ import { Profile } from './pages/profile/profile';
 
 export const routes: Routes = [
   // --- ROTAS PÚBLICAS ---
-  // (Qualquer pessoa pode acessar)
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: '', component: Home }, // Landing page do app
+  { path: '', component: Home },
 
   // --- ROTAS PROTEGIDAS ---
-  // (O AuthGuard vai checar o JWT antes de deixar entrar)
   {
     path: 'dashboard',
     component: Dashboard,
@@ -39,6 +37,5 @@ export const routes: Routes = [
   },
 
   // --- REDIRECIONAMENTO DE SEGURANÇA ---
-  // Se a rota não existir, manda para o login ou home
   { path: '**', redirectTo: '' }
 ];

@@ -9,7 +9,8 @@ const tripSchema = new mongoose.Schema({
     financialGoalBrl: { type: Number, required: true }, // Meta convertida para R$
     currentSavingsBrl: { type: Number, default: 0 }, // O que já tem guardado
     monthlyContributionBrl: { type: Number, required: true }, // Aporte mensal
-    estimatedTravelDate: { type: Date } // Data calculada pela lógica do front
+    estimatedTravelDate: { type: Date }, // Data calculada pela lógica do front,
+    itinerary: { type: Array, default: [] }, // Lista de atrações planejadas
 }, { timestamps: true });
 
 module.exports = mongoose.model('Trip', tripSchema);
