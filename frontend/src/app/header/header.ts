@@ -1,5 +1,5 @@
-import { Component, inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -10,23 +10,18 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './header.html'
 })
 export class Header {
-  private authService = inject(AuthService);
-  private platformId = inject(PLATFORM_ID);
+  // Torna o serviço público para acessar o sinal direto no HTML se preferir
+  public authService = inject(AuthService);
 
+  // Atalho para o sinal de login
   isLoggedIn = this.authService.isLoggedInSignal;
 
   logout() {
     this.authService.logout();
   }
 
+  // Agora o nome também reage às mudanças do AuthService
   getUserName(): string {
-    if (isPlatformBrowser(this.platformId)) {
-      const userData = localStorage.getItem('travel_planner_user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        return user.name;
-      }
-    }
-    return 'Viajante';
+    return this.authService.getUserName();
   }
 }

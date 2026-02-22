@@ -28,12 +28,12 @@ export class AuthService {
     return null;
   }
 
+  // --- LOGIN ---
   login(credentials: any) {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
         if (response?.token) {
           this.saveAuthData(response);
-          this.isLoggedInSignal.set(true);
         }
       })
     );
@@ -48,6 +48,7 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  // --- REGISTRAR ---
   register(userData: any) {
     return this.http.post<any>(`${this.apiUrl}/register`, userData).pipe(
       tap(response => {
@@ -65,10 +66,12 @@ export class AuthService {
     return false;
   }
 
+  // --- SALVAR DADOS (Privado) ---
   private saveAuthData(data: any) {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem(this.tokenKey, data.token);
       localStorage.setItem(this.userKey, JSON.stringify({ name: data.name }));
+      this.isLoggedInSignal.set(true);
     }
   }
 
