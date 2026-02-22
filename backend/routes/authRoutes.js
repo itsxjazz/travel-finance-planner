@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 // Função para gerar o JWT (Crachá de Acesso)
 const generateToken = (id) => {
-    // Se o process.env.JWT_SECRET não existir, o servidor vai falhar de propósito
+    // Se o process.env.JWT_SECRET não existir, o servidor vai falhar 
     if (!process.env.JWT_SECRET) {
         throw new Error('FATAL ERROR: JWT_SECRET is not defined.');
     }
@@ -61,6 +62,44 @@ router.post('/login', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Erro no servidor.', error: error.message });
+    }
+});
+
+// --- ROTA DE PERFIL (GET) ---
+// Retorna os dados do usuário logado (protegido pelo middleware auth)
+router.get('/profile', auth, async (req, res) => {
+    try {
+        // O select('-password') garante que a senha não seja enviada de volta por segurança
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) return res.status(404).json({ message: 'Usuário não encontrado.' });
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao buscar perfil.', error: error.message });
+    }
+});
+
+// --- ROTA DE TROCAR SENHA (PUT) ---
+router.put('/change-password', auth, async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+
+        // 1. Busca o usuário no banco, incluindo a senha para poder comparar
+        const user = await User.findById(req.user.id);
+
+        // 2. Usa o método do modelo para verificar a senha antiga
+        const isMatch = await user.comparePassword(oldPassword);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'A senha atual está incorreta.' });
+        }
+
+        // 3. Atualiza a senha
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: 'Senha atualizada com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao atualizar a senha.', error: error.message });
     }
 });
 

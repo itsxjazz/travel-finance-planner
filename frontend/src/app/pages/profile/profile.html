@@ -1,0 +1,68 @@
+<div style="max-width: 800px; margin: 50px auto; padding: 0 20px; font-family: 'Inter', sans-serif;">
+
+  <h2 style="color: var(--text-white, #333); font-size: 2rem; margin-bottom: 30px;">
+    Meu <span style="color: var(--primary-neon, #00d2ff);">Perfil</span>
+  </h2>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+
+    <div
+      style="background: var(--bg-card, #f9f9f9); border: 1px solid var(--border, #eee); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3
+        style="color: var(--text-white, #111); margin-top: 0; border-bottom: 1px solid var(--border, #eee); padding-bottom: 10px;">
+        Dados da Conta</h3>
+
+      @if (userData()) {
+      <div style="margin-top: 20px;">
+        <p style="color: var(--text-gray, #666); font-size: 0.9rem; margin-bottom: 5px;">Nome Completo</p>
+        <p style="color: var(--text-white, #222); font-size: 1.1rem; margin-top: 0; font-weight: bold;">{{
+          userData().name }}</p>
+
+        <p style="color: var(--text-gray, #666); font-size: 0.9rem; margin-bottom: 5px; margin-top: 20px;">E-mail de
+          Acesso</p>
+        <p style="color: var(--text-white, #222); font-size: 1.1rem; margin-top: 0; font-weight: bold;">{{
+          userData().email }}</p>
+      </div>
+      } @else {
+      <p style="color: var(--primary-neon, #00d2ff);">Carregando dados...</p>
+      }
+    </div>
+
+    <div
+      style="background: var(--bg-card, #f9f9f9); border: 1px solid var(--border, #eee); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3
+        style="color: var(--text-white, #111); margin-top: 0; border-bottom: 1px solid var(--border, #eee); padding-bottom: 10px;">
+        Segurança</h3>
+
+      <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+
+        <div>
+          <label style="color: var(--text-gray, #666); font-size: 0.9rem; display: block; margin-bottom: 5px;">Senha
+            Atual</label>
+          <input type="password" [(ngModel)]="oldPassword" placeholder="Digite a senha atual"
+            style="width: 100%; box-sizing: border-box; background: var(--bg-dark, #fff); border: 1px solid var(--border, #ccc); color: var(--text-white, #333); padding: 12px; border-radius: 6px; outline: none; transition: 0.3s;">
+        </div>
+
+        <div>
+          <label style="color: var(--text-gray, #666); font-size: 0.9rem; display: block; margin-bottom: 5px;">Nova
+            Senha</label>
+          <input type="password" [(ngModel)]="newPassword" placeholder="Digite a nova senha"
+            style="width: 100%; box-sizing: border-box; background: var(--bg-dark, #fff); border: 1px solid var(--border, #ccc); color: var(--text-white, #333); padding: 12px; border-radius: 6px; outline: none; transition: 0.3s;">
+        </div>
+
+        <button (click)="changePassword()"
+          style="margin-top: 10px; background: var(--primary-neon, #00d2ff); color: #000; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+          Atualizar Senha
+        </button>
+
+        @if (message()) {
+        <div [style.color]="isError() ? 'red' : 'green'"
+          style="font-size: 0.9rem; margin-top: 10px; text-align: center; font-weight: bold;">
+          {{ message() }}
+        </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -16,7 +16,10 @@
     <a routerLink="/login" style="text-decoration: none; color: #333;">Login</a>
     <a routerLink="/register" style="text-decoration: none; color: #333;">Registrar</a>
     } @else {
-    <span style="color: #666;">Olá, {{ getUserName() }}!</span>
+    <a routerLink="/profile" style="color: var(--text-gray); text-decoration: none; cursor: pointer; transition: 0.3s;"
+      onmouseover="this.style.color='var(--primary-neon)'" onmouseout="this.style.color='var(--text-gray)'">
+      Olá, <b style="color: var(--text-white);">{{ getUserName() }}</b>
+    </a>
     <button (click)="logout()"
       style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
       Sair

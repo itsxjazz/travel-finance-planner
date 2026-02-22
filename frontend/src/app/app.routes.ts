@@ -6,6 +6,7 @@ import { Search } from './pages/search/search';
 import { Planner } from './pages/planner/planner';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
+import { Profile } from './pages/profile/profile';
 
 export const routes: Routes = [
   // --- ROTAS PÚBLICAS ---
@@ -29,6 +30,11 @@ export const routes: Routes = [
   {
     path: 'planner',
     component: Planner,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'profile',
+    component: Profile,
     canActivate: [authGuard]
   },
 

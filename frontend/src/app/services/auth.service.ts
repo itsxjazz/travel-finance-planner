@@ -59,6 +59,16 @@ export class AuthService {
     );
   }
 
+  // Busca os dados do usuário logado
+  getProfile() {
+    return this.http.get<any>(`${this.apiUrl}/profile`);
+  }
+
+  // Envia a requisição de troca de senha
+  changePassword(data: any) {
+    return this.http.put<any>(`${this.apiUrl}/change-password`, data);
+  }
+
   isLoggedIn(): boolean {
     if (isPlatformBrowser(this.platformId)) {
       return !!localStorage.getItem(this.tokenKey);
