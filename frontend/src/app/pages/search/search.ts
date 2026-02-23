@@ -8,18 +8,19 @@ import { Router } from '@angular/router';
   selector: 'app-search',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './search.html'
+  templateUrl: './search.html',
+  styleUrl: './search.scss'
 })
 export class Search {
   private http = inject(HttpClient);
   private router = inject(Router);
 
   searchQuery = signal<string>('');
-  searchResults = signal<any[]>([]); 
+  searchResults = signal<any[]>([]);
   isSearching = signal<boolean>(false);
   hasSearched = signal<boolean>(false);
 
-  // A LISTA DE OURO: Países que Amadeus e AwesomeAPI suportam perfeitamente
+  // Países que Amadeus e AwesomeAPI suportam perfeitamente
   private verifiedCountries = [
     // Américas
     'BRA', 'USA', 'CAN', 'MEX', 'ARG', 'CHL', 'COL', 'PER', 'URY',
@@ -30,10 +31,10 @@ export class Search {
     // África
     'EGY'
   ];
-  
+
   searchCountry() {
     if (!this.searchQuery().trim()) return;
-    
+
     this.isSearching.set(true);
     this.hasSearched.set(false);
 
@@ -41,14 +42,14 @@ export class Search {
 
     this.http.get<any[]>(url).subscribe({
       next: (data) => {
-        // FILTRO ESTRATÉGICO: 
-        // Filtramos o array 'data' para manter apenas países cujos códigos (cca3) estão na nossa lista.
-        const filteredResults = data.filter(country => 
+        // FILTRO ESTRATÉGICO:
+        // Filtra o array 'data' para manter apenas países cujos códigos (cca3) estão na lista.
+        const filteredResults = data.filter(country =>
           this.verifiedCountries.includes(country.cca3)
         );
 
         console.log('Países encontrados e filtrados:', filteredResults);
-        
+
         this.searchResults.set(filteredResults);
         this.isSearching.set(false);
         this.hasSearched.set(true);
@@ -62,7 +63,7 @@ export class Search {
     });
   }
 
-  selectCountry(apiCountry: any) {
+  selectCountry(apiCountry: any) { // Quando o usuário clica em um país da lista de resultados
     const currencyCode = this.getCurrencyCode(apiCountry);
     const countryName = apiCountry.translations?.por?.common || apiCountry.name.common;
 
@@ -75,7 +76,7 @@ export class Search {
     this.router.navigate(['/planner'], { state: { tripData: tripData } });
   }
 
-  getCurrencyCode(country: any): string {
+  getCurrencyCode(country: any): string { // Retorna o código da moeda local
     if (!country || !country.currencies) return 'N/A';
     const keys = Object.keys(country.currencies);
     return keys.length > 0 ? keys[0] : 'N/A';

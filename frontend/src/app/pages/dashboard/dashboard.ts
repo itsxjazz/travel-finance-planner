@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, signal, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule  } from '@angular/router';
 import { TripService } from '../../services/trip.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './dashboard.html'
+  imports: [CommonModule, RouterModule],
+  templateUrl: './dashboard.html',
+  styleUrl: './dashboard.scss'
 })
 export class Dashboard implements OnInit {
   private tripService = inject(TripService);
@@ -29,7 +30,7 @@ export class Dashboard implements OnInit {
     }
   }
 
-  loadTrips() {
+  loadTrips() { // Busca as viagens
     this.isLoading.set(true);
     this.tripService.getTrips().subscribe({
       next: (data) => {
@@ -43,13 +44,13 @@ export class Dashboard implements OnInit {
     });
   }
 
-  editTrip(trip: any) {
+  editTrip(trip: any) { // Navega para o planner com os dados da viagem
     this.router.navigate(['/planner'], {
       state: { tripData: trip, isEditing: true }
     });
   }
 
-  deleteTrip(id: string) {
+  deleteTrip(id: string) { // Exclui a viagem
     if (confirm('Tem certeza que deseja excluir este planejamento?')) {
       this.tripService.deleteTrip(id).subscribe({
         next: () => {

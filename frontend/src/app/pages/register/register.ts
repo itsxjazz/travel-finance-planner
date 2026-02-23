@@ -15,13 +15,14 @@ export class Register {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  // Sinais para controle do formulário e feedback
   name = signal<string>('');
   email = signal<string>('');
   password = signal<string>('');
   errorMessage = signal<string>('');
   isLoading = signal<boolean>(false);
 
-  handleRegister() {
+  handleRegister() { // Função disparada ao enviar o formulário
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -33,7 +34,7 @@ export class Register {
 
     this.authService.register(userData).subscribe({
       next: () => {
-        // Após o registro, o serviço já guarda o token e podemos ir para a busca
+        // Após o registro, o serviço já guarda o token e pode ir para a busca
         this.router.navigate(['/search']);
       },
       error: (err) => {

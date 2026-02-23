@@ -6,7 +6,8 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-savings-calculator',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './savings-calculator.html'
+  templateUrl: './savings-calculator.html',
+  styleUrls: ['./savings-calculator.scss'],
 })
 export class SavingsCalculator {
   readonly Infinity = Infinity;
@@ -31,17 +32,17 @@ export class SavingsCalculator {
     });
   }
 
-  // Agora o computed rastreia as mudanças corretamente
+  // O computed rastreia as mudanças
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
 
-  private getIRRate(months: number): number {
+  private getIRRate(months: number): number { // Tabela regressiva do IR para investimentos de renda fixa no Brasil
     if (months <= 6) return 0.225;
     if (months <= 12) return 0.20;
     if (months <= 24) return 0.175;
     return 0.15;
   }
 
-  monthsToGoal = computed(() => {
+  monthsToGoal = computed(() => { // Cálculo de tempo para atingir a meta considerando juros compostos e tributação
     const target = this.targetAmountBrl();
     const initial = this.currentSavings();
     const monthlyAdd = this.monthlyContribution();
@@ -66,7 +67,7 @@ export class SavingsCalculator {
     return Infinity;
   });
 
-  redemptionDetails = computed(() => {
+  redemptionDetails = computed(() => { // Cálculo detalhado do valor final, lucro bruto, IR pago e valor líquido considerando o tempo para atingir a meta
     const months = this.monthsToGoal();
     if (months === Infinity || months === 0) return null;
 
@@ -96,7 +97,7 @@ export class SavingsCalculator {
     };
   });
 
-  travelDate = computed(() => {
+  travelDate = computed(() => { // Cálculo da data estimada para atingir a meta com base nos meses calculados
     const months = this.monthsToGoal();
     if (months === Infinity || months === 0) return null;
     const date = new Date();
@@ -104,7 +105,7 @@ export class SavingsCalculator {
     return date;
   });
 
-  onInput(event: any, type: 'savings' | 'contribution' | 'index') {
+  onInput(event: any, type: 'savings' | 'contribution' | 'index') { // Normalização dos valores de entrada para garantir que sejam numéricos e emitidos corretamente
     let val = event.target.value;
     if (!val) val = 0;
     const cleanVal = parseFloat(val.toString().replace(/\./g, '').replace(/,/g, '.')) || 0;

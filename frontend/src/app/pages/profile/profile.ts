@@ -7,7 +7,8 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './profile.html'
+  templateUrl: './profile.html',
+  styleUrl: './profile.scss'
 })
 export class Profile implements OnInit {
   private authService = inject(AuthService);
@@ -27,14 +28,14 @@ export class Profile implements OnInit {
     this.loadProfile();
   }
 
-  loadProfile() {
+  loadProfile() { // Busca os dados do perfil para exibir
     this.authService.getProfile().subscribe({
       next: (data) => this.userData.set(data),
       error: (err) => console.error('Erro ao buscar dados do perfil', err)
     });
   }
 
-  changePassword() {
+  changePassword() { // Função disparada ao enviar o formulário de mudança de senha
     if (!this.oldPassword() || !this.newPassword()) {
       this.showFeedback('Preencha as duas senhas.', true);
       return;

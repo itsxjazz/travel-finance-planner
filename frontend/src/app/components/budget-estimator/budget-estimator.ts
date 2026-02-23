@@ -6,7 +6,8 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-budget-estimator',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './budget-estimator.html'
+  templateUrl: './budget-estimator.html',
+  styleUrl: './budget-estimator.scss'
 })
 export class BudgetEstimator {
   // Recebe o nome do país vindo do planner.ts
@@ -42,7 +43,7 @@ export class BudgetEstimator {
     return date.toISOString().split('T')[0];
   });
 
-  // Espelho do nosso dicionário do Backend para exibir a sigla na tela
+  // Espelho do dicionário do Backend para exibir a sigla na tela
   private iataMap: Record<string, string> = {
     'Brasil': 'GRU', 'Estados Unidos': 'NYC', 'Canadá': 'YTO', 'México': 'MEX',
     'Argentina': 'EZE', 'Chile': 'SCL', 'Colômbia': 'BOG', 'Peru': 'LIM', 'Uruguai': 'MVD',

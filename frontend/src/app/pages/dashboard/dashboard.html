@@ -1,81 +1,72 @@
-<div
-  style="max-width: 800px; margin: 0 auto; padding: 30px 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1 class="neon-title">Minhas <span>Viagens</span></h1>
+    <p class="subtitle">Acompanhe os planejamentos das suas viagens.</p>
+  </header>
 
-  <h2 style="color: #2c3e50; margin-bottom: 5px;">Minhas Viagens</h2>
-  <p style="color: #777; font-size: 0.9rem; margin-bottom: 30px;">Acompanhe o planejamento da sua Bucket List.</p>
-
-  <div *ngIf="isLoading()" style="text-align: center; padding: 40px; color: #999;">
-    Buscando dados no MongoDB...
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="neon-spinner"></div>
+    <span>Conectando ao MongoDB Atlas...</span>
   </div>
 
-  <div *ngIf="!isLoading() && savedTrips().length === 0"
-    style="text-align: center; padding: 40px; background: white; border-radius: 12px; border: 1px dashed #ccc;">
-    <p style="color: #777; margin: 0;">Você ainda não tem nenhum planejamento salvo.</p>
+  <div *ngIf="!isLoading() && savedTrips().length === 0" class="empty-state card-dark">
+    <p>Você ainda não tem nenhum planejamento salvo.</p>
+    <button routerLink="/search" class="btn-neon">Começar Novo Planejamento</button>
   </div>
 
-  <div *ngIf="!isLoading() && savedTrips().length > 0"
-    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+  <div *ngIf="!isLoading() && savedTrips().length > 0" class="trips-grid">
+    <div *ngFor="let trip of savedTrips()" class="trip-card card-dark">
 
-    <div *ngFor="let trip of savedTrips()"
-      style="background: white; border-radius: 12px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s;">
-
-      <div
-        style="background: #f8f9fa; padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px;">
-        <img [src]="trip.flagUrl" style="width: 40px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <div>
-          <h3 style="margin: 0; font-size: 1.1rem; color: #2c3e50;">{{ trip.destination }}</h3>
-          <span style="font-size: 0.75rem; color: #999; text-transform: uppercase;">{{ trip.countryCode }}</span>
+      <div class="card-header">
+        <div class="flag-wrapper">
+          <img [src]="trip.flagUrl" [alt]="trip.destination">
+        </div>
+        <div class="destination-info">
+          <h3>{{ trip.destination }}</h3>
+          <span class="iata">{{ trip.countryCode }}</span>
         </div>
       </div>
 
-      <div style="padding: 15px;">
-
-        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #eee;">
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px;">
-            <span style="color: #777;">Progresso da Meta</span>
-            <strong style="color: #27ae60;">{{ getProgress(trip) | number:'1.0-0' }}%</strong>
+      <div class="card-body">
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>Progresso da Meta</span>
+            <strong class="text-cyan">{{ getProgress(trip) | number:'1.0-0' }}%</strong>
           </div>
-          <div style="width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
-            <div [style.width.%]="getProgress(trip)"
-              style="height: 100%; background: #27ae60; border-radius: 4px; transition: width 0.5s ease-in-out;"></div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" [style.width.%]="getProgress(trip)"></div>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem;">
-          <span style="color: #777;">Meta Total:</span>
-          <strong style="color: #2c3e50;">{{ trip.financialGoalBrl | currency:'BRL' }}</strong>
+        <div class="finance-info">
+          <div class="info-row">
+            <span class="label">Meta Total:</span>
+            <span class="value">{{ trip.financialGoalBrl | currency:'BRL' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Aporte Mensal:</span>
+            <span class="value text-purple">{{ trip.monthlyContributionBrl | currency:'BRL' }}</span>
+          </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem;">
-          <span style="color: #777;">Aporte Mensal:</span>
-          <strong style="color: #27ae60;">{{ trip.monthlyContributionBrl | currency:'BRL' }}</strong>
+        <div *ngIf="trip.itinerary && trip.itinerary.length > 0" class="itinerary-badge">
+          {{ trip.itinerary.length }} {{ trip.itinerary.length === 1 ? 'local' : 'locais' }} no roteiro
         </div>
 
-        <div *ngIf="trip.itinerary && trip.itinerary.length > 0"
-          style="display: flex; align-items: center; gap: 5px; margin-bottom: 15px; font-size: 0.85rem; color: #007bff; font-weight: 500;">
-          <span>📍</span> {{ trip.itinerary.length }} {{ trip.itinerary.length === 1 ? 'local' : 'locais' }} no roteiro
+        <div class="date-badge">
+          <span class="badge-title">DATA ESTIMADA</span>
+          <span class="badge-date">{{ trip.estimatedTravelDate | date:'MMMM / yyyy':'':'pt-BR' }}</span>
         </div>
 
-        <div style="background: #eef9f2; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px;">
-          <span style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 4px;">DATA
-            ESTIMADA</span>
-          <span style="color: #2c3e50; font-weight: bold;">{{ trip.estimatedTravelDate | date:'MMMM / yyyy':'':'pt-BR'
-            }}</span>
-        </div>
-
-        <div style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 15px;">
-          <button (click)="editTrip(trip)"
-            style="flex: 1; padding: 8px; background: #f8f9fa; color: #2c3e50; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">
-            ✏️ Editar
+        <div class="card-actions">
+          <button (click)="editTrip(trip)" class="btn-action edit">
+            Editar
           </button>
-          <button (click)="deleteTrip(trip._id)"
-            style="flex: 1; padding: 8px; background: #fff1f0; color: #e74c3c; border: 1px solid #fadbd8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">
-            🗑️ Excluir
+          <button (click)="deleteTrip(trip._id)" class="btn-action delete">
+            Excluir
           </button>
         </div>
-
       </div>
     </div>
-
   </div>
 </div>

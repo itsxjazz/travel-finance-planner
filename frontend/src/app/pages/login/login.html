@@ -1,61 +1,73 @@
-<div
-  style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f4f7f6; padding: 20px;">
-  <div
-    style="background: white; width: 100%; max-width: 400px; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+<div class="auth-container">
+  <div class="auth-card card-dark">
 
-    <div style="text-align: center; margin-bottom: 30px;">
-      <span style="font-size: 3rem;">✈️</span>
-      <h2 style="color: #2c3e50; margin: 10px 0 5px 0;">Bem-vindo de volta!</h2>
-      <p style="color: #7f8c8d; font-size: 0.9rem;">Acesse seus planos de viagem.</p>
+    <div class="auth-header">
+      <div class="brand-icon">
+        <img src="/logo.svg" alt="NextDestination Logo">
+      </div>
+      <h2 class="auth-title">Bem-vindo <span>de volta!</span></h2>
+      <p class="auth-subtitle">Acesse seus planos de viagem.</p>
     </div>
 
-    <form #loginForm="ngForm" (submit)="loginForm.valid && handleLogin()">
+    <form #loginForm="ngForm" (submit)="loginForm.valid && handleLogin()" class="auth-form">
 
-      <div style="margin-bottom: 20px;">
-        <label
-          style="display: block; font-size: 0.8rem; color: #95a5a6; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;">E-mail</label>
-        <input type="email" [(ngModel)]="email" name="email" #emailRef="ngModel" required email
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="email"
+          name="email"
+          #emailRef="ngModel"
+          required
+          email
           placeholder="seu@email.com"
-          [style.border-color]="emailRef.invalid && emailRef.touched ? '#e74c3c' : '#dfe6e9'"
-          style="width: 100%; padding: 12px; border: 1px solid; border-radius: 8px; font-size: 1rem; outline: none; box-sizing: border-box; transition: 0.3s;">
+          [class.is-invalid]="emailRef.invalid && emailRef.touched"
+          class="form-input">
 
         @if (emailRef.invalid && emailRef.touched) {
-        <small style="color: #e74c3c; font-size: 0.75rem; margin-top: 5px; display: block;">Insira um e-mail
-          válido.</small>
+          <small class="error-text">Insira um e-mail válido.</small>
         }
       </div>
 
-      <div style="margin-bottom: 25px;">
-        <label
-          style="display: block; font-size: 0.8rem; color: #95a5a6; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;">Senha</label>
-        <input type="password" [(ngModel)]="password" name="password" #passRef="ngModel" required minlength="6"
-          placeholder="••••••••" [style.border-color]="passRef.invalid && passRef.touched ? '#e74c3c' : '#dfe6e9'"
-          style="width: 100%; padding: 12px; border: 1px solid; border-radius: 8px; font-size: 1rem; outline: none; box-sizing: border-box; transition: 0.3s;">
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          #passRef="ngModel"
+          required
+          minlength="6"
+          placeholder="••••••••"
+          [class.is-invalid]="passRef.invalid && passRef.touched"
+          class="form-input">
 
         @if (passRef.invalid && passRef.touched) {
-        <small style="color: #e74c3c; font-size: 0.75rem; margin-top: 5px; display: block;">A senha deve ter pelo menos
-          6 caracteres.</small>
+          <small class="error-text">A senha deve ter pelo menos 6 caracteres.</small>
         }
       </div>
 
       @if (errorMessage()) {
-      <div
-        style="background: #fff0f0; color: #e74c3c; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 20px; text-align: center; border: 1px solid #ffcccc;">
-        {{ errorMessage() }}
-      </div>
+        <div class="backend-error">
+          {{ errorMessage() }}
+        </div>
       }
 
-      <button type="submit" [disabled]="loginForm.invalid || isLoading()"
-        [style.opacity]="loginForm.invalid || isLoading() ? '0.6' : '1'"
-        style="width: 100%; padding: 14px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;">
+      <button
+        type="submit"
+        class="btn-neon w-full"
+        [disabled]="loginForm.invalid || isLoading()">
         {{ isLoading() ? 'Entrando...' : 'Entrar na conta' }}
       </button>
 
     </form>
 
-    <div style="text-align: center; margin-top: 25px; font-size: 0.9rem; color: #7f8c8d;">
-      Ainda não tem conta? <a routerLink="/register"
-        style="color: #27ae60; font-weight: bold; text-decoration: none;">Cadastre-se</a>
+    <div class="auth-footer">
+      <span>Ainda não tem conta?</span>
+      <a routerLink="/register" class="text-purple">Cadastre-se</a>
     </div>
+
   </div>
 </div>

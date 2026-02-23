@@ -1,14 +1,14 @@
-import { Component, Input, PLATFORM_ID, inject, effect, OnDestroy, signal } from '@angular/core';
+import { Component, Input, PLATFORM_ID, inject, OnDestroy, signal, effect } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-interactive-map',
   standalone: true,
   imports: [CommonModule],
-  template: `<div id="map-container" style="height: 400px; width: 100%; border-radius: 12px; z-index: 1;"></div>`
+  templateUrl: './interactive-map.html',
+  styleUrl: './interactive-map.scss'
 })
 export class InteractiveMap implements OnDestroy {
-  // Cria um sinal interno para rastrear os dados com o effect
   private poisSignal = signal<any[]>([]);
 
   @Input() set pois(value: any[]) {
@@ -21,7 +21,6 @@ export class InteractiveMap implements OnDestroy {
   private L: any;
 
   constructor() {
-    // Agora o effect rastreia o poisSignal() e rodará sempre que os dados mudarem
     effect(async () => {
       const currentPois = this.poisSignal();
       if (currentPois.length > 0 && isPlatformBrowser(this.platformId)) {
@@ -31,36 +30,46 @@ export class InteractiveMap implements OnDestroy {
     });
   }
 
-  private async ensureMapReady(firstPoi: any) {
+  private async ensureMapReady(firstPoi: any) { // Inicializa o mapa se ainda não estiver pronto
     if (!this.L) this.L = await import('leaflet');
     if (!this.map) {
       this.map = this.L.map('map-container').setView([firstPoi.lat, firstPoi.lon], 13);
-      this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+
+      this.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors © CARTO'
       }).addTo(this.map);
+
       this.markersLayer = this.L.layerGroup().addTo(this.map);
     }
 
-    // Força o Leaflet a recalcular o tamanho (evita o mapa cinza/vazio)
     setTimeout(() => {
-      this.map.invalidateSize();
+      if (this.map) this.map.invalidateSize();
     }, 100);
   }
 
-  private updateMarkers(currentPois: any[]) {
+  private updateMarkers(currentPois: any[]) { // Atualiza os marcadores no mapa com base nos POIs atuais
     if (!this.markersLayer) return;
     this.markersLayer.clearLayers();
 
     currentPois.forEach(poi => {
       const color = this.getCategoryColor(poi.category);
+
       const marker = this.L.circleMarker([poi.lat, poi.lon], {
-        radius: 8, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.8
+        radius: 10,
+        fillColor: color,
+        color: '#ffffff',
+        weight: 1.5,
+        fillOpacity: 0.9
       });
 
+      // Tradução visual no Popup
+      const displayTag = this.translateTag(poi.category);
+
       marker.bindPopup(`
-        <div style="font-family: sans-serif; min-width: 150px;">
-          <strong style="color: #2c3e50; font-size: 1rem;">${poi.name}</strong><br>
-          <p style="font-size: 0.75rem; margin: 8px 0;">${poi.address}</p>
+        <div class="map-popup-content">
+          <strong class="text-cyan">${poi.name}</strong>
+          <p class="address">${poi.address}</p>
+          <span class="category-tag" style="color: ${color}">${displayTag}</span>
         </div>
       `);
       this.markersLayer.addLayer(marker);
@@ -72,11 +81,25 @@ export class InteractiveMap implements OnDestroy {
     }
   }
 
+  // SINCRONIZAÇÃO COM A LEGENDA DO PLANNER
   private getCategoryColor(category: string): string {
+    const cat = category.toUpperCase();
     const colors: { [key: string]: string } = {
-      'RESTAURANT': '#e67e22', 'SHOPPING': '#3498db', 'CULTURA': '#27ae60'
+      'CULTURA': '#00f3ff',    // Ciano
+      'RESTAURANT': '#e67e22', // Laranja (Gastronomia)
+      'SHOPPING': '#bc13fe'    // Roxo (Compras)
     };
-    return colors[category] || '#95a5a6';
+    return colors[cat] || '#d0d0d0'; // Cinza para desconhecidos
+  }
+
+  private translateTag(category: string): string {
+    const cat = category.toUpperCase();
+    const tags: { [key: string]: string } = {
+      'RESTAURANT': 'GASTRONOMIA',
+      'SHOPPING': 'COMPRAS',
+      'CULTURA': 'CULTURA'
+    };
+    return tags[cat] || cat;
   }
 
   ngOnDestroy() {

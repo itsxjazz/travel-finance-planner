@@ -1,0 +1,215 @@
+/* --- CONTAINER PRINCIPAL --- */
+.profile-container {
+  max-width: 1000px;
+  width: 100%;
+  margin: 60px auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    margin: 32px auto;
+    padding: 0 16px;
+  }
+}
+
+/* --- HEADER DO PERFIL --- */
+.profile-header {
+  margin-bottom: 40px;
+
+  @media (max-width: 480px) {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .neon-title {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin: 0;
+
+    @media (max-width: 480px) {
+      font-size: 1.8rem;
+    }
+
+    span {
+      color: var(--cyan-neon);
+      text-shadow: var(--glow-cyan);
+    }
+  }
+}
+
+/* --- GRID DE CARDS --- */
+.profile-grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: minmax(0, 1fr);
+
+  @media (max-width: 480px) {
+    gap: 16px;
+  }
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+/* --- O CARD DE PERFIL --- */
+.profile-card {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(20, 20, 35, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-sizing: border-box;
+  min-width: 0;
+
+  @media (max-width: 480px) {
+    padding: 20px 16px;
+  }
+
+  .card-title {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+
+    @media (max-width: 480px) {
+      font-size: 1.15rem;
+      margin-bottom: 16px;
+    }
+  }
+}
+
+/* --- DADOS DO USUÁRIO --- */
+.user-info {
+  .info-group {
+    margin-bottom: 24px;
+
+    @media (max-width: 480px) {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+
+      @media (max-width: 480px) {
+        font-size: 0.75rem;
+      }
+    }
+
+    .highlight {
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      font-weight: 600;
+      word-break: break-word;
+
+      @media (max-width: 480px) {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+/* --- FORMULÁRIO DE SEGURANÇA --- */
+.security-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (max-width: 480px) {
+    gap: 16px;
+  }
+
+  .form-group {
+    label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+
+      @media (max-width: 480px) {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+      }
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all 0.3s ease;
+      box-sizing: border-box; /* Bala de prata nos inputs */
+
+      @media (max-width: 480px) {
+        padding: 10px 14px;
+        font-size: 0.95rem;
+      }
+
+      &:focus {
+        border-color: var(--purple-neon);
+        box-shadow: var(--glow-purple);
+      }
+
+      &::placeholder {
+        color: var(--text-muted);
+      }
+    }
+  }
+
+  /* Botão de atualizar */
+  .btn-neon {
+    width: 100%;
+    margin-top: 10px;
+
+    @media (max-width: 480px) {
+      padding: 14px;
+      font-size: 1rem;
+    }
+  }
+}
+
+/* --- MENSAGENS DE FEEDBACK --- */
+.feedback-msg {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  box-sizing: border-box;
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+
+  &.error {
+    color: var(--pink-neon);
+    background: rgba(255, 0, 85, 0.1);
+    border: 1px solid var(--pink-neon);
+  }
+
+  &.success {
+    color: var(--cyan-neon);
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--cyan-neon);
+  }
+}
+
+/* --- CORES ÚTEIS --- */
+.text-cyan {
+  color: var(--cyan-neon);
+}

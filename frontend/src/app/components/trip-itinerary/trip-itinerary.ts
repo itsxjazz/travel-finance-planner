@@ -5,7 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-trip-itinerary',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './trip-itinerary.html'
+  templateUrl: './trip-itinerary.html',
+  styleUrls: ['./trip-itinerary.scss']
 })
 export class TripItinerary {
   // Signal Input para receber os itens do roteiro
@@ -17,9 +18,9 @@ export class TripItinerary {
   // Lógica de tradução isolada
   translateCategory(category: string): string {
     const categories: { [key: string]: string } = {
-      'CULTURA': '🏛️ Cultura',
-      'RESTAURANT': '🍴 Gastronomia',
-      'SHOPPING': '🛍️ Compras'
+      'CULTURA': 'Cultura',
+      'RESTAURANT': 'Gastronomia',
+      'SHOPPING': 'Compras'
     };
     return categories[category] || category;
   }

@@ -1,62 +1,54 @@
-<div
-  style="background: white; padding: 30px; border-radius: 16px; margin-top: 30px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-  <div
-    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
-    <h3 style="color: #2c3e50; font-size: 1.3rem; margin: 0;">Descubra {{ destinationName() }}</h3>
+<div class="discovery-container card-dark">
+  <header class="discovery-header">
+    <h2 class="title">Experiências Locais</h2>
 
-    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <div class="filter-group">
       @for (f of ['Todos', 'Cultura', 'Gastronomia', 'Shopping']; track f) {
-      <button (click)="setFilter(f)" [class.active]="activeFilter() === f"
-        style="padding: 8px 15px; border-radius: 20px; border: 1px solid #eee; cursor: pointer; transition: 0.3s;"
-        [style.background]="activeFilter() === f ? '#27ae60' : 'white'"
-        [style.color]="activeFilter() === f ? 'white' : '#666'">
-        {{ f === 'Todos' ? 'Todos' : (f === 'Cultura' ? '🏛️ Cultura' : (f === 'Gastronomia' ? '🍴 Gastronomia' : '🛍️
-        Compras')) }}
+      <button
+        (click)="setFilter(f)"
+        [class.active]="activeFilter() === f"
+        class="filter-btn">
+        {{ f === 'Todos' ? 'Todos' : (f === 'Cultura' ? 'Cultura' : (f === 'Gastronomia' ? ' Gastronomia' : 'Compras')) }}
       </button>
       }
     </div>
-  </div>
+  </header>
 
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+  <div class="pois-grid">
     @for (poi of filteredPOIs(); track poi.id) {
-    <div
-      style="background: #fdfdfd; border: 1px solid #eee; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-      <div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-          <span
-            style="background: #eef9f2; color: #27ae60; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">
-            {{ translateCategory(poi.category) }}
-          </span>
-          <span style="color: #f39c12; font-size: 0.85rem; font-weight: bold;">⭐ {{ poi.rank }}</span>
-        </div>
-        <h4 style="color: #2c3e50; margin: 0 0 8px 0; font-size: 1.1rem; line-height: 1.4;">{{ poi.name }}</h4>
-        <p
-          style="color: #888; font-size: 0.8rem; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 5px;">
-          <span style="font-size: 1rem;">📍</span> {{ poi.address }}
+    <div class="poi-card">
+      <div class="poi-header">
+        <span class="category-badge" [attr.data-category]="poi.category">
+          {{ translateCategory(poi.category) }}
+        </span>
+        <span class="rank">⭐ {{ poi.rank }}</span>
+      </div>
+
+      <div class="poi-info">
+        <h4>{{ poi.name }}</h4>
+        <p class="address">
+          <span>{{ poi.address }}</span>
         </p>
       </div>
 
-      <div style="display: flex; gap: 8px;">
-        <a [href]="poi.mapUrl" target="_blank"
-          style="flex: 1; text-align: center; background: #f0f7ff; color: #007bff; border: 1px solid #cce5ff; padding: 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🗺️
-          Mapa</a>
-        <button (click)="addRequested.emit(poi)"
-          style="flex: 1.5; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">+
-          Roteiro</button>
+      <div class="poi-actions">
+        <a [href]="poi.mapUrl" target="_blank" class="btn-outline">Mapa</a>
+        <button (click)="addRequested.emit(poi)" class="btn-neon-small">
+          + Roteiro
+        </button>
       </div>
     </div>
     }
   </div>
 
-  <div
-    style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0; flex-wrap: wrap;">
+  <footer class="pagination-footer">
     @for (p of [1,2,3,4,5,6,7,8,9,10]; track p) {
-    <button (click)="setPage(p)" [style.background]="currentPage() === p ? '#27ae60' : 'white'"
-      [style.color]="currentPage() === p ? 'white' : '#777'"
-      [style.border]="currentPage() === p ? 'none' : '1px solid #ddd'"
-      style="width: 35px; height: 35px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+    <button
+      (click)="setPage(p)"
+      [class.active]="currentPage() === p"
+      class="page-btn">
       {{ p }}
     </button>
     }
-  </div>
+  </footer>
 </div>

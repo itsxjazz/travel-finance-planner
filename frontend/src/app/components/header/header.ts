@@ -7,10 +7,11 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-header',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './header.html'
+  templateUrl: './header.html',
+  styleUrl: './header.scss'
 })
 export class Header {
-  // Torna o serviço público para acessar o sinal direto no HTML se preferir
+  // Torna o serviço público para acessar o sinal direto no HTML
   public authService = inject(AuthService);
 
   // Atalho para o sinal de login

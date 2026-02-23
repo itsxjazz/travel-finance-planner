@@ -8,7 +8,8 @@ Chart.register(...registerables);
   selector: 'app-budget-visualizer',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './budget-visualizer.html'
+  templateUrl: './budget-visualizer.html',
+  styleUrl: './budget-visualizer.scss'
 })
 export class BudgetVisualizer implements OnChanges {
   // Recebe os dados do Planner
@@ -25,27 +26,44 @@ export class BudgetVisualizer implements OnChanges {
     }
   }
 
-  createChart() {
-    if (!this.chartCanvas) return;
-    if (this.chartInstance) this.chartInstance.destroy();
+ createChart() { // Criação do gráfico usando Chart.js
+  if (!this.chartCanvas) return;
+  if (this.chartInstance) this.chartInstance.destroy();
 
-    const ctx = this.chartCanvas.nativeElement.getContext('2d');
-    this.chartInstance = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Aéreo', 'Hospedagem', 'Gastos Diários'],
-        datasets: [{
-          data: [this.budgetBreakdown.flight, this.budgetBreakdown.hotel, this.budgetBreakdown.dailyExpenses],
-          backgroundColor: ['#00d2ff', '#f39c12', '#27ae60'],
-          borderWidth: 0
-        }]
+  const ctx = this.chartCanvas.nativeElement.getContext('2d');
+
+  const cyanNeon = '#00f3ff';
+  const purpleNeon = '#bc13fe';
+  const pinkNeon = '#ff0055';
+
+  this.chartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Passagens', 'Hotel', 'Gasto Diário'],
+      datasets: [{
+        data: [
+          this.budgetBreakdown.flight,
+          this.budgetBreakdown.hotel,
+          this.budgetBreakdown.dailyExpenses
+        ],
+        backgroundColor: [cyanNeon, purpleNeon, pinkNeon],
+        hoverOffset: 15,
+        borderWidth: 0,
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '75%',
+      plugins: {
+        legend: { display: false }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { color: '#ffffff', boxWidth: 12 } } },
-        cutout: '70%'
+      animation: {
+        animateScale: true,
+        animateRotate: true
       }
-    });
-  }
+    }
+  });
+}
 }

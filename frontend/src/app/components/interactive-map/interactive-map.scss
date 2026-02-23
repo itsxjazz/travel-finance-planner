@@ -1,0 +1,54 @@
+.neon-map { // Mapa Neon
+  height: 400px;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  z-index: 1;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* --- OVERRIDES DO LEAFLET --- */
+::ng-deep {
+  .leaflet-container {
+    background: #0a0a0f !important;
+  }
+
+  /* Estilização dos Popups Dark Neon */
+  .leaflet-popup-content-wrapper {
+    background: #151520 !important;
+    color: #ffffff !important;
+    border: 1px solid #2a2a3d;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+    border-radius: 8px;
+  }
+
+  .leaflet-popup-tip {
+    background: #151520 !important;
+    border: 1px solid #2a2a3d;
+  }
+}
+
+.map-popup-content {
+  font-family: 'Inter', sans-serif;
+  min-width: 160px;
+
+  strong {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    display: block;
+    color: var(--cyan-neon, #00f3ff);
+  }
+
+  .address {
+    color: #a0a0b5;
+    font-size: 0.8rem;
+    margin: 8px 0;
+  }
+
+  .category-tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+}

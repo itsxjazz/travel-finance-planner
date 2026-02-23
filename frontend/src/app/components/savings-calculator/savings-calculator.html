@@ -1,59 +1,54 @@
-<div
-  style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+<div class="card-dark calculator-wrapper">
 
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-    <h3 style="margin: 0; font-size: 1rem; color: #555;">Minha Caixinha</h3>
-    <div
-      style="font-size: 0.85rem; color: #666; background: #f8f9fa; padding: 4px 8px; border-radius: 6px; border: 1px solid #eee; display: flex; align-items: center; gap: 5px;">
-      Rendendo
-      <input type="number" [value]="indexPercentage()" (input)="onInput($event, 'index')"
-        style="width: 45px; border: none; background: transparent; font-weight: bold; color: #27ae60; text-align: center; outline: none; border-bottom: 1px dashed #27ae60;">
-      % do CDI
+  <header class="calc-header">
+    <h3 class="card-label">Investimento</h3>
+    <div class="cdi-badge">
+      <span>Rendendo</span>
+      <input type="number" [value]="indexPercentage()" (input)="onInput($event, 'index')" class="cdi-input">
+      <span>% do CDI</span>
     </div>
-  </div>
+  </header>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-    <div>
-      <label style="font-size: 0.8rem; color: #999;">Já guardei (R$)</label>
-      <input type="text" [value]="currentSavings()" (input)="onInput($event, 'savings')"
-        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+  <div class="input-grid">
+    <div class="form-group">
+      <label>Aporte Inicial (R$)</label>
+      <input type="text" [value]="currentSavings()" (input)="onInput($event, 'savings')" class="neon-input" placeholder="0,00">
     </div>
-    <div>
-      <label style="font-size: 0.8rem; color: #999;">Guardar/mês (R$)</label>
-      <input type="text" [value]="monthlyContribution()" (input)="onInput($event, 'contribution')"
-        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+    <div class="form-group">
+      <label>Aporte Mensal (R$)</label>
+      <input type="text" [value]="monthlyContribution()" (input)="onInput($event, 'contribution')" class="neon-input" placeholder="0,00">
     </div>
   </div>
 
   @if (monthsToGoal() !== Infinity && monthsToGoal() > 0) {
-  <div style="background: #eef9f2; padding: 20px; border-radius: 12px; border-left: 6px solid #27ae60;">
+  <div class="projection-panel">
 
     @if (redemptionDetails()) {
-    <div style="margin-bottom: 15px; border-bottom: 1px solid #d4edda; padding-bottom: 12px;">
-      <span style="font-size: 0.8rem; color: #27ae60; font-weight: bold; display: block; margin-bottom: 10px;">
-        PROJEÇÃO NO RESGATE:
-      </span>
+    <section class="redemption-details">
+      <span class="section-title">Projeção de Rendimento:</span>
 
-      <div style="display: flex; justify-content: space-between; font-size: 0.95rem; color: #444; margin-bottom: 8px;">
-        <span>Saldo Líquido (Final):</span>
-        <strong style="color: #27ae60;">{{ redemptionDetails()?.netRedemption | currency:'BRL' }}</strong>
+      <div class="detail-row highlight">
+        <span>Valor Líquido Projetado:</span>
+        <strong class="text-cyan">{{ redemptionDetails()?.netRedemption | currency:'BRL' }}</strong>
       </div>
 
-      <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #777; margin-bottom: 4px;">
-        <span>Lucro Real (pós-IR):</span>
-        <span>+ {{ (redemptionDetails()!.grossInterest - redemptionDetails()!.totalIR) | currency:'BRL' }}</span>
+      <div class="detail-row">
+        <span>Rendimento Acumulado:</span>
+        <span class="text-green">+ {{ (redemptionDetails()!.grossInterest - redemptionDetails()!.totalIR) | currency:'BRL' }}</span>
       </div>
 
-      <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #777;">
-        <span>IR Pago ({{ redemptionDetails()?.irRatePercentage }}%):</span>
-        <span>- {{ redemptionDetails()?.totalIR | currency:'BRL' }}</span>
+      <div class="detail-row">
+        <span>Tributação (IRRF) {{ redemptionDetails()?.irRatePercentage }}%:</span>
+        <span class="text-muted">- {{ redemptionDetails()?.totalIR | currency:'BRL' }}</span>
       </div>
-    </div>
+    </section>
     }
 
-    <h4 style="margin: 0; color: #2c3e50; font-size: 1.1rem;">Viaje em <strong>{{ monthsToGoal() }} meses</strong>!</h4>
-    <p style="margin: 5px 0 15px; color: #555;">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy':'':'pt-BR'
-        }}</strong></p>
+    <footer class="achievement-info">
+      <h4 class="time-to-goal">Meta alcançada em <span>{{ monthsToGoal() }} meses</span>!</h4>
+      <p class="target-date">Data estimada: <strong>{{ travelDate() | date:'MMMM / yyyy':'':'pt-BR' }}</strong></p>
+    </footer>
+
   </div>
   }
 </div>

@@ -1,19 +1,387 @@
-.filter-btn {
-  background: transparent;
-  color: var(--text-gray, #888);
-  border: 1px solid var(--border, #ccc);
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: 0.3s;
-  font-weight: 500;
+/* --- CONTAINER PRINCIPAL --- */
+.planner-container {
+  max-width: 1580px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    padding: 12px 8px;
+  }
 }
 
-.filter-btn.active,
-.filter-btn:hover {
-  background: var(--primary-neon, #00d2ff);
-  color: #000;
-  /* Texto preto para alto contraste com o neon */
-  border-color: var(--primary-neon, #00d2ff);
-  box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+/* --- HEADER E TABS --- */
+.planner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 16px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      justify-content: center;
+    }
+
+    .country-flag {
+      width: 40px;
+      height: 26px;
+      object-fit: cover;
+      border-radius: 4px;
+      box-shadow: var(--glow-cyan);
+      flex-shrink: 0;
+
+      @media (max-width: 480px) {
+        width: 32px;
+        height: 22px;
+      }
+    }
+
+    .neon-title {
+      font-size: 1.5rem;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      span { color: var(--cyan-neon); text-shadow: var(--glow-cyan); }
+
+      @media (max-width: 480px) {
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .save-btn {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      padding: 12px;
+      order: 3;
+    }
+  }
+}
+
+.tab-switcher {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 4px;
+  border-radius: 50px;
+  border: 1px solid var(--border-color);
+  gap: 4px;
+  min-width: 0;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    order: 2;
+  }
+
+  button {
+    padding: 10px 24px;
+    border-radius: 50px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @media (max-width: 768px) {
+      flex: 1;
+      padding: 10px 4px;
+      font-size: 0.8rem;
+    }
+
+    &.active {
+      background: var(--cyan-neon);
+      color: var(--bg-main);
+      box-shadow: var(--glow-cyan);
+    }
+
+    &:hover:not(.active) {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+}
+
+/* --- GRID FINANCEIRO --- */
+.dashboard-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  width: 100%;
+
+  @media (max-width: 480px) {
+    gap: 16px;
+  }
+
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.column-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+
+  @media (max-width: 480px) {
+    gap: 16px;
+  }
+}
+
+/* --- ESTILIZAÇÃO DOS CARDS --- */
+.card-dark {
+  padding: 24px;
+  background: rgba(20, 20, 35, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  @media (max-width: 480px) {
+    padding: 16px 12px;
+    border-radius: var(--radius-md);
+  }
+
+  &.no-padding { padding: 0 !important; overflow: hidden; }
+
+  .card-label {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    font-weight: 800;
+    display: block;
+
+    @media (max-width: 480px) {
+      margin-bottom: 12px;
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+/* --- ABA EXPLORAÇÃO --- */
+.exploration-view {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  min-width: 0;
+
+  @media (max-width: 480px) {
+    gap: 16px;
+  }
+
+  .explore-main-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: minmax(0, 1fr);
+
+    @media (max-width: 480px) {
+      gap: 16px;
+    }
+
+    @media (min-width: 1200px) {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr);
+    }
+  }
+}
+
+.map-card {
+  padding: 24px;
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
+
+  .map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+
+    @media (max-width: 480px) {
+      margin-bottom: 12px;
+    }
+  }
+}
+
+/* Legenda Sincronizada */
+.map-legend {
+  display: flex;
+  gap: 15px;
+  font-size: 0.75rem;
+
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.7rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    &.culture { background: #00f3ff; box-shadow: 0 0 8px #00f3ff; }
+    &.food { background: #e67e22; box-shadow: 0 0 8px #e67e22; }
+    &.shopping { background: #bc13fe; box-shadow: 0 0 8px #bc13fe; }
+  }
+}
+
+/* --- INPUTS E OBJETIVO --- */
+.goal-input-group {
+  .neon-input {
+    width: 100%;
+    background: #0d0d1a;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin: 10px 0;
+    outline: none;
+    box-sizing: border-box;
+
+    @media (max-width: 480px) {
+      padding: 12px;
+      font-size: 1.1rem;
+    }
+
+    &:focus {
+      border-color: var(--cyan-neon);
+      box-shadow: var(--glow-cyan);
+    }
+  }
+
+  .goal-summary {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border-color);
+    font-size: 0.9rem;
+    width: 100%;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+
+    .rate-info { color: var(--text-muted); }
+    .total-brl strong { color: var(--cyan-neon); }
+  }
+}
+
+/* --- ANIMAÇÕES --- */
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- ESTADOS VAZIOS (FEEDBACK VISUAL) --- */
+.empty-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  min-height: 180px;
+
+  .icon {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 80%;
+  }
+
+  .spinner-neon.small {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    animation: pulseNeon 1.5s infinite ease-in-out;
+  }
+}
+
+/* O Itinerário Vazio herda a estrutura de card para manter as alturas alinhadas */
+.empty-itinerary {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .empty-state-box {
+    flex: 1;
+  }
+}
+
+/* Animação do Loading Menor */
+@keyframes pulseNeon {
+  0% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 1; text-shadow: var(--glow-cyan); }
+  100% { transform: scale(1); opacity: 0.5; }
 }

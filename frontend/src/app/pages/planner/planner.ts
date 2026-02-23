@@ -44,12 +44,15 @@ export class Planner implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
 
+  // --- CONTROLE DE UI (ABAS) ---
+  activeTab = signal<'finance' | 'explore'>('finance');
+
   // Dados da Viagem
   tripDetails: any = null;
   isLoading = signal<boolean>(true);
   rawPointsOfInterest = signal<any[]>([]);
 
-  // Estados Financeiros (Centralizados para o MongoDB)
+  // Estados Financeiros
   localGoal = signal<number>(0);
   exchangeRate = signal<number>(0);
   currentSavings = signal<number>(0);
@@ -58,8 +61,7 @@ export class Planner implements OnInit {
   indexPercentage = signal<number>(100);
   estimatedTravelDate = signal<string | Date | null>(null);
 
-
-  // Estados de Operação e Edição
+  // Estados de Operação
   isSaving = signal<boolean>(false);
   saveSuccess = signal<boolean>(false);
   isEditing = signal<boolean>(false);
@@ -73,7 +75,7 @@ export class Planner implements OnInit {
   // Roteiro
   itinerary = signal<any[]>([]);
 
-  // Computeds Essenciais
+  // Computeds
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
 
   ngOnInit() {
@@ -89,9 +91,7 @@ export class Planner implements OnInit {
     }
   }
 
-  // --- INICIALIZAÇÃO ---
-
-  private restoreSession() {
+  private restoreSession() { // Restaura os dados da viagem do estado de navegação ou do localStorage
     if (history.state && history.state.tripData) {
       this.tripDetails = history.state.tripData;
       localStorage.setItem('activeTrip', JSON.stringify(this.tripDetails));
@@ -111,7 +111,7 @@ export class Planner implements OnInit {
     }
   }
 
-  private initializeData() {
+  private initializeData() { // Inicializa os sinais com os dados da viagem
     this.localGoal.set(this.tripDetails.financialGoalLocal || 0);
     this.currentSavings.set(this.tripDetails.currentSavingsBrl || 0);
     this.monthlyContribution.set(this.tripDetails.monthlyContributionBrl || 0);
@@ -128,19 +128,17 @@ export class Planner implements OnInit {
     this.isLoading.set(false);
   }
 
-  // --- SERVIÇOS EXTERNOS ---
-
-  fetchRate() {
+  fetchRate() { // Busca a cotação atual do destino para converter os valores
     this.currencyService.getExchangeRate(this.tripDetails.countryCode).subscribe(rate => {
       this.exchangeRate.set(Math.round(rate * 100) / 100);
     });
   }
 
-  fetchCDI() {
+  fetchCDI() { // Busca a taxa CDI atual para os cálculos financeiros
     this.taxService.getRate('CDI').subscribe((rate: number) => this.cdiRate.set(rate));
   }
 
-  loadPOIs() {
+  loadPOIs() { // Busca os pontos de interesse do destino
     if (!this.tripDetails?.destination) return;
     const iataCode = IATA_CODES[this.tripDetails.destination] || 'PAR';
     this.tripService.getPointsOfInterest(iataCode).subscribe({
@@ -149,18 +147,14 @@ export class Planner implements OnInit {
     });
   }
 
-  // --- INTERAÇÃO E UI ---
-
-  handleInput(event: any, signalRef: any) {
+  handleInput(event: any, signalRef: any) { // Formata os inputs financeiros para aceitar apenas números e vírgula
     let value = event.target.value;
     if (!value) { signalRef.set(0); return; }
     let cleanValue = value.replace(/\./g, '').replace(/,/g, '.');
     signalRef.set(parseFloat(cleanValue) || 0);
   }
 
-  // --- LÓGICA DE PERSISTÊNCIA ---
-
-  saveTrip() {
+  saveTrip() { // Salva a viagem no banco de dados
     if (this.isSaving()) return;
     this.isSaving.set(true);
 
@@ -199,7 +193,7 @@ export class Planner implements OnInit {
     });
   }
 
-  generateBudget(preferences: any) {
+  generateBudget(preferences: any) { // Envia as preferências para o backend, recebe o orçamento detalhado e atualiza os sinais correspondentes
     this.budgetPreferences.set(preferences);
     this.isCalculating.set(true);
     const destCurrency = this.tripDetails?.countryCode;
@@ -229,9 +223,7 @@ export class Planner implements OnInit {
     });
   }
 
-  // --- GESTÃO DO ROTEIRO ---
-
-  addToItinerary(poi: any) {
+  addToItinerary(poi: any) { // Adiciona um ponto de interesse ao roteiro, evitando duplicatas
     if (!this.itinerary().find(item => item.id === poi.id)) {
       this.itinerary.update(current => [...current, poi]);
     } else {
@@ -239,20 +231,13 @@ export class Planner implements OnInit {
     }
   }
 
-  removeFromItinerary(poiId: string) {
+  removeFromItinerary(poiId: string) { // Remove um ponto de interesse do roteiro
     this.itinerary.update(current => current.filter(item => item.id !== poiId));
   }
 
-  handleSaveSuccess() {
+  handleSaveSuccess() { // Feedback visual após salvar a viagem
     this.isSaving.set(false);
     this.saveSuccess.set(true);
     setTimeout(() => this.saveSuccess.set(false), 3000);
-  }
-
-  goToSearch() {
-    localStorage.removeItem('activeTrip');
-    localStorage.removeItem('isEditing');
-    localStorage.removeItem('tripId');
-    this.router.navigate(['/search']);
   }
 }

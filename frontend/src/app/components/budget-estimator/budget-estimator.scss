@@ -1,0 +1,149 @@
+.estimator-wrapper { // CONTAINER PRINCIPAL
+  color: var(--text-primary);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.estimator-header { // CABEÇALHO COM ÍCONE E TEXTO
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .text { min-width: 0; }
+  .title { color: var(--text-primary); font-size: 1.1rem; margin: 0; font-weight: 800; }
+  .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; line-height: 1.4; }
+}
+
+.estimator-form { // FORMULÁRIO DE ENTRADA
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* --- GRIDS DINÂMICOS --- */
+.form-row {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+
+  &.iata-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: var(--radius-md);
+  }
+
+  &.date-row {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+
+    @media (max-width: 480px) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      .form-group:first-child { grid-column: span 2; }
+    }
+  }
+
+  &.passengers-row {
+    grid-template-columns: 80px minmax(0, 1fr);
+
+    @media (max-width: 480px) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    }
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* --- LABELS E INPUTS NEON --- */
+label, .stars-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.neon-input, .neon-select, .static-value {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0 12px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  height: 44px;
+
+  &.centered { text-align: center; }
+  &.iata-input { text-transform: uppercase; font-weight: 800; color: var(--cyan-neon); letter-spacing: 2px;}
+}
+
+/* --- REMOÇÃO DAS SETAS (SPIN BUTTONS) DOS INPUTS NUMBERS --- */
+.no-spin::-webkit-inner-spin-button,
+.no-spin::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.no-spin {
+  -moz-appearance: textfield; /* Para Firefox */
+}
+
+.neon-input:focus, .neon-select:focus {
+  border-color: var(--cyan-neon);
+  box-shadow: var(--glow-cyan);
+}
+
+.static-value {
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* --- ESTRELAS DE HOTEL --- */
+.stars-section {
+  .stars-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+
+    .star-btn {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: var(--radius-md);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 44px;
+
+      &.active {
+        color: #f1c40f;
+        border-color: #f1c40f;
+        background: rgba(241, 196, 15, 0.1);
+        text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+      }
+
+      &:hover:not(.active) {
+        border-color: var(--text-secondary);
+      }
+    }
+  }
+}
+
+.w-full { width: 100%; box-sizing: border-box; }
+.text-cyan { color: var(--cyan-neon); }

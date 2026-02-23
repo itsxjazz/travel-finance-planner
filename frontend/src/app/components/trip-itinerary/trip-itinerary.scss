@@ -1,0 +1,93 @@
+.itinerary-wrapper { // CONTAINER PRINCIPAL
+  padding: 24px;
+}
+
+.itinerary-header { // CABEÇALHO COM TÍTULO E CONTADOR DE ITENS
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  .title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary, #ffffff);
+    font-weight: 700;
+  }
+
+  .count-badge {
+    background: rgba(188, 19, 254, 0.1);
+    border: 1px solid var(--purple-neon, #bc13fe);
+    color: var(--purple-neon, #bc13fe);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 50px;
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+  }
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.itinerary-item {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 16px 20px;
+  border-radius: var(--radius-md, 8px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--border-color, #2a2a3d);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateX(5px);
+  }
+
+  .item-info {
+    .category-indicator {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 4px;
+
+      /* Sincronização de cores com o mapa e discovery grid */
+      &[data-category="CULTURA"] { color: var(--cyan-neon, #00f3ff); }
+      &[data-category="RESTAURANT"], &[data-category="GASTRONOMIA"] { color: #e67e22; }
+      &[data-category="SHOPPING"] { color: var(--purple-neon, #bc13fe); }
+    }
+
+    .item-name {
+      margin: 0;
+      font-weight: 700;
+      color: var(--text-primary, #ffffff);
+      font-size: 1rem;
+    }
+  }
+
+  /* Botão Remover com Estilo Danger Neon */
+  .btn-remove {
+    background: transparent;
+    border: 1px solid var(--pink-neon, #ff0055);
+    color: var(--pink-neon, #ff0055);
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: var(--pink-neon, #ff0055);
+      color: #05050a;
+      box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+    }
+  }
+}

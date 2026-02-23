@@ -1,89 +1,145 @@
 @if (isLoading()) {
-<div
-  style="text-align: center; padding: 100px; color: #999; font-family: sans-serif; min-height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-  <div style="font-size: 3rem; margin-bottom: 15px; animation: pulse 1.5s infinite;">🌍</div>
-  <p>Carregando seu planejamento...</p>
+<div class="loading-overlay">
+  <div class="spinner-neon">🌍</div>
+  <p>Sincronizando com o MongoDB Atlas...</p>
 </div>
 }
 
 @if (!isLoading() && tripDetails) {
-<div
-  style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif; background: #fdfdfd; min-height: 100vh;">
+<div class="planner-container">
 
-  <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-    <img [src]="tripDetails.flagUrl" style="width: 50px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h2 style="margin: 0; color: #2c3e50;">Meta: {{ tripDetails.destination }}</h2>
-  </div>
-
-  <app-currency-chart [countryCode]="tripDetails.countryCode"></app-currency-chart>
-
-  <div
-    style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-    <h3 style="margin: 0 0 15px; font-size: 1rem; color: #555;">Objetivo da Viagem</h3>
-    <label style="font-size: 0.8rem; color: #999;">Valor total em <strong>{{ tripDetails.countryCode
-        }}</strong>:</label>
-
-    <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)" placeholder="Ex: 1000"
-      style="display: block; width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; outline: none; box-sizing: border-box;">
-
-    <div
-      style="margin-top: 15px; display: flex; justify-content: space-between; border-top: 1px dashed #eee; padding-top: 15px;">
-      <span style="font-size: 0.9rem; color: #777;">Cotação Atual: <strong>{{ exchangeRate() |
-          currency:'BRL':'symbol':'1.2-2' }}</strong></span>
-      <span style="font-weight: bold; color: #27ae60;">Total: {{ brlGoal() | currency:'BRL' }}</span>
+  <header class="planner-header">
+    <div class="header-info">
+      <img [src]="tripDetails.flagUrl" class="country-flag" [alt]="tripDetails.destination">
+      <h1 class="neon-title">Destino: <span>{{ tripDetails.destination }}</span></h1>
     </div>
-  </div>
 
-  <app-budget-estimator [destinationName]="tripDetails?.destination" [savedPreferences]="budgetPreferences()"
-    (estimateRequested)="generateBudget($event)">
-  </app-budget-estimator>
+    <nav class="tab-switcher">
+      <button (click)="activeTab.set('finance')" [class.active]="activeTab() === 'finance'">
+        Financeiro
+      </button>
+      <button (click)="activeTab.set('explore')" [class.active]="activeTab() === 'explore'">
+        Exploração
+      </button>
+    </nav>
 
-  @if (budgetResult()) {
-  <app-budget-visualizer [budgetBreakdown]="budgetResult().breakdown" [currencyCode]="tripDetails.countryCode">
-  </app-budget-visualizer>
-  }
+    <button (click)="saveTrip()" [disabled]="isSaving()" class="btn-neon save-btn">
+      {{ isSaving() ? 'Processando...' : 'Salvar Planejamento' }}
+    </button>
+  </header>
 
-  <app-savings-calculator
-  [targetAmountBrl]="brlGoal()"
-  [cdiRate]="cdiRate()"
-  [currentSavings]="currentSavings()"
-  [monthlyContribution]="monthlyContribution()"
-  [indexPercentage]="indexPercentage()"
-  (savingsChange)="currentSavings.set($event)"
-  (contributionChange)="monthlyContribution.set($event)"
-  (indexChange)="indexPercentage.set($event)"
-  (dateCalculated)="estimatedTravelDate.set($event)"> </app-savings-calculator>
+  <div class="tab-content">
 
-  <button (click)="saveTrip()" [disabled]="isSaving()"
-    style="width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 30px; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.2);"
-    [style.opacity]="isSaving() ? '0.7' : '1'">
-    {{ isSaving() ? 'Salvando...' : '💾 Salvar Planejamento' }}
-  </button>
+    @if (activeTab() === 'finance') {
+    <div class="dashboard-grid fade-in">
 
-  <app-trip-itinerary [items]="itinerary()" (removeRequested)="removeFromItinerary($event)">
-  </app-trip-itinerary>
+      <div class="column-stack">
+        <section class="card-dark">
+          <app-budget-estimator
+            [destinationName]="tripDetails?.destination"
+            [savedPreferences]="budgetPreferences()"
+            (estimateRequested)="generateBudget($event)">
+          </app-budget-estimator>
+        </section>
+      </div>
 
-  <div
-    style="margin-top: 30px; background: white; padding: 15px; border-radius: 16px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-    <h3 style="color: #2c3e50; font-size: 1.1rem; margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px;">
-      🗺️ Mapa de Exploração <span style="font-size: 0.8rem; font-weight: normal; color: #999;">(Exibindo locais
-        sugeridos)</span>
-    </h3>
-    <app-interactive-map [pois]="rawPointsOfInterest()"></app-interactive-map>
+      <div class="column-stack">
+        <section class="card-dark">
+          <div class="goal-input-group">
+            <label>Valor total em <strong>{{ tripDetails.countryCode }}</strong>:</label>
+            <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)"
+                   placeholder="Ex: 5000" class="neon-input">
+            <div class="goal-summary">
+              <span class="rate-info">Cotação: <strong>{{ exchangeRate() | currency:'BRL' }}</strong></span>
+              <span class="total-brl">Total em Reais: <strong>{{ brlGoal() | currency:'BRL' }}</strong></span>
+            </div>
+          </div>
+        </section>
 
-    <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.75rem; color: #666;">
-      <span style="display: flex; align-items: center; gap: 4px;"><span
-          style="width: 10px; height: 10px; border-radius: 50%; background: #27ae60;"></span> Cultura</span>
-      <span style="display: flex; align-items: center; gap: 4px;"><span
-          style="width: 10px; height: 10px; border-radius: 50%; background: #e67e22;"></span> Gastronomia</span>
-      <span style="display: flex; align-items: center; gap: 4px;"><span
-          style="width: 10px; height: 10px; border-radius: 50%; background: #3498db;"></span> Compras</span>
+        <section class="card-dark no-padding">
+          <app-savings-calculator
+            [targetAmountBrl]="brlGoal()"
+            [cdiRate]="cdiRate()"
+            [currentSavings]="currentSavings()"
+            [monthlyContribution]="monthlyContribution()"
+            [indexPercentage]="indexPercentage()"
+            (savingsChange)="currentSavings.set($event)"
+            (contributionChange)="monthlyContribution.set($event)"
+            (indexChange)="indexPercentage.set($event)"
+            (dateCalculated)="estimatedTravelDate.set($event)">
+          </app-savings-calculator>
+        </section>
+      </div>
+
+      <div class="column-stack">
+          <app-currency-chart [countryCode]="tripDetails.countryCode"></app-currency-chart>
+
+        <section class="card-dark">
+          <h3 class="title">Divisão do Orçamento</h3>
+
+          @if (isCalculating()) {
+            <div class="empty-state-box">
+              <div class="spinner-neon small">⏳</div>
+              <p>Analisando voos e hotéis no Amadeus...</p>
+            </div>
+          } @else if (budgetResult()) {
+            <app-budget-visualizer
+              [budgetBreakdown]="budgetResult().breakdown"
+              [currencyCode]="tripDetails.countryCode">
+            </app-budget-visualizer>
+          } @else {
+            <div class="empty-state-box">
+              <p>Aguardando Orçamento Inteligente. Gere a cotação no painel ao lado.</p>
+            </div>
+          }
+        </section>
+      </div>
+
     </div>
+    }
+
+    @if (activeTab() === 'explore') {
+    <div class="exploration-view fade-in">
+      <div class="explore-main-grid">
+
+        <div class="card-dark map-card">
+          <header class="map-header">
+            <h3 class="title">Mapa de Exploração Local</h3>
+            <div class="map-legend">
+              <span class="legend-item"><i class="dot culture"></i> Cultura</span>
+              <span class="legend-item"><i class="dot food"></i> Gastronomia</span>
+              <span class="legend-item"><i class="dot shopping"></i> Compras</span>
+            </div>
+          </header>
+          <app-interactive-map [pois]="rawPointsOfInterest()"></app-interactive-map>
+        </div>
+
+        <aside class="itinerary-aside">
+          @if (itinerary().length > 0) {
+            <app-trip-itinerary
+              [items]="itinerary()"
+              (removeRequested)="removeFromItinerary($event)">
+            </app-trip-itinerary>
+          } @else {
+            <div class="card-dark empty-itinerary">
+              <h3 class="title">Roteiro Personalizado</h3>
+              <div class="empty-state-box">
+                <p>Seu roteiro está vazio. Explore a grade abaixo e adicione locais para visitar!</p>
+              </div>
+            </div>
+          }
+        </aside>
+      </div>
+
+      <section class="discovery-section">
+        <app-discovery-grid
+          [destinationName]="tripDetails.destination"
+          [rawPOIs]="rawPointsOfInterest()"
+          (addRequested)="addToItinerary($event)">
+        </app-discovery-grid>
+      </section>
+    </div>
+    }
   </div>
-
-  <app-discovery-grid [destinationName]="tripDetails.destination" [rawPOIs]="rawPointsOfInterest()"
-    (addRequested)="addToItinerary($event)">
-  </app-discovery-grid>
-
 </div>
 }

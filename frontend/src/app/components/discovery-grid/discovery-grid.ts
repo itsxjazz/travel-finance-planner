@@ -5,7 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-discovery-grid',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './discovery-grid.html'
+  templateUrl: './discovery-grid.html',
+  styleUrls: ['./discovery-grid.scss']
 })
 export class DiscoveryGrid {
   destinationName = input<string>('');
@@ -18,7 +19,7 @@ export class DiscoveryGrid {
   currentPage = signal<number>(1);
   itemsPerPage = 10;
 
-  filteredPOIs = computed(() => {
+  filteredPOIs = computed(() => { // Computed que retorna os POIs filtrados e paginados
     const filter = this.activeFilter();
     const page = this.currentPage();
     const pois = this.rawPOIs();
@@ -35,7 +36,7 @@ export class DiscoveryGrid {
     return filtered.slice(startIndex, startIndex + this.itemsPerPage);
   });
 
-  setFilter(filter: string) {
+  setFilter(filter: string) { // Atualiza o filtro ativo e reseta para a primeira página
     this.activeFilter.set(filter);
     this.currentPage.set(1);
   }
@@ -46,9 +47,9 @@ export class DiscoveryGrid {
     window.scrollTo({ top: 800, behavior: 'smooth' });
   }
 
-  translateCategory(category: string): string {
+  translateCategory(category: string): string { // Função de tradução para exibir os nomes das categorias de forma amigável
     const categories: Record<string, string> = {
-      'CULTURA': '🏛️ Cultura', 'RESTAURANT': '🍴 Gastronomia', 'SHOPPING': '🛍️ Compras'
+      'CULTURA': 'Cultura', 'RESTAURANT': ' Gastronomia', 'SHOPPING': 'Compras'
     };
     return categories[category] || category;
   }

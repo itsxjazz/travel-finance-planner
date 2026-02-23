@@ -1,0 +1,57 @@
+.visualizer-wrapper { // CONTAINER PRINCIPAL
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(5px);
+}
+
+.chart-container { // CONTAINER DO GRÁFICO
+  position: relative;
+  height: 250px;
+  width: 100%;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.5));
+  padding: 10px;
+}
+
+.breakdown-list { // LISTA DE QUEBRA DE CUSTOS
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border-color);
+
+  .breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+
+    .label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .value {
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+/* Classes utilitárias de cores Neon */
+.text-cyan {
+  color: var(--cyan-neon);
+  text-shadow: 0 0 5px rgba(0, 243, 255, 0.2);
+}
+
+.text-purple {
+  color: var(--purple-neon);
+  text-shadow: 0 0 5px rgba(188, 19, 254, 0.2);
+}
+
+.text-pink {
+  color: var(--pink-neon);
+  text-shadow: 0 0 5px rgba(255, 0, 85, 0.2);
+}
