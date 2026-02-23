@@ -43,11 +43,16 @@
   </app-budget-visualizer>
   }
 
-  <app-savings-calculator [targetAmountBrl]="brlGoal()" [cdiRate]="cdiRate()" [currentSavings]="currentSavings()"
-    [monthlyContribution]="monthlyContribution()" [indexPercentage]="indexPercentage()"
-    (savingsChange)="currentSavings.set($event)" (contributionChange)="monthlyContribution.set($event)"
-    (indexChange)="indexPercentage.set($event)">
-  </app-savings-calculator>
+  <app-savings-calculator
+  [targetAmountBrl]="brlGoal()"
+  [cdiRate]="cdiRate()"
+  [currentSavings]="currentSavings()"
+  [monthlyContribution]="monthlyContribution()"
+  [indexPercentage]="indexPercentage()"
+  (savingsChange)="currentSavings.set($event)"
+  (contributionChange)="monthlyContribution.set($event)"
+  (indexChange)="indexPercentage.set($event)"
+  (dateCalculated)="estimatedTravelDate.set($event)"> </app-savings-calculator>
 
   <button (click)="saveTrip()" [disabled]="isSaving()"
     style="width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 30px; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.2);"

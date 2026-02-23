@@ -56,6 +56,8 @@ export class Planner implements OnInit {
   monthlyContribution = signal<number>(0);
   cdiRate = signal<number>(0);
   indexPercentage = signal<number>(100);
+  estimatedTravelDate = signal<string | Date | null>(null);
+
 
   // Estados de Operação e Edição
   isSaving = signal<boolean>(false);
@@ -116,6 +118,9 @@ export class Planner implements OnInit {
     if (this.tripDetails.itinerary) this.itinerary.set(this.tripDetails.itinerary);
     if (this.tripDetails.budgetResult) this.budgetResult.set(this.tripDetails.budgetResult);
     if (this.tripDetails.budgetPreferences) this.budgetPreferences.set(this.tripDetails.budgetPreferences);
+    if (this.tripDetails.estimatedTravelDate) {
+      this.estimatedTravelDate.set(this.tripDetails.estimatedTravelDate);
+    }
 
     this.fetchRate();
     this.fetchCDI();
@@ -169,7 +174,8 @@ export class Planner implements OnInit {
       monthlyContributionBrl: this.monthlyContribution(),
       itinerary: this.itinerary(),
       budgetResult: this.budgetResult(),
-      budgetPreferences: this.budgetPreferences()
+      budgetPreferences: this.budgetPreferences(),
+      estimatedTravelDate: this.estimatedTravelDate()
     };
 
     const action = this.isEditing() && this.tripId()

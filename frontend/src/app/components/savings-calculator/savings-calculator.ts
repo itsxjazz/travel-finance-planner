@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, computed, input } from '@angular/core';
+import { Component, Output, EventEmitter, computed, input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 export class SavingsCalculator {
   readonly Infinity = Infinity;
 
-  // Transformamos os Inputs em Signals (Signal Inputs)
+  // Transforma os Inputs em Signals (Signal Inputs)
   targetAmountBrl = input<number>(0);
   cdiRate = input<number>(0);
   currentSavings = input<number>(0);
@@ -22,8 +22,16 @@ export class SavingsCalculator {
   @Output() savingsChange = new EventEmitter<number>();
   @Output() contributionChange = new EventEmitter<number>();
   @Output() indexChange = new EventEmitter<number>();
+  @Output() dateCalculated = new EventEmitter<Date | null>();
 
-  // Agora o computed vai rastrear as mudanças corretamente!
+  constructor() {
+    effect(() => {
+       const calculatedDate = this.travelDate();
+       this.dateCalculated.emit(calculatedDate);
+    });
+  }
+
+  // Agora o computed rastreia as mudanças corretamente
   finalAnnualTax = computed(() => (this.cdiRate() * this.indexPercentage()) / 100);
 
   private getIRRate(months: number): number {
