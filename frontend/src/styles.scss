@@ -96,3 +96,10 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--purple-neon);
 }
+
+// Responsividade
+body {
+  padding-top: 70px;
+  margin: 0;
+  background-color: var(--bg-main);
+}

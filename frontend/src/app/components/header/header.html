@@ -1,27 +1,61 @@
-<nav class="navbar">
-  <div class="nav-brand" routerLink="/">
-    <img src="/logo.svg" alt="NextDestination Logo" class="logo-img">
+<div class="global-topbar">
+  <div class="topbar-brand" routerLink="/">
+    <img src="/logo.svg" alt="Logo" class="mini-logo">
     <span class="brand-name">NextDestination</span>
+  </div>
+
+  <div class="topbar-right">
+    @if (isLoggedIn()) {
+      <span class="user-greeting">
+        Olá, <span class="text-cyan">{{ getUserName() }}</span>
+      </span>
+    }
+
+    <button class="menu-trigger" (click)="toggleMenu()">
+      <div class="hamburger-box" [class.open]="isMenuOpen()">
+        <span class="line"></span>
+        <span class="line"></span>
+        <span class="line"></span>
+      </div>
+    </button>
+  </div>
+</div>
+
+<nav class="sidebar-offcanvas" [class.active]="isMenuOpen()">
+  <div class="sidebar-header">
+    <div class="nav-brand">
+      <img src="/logo.svg" alt="NextDestination Logo" class="logo-img">
+      <span class="brand-name">NextDestination</span>
+    </div>
+    <button class="close-sidebar" (click)="closeMenu()">✕</button>
   </div>
 
   <div class="nav-links">
     @if (isLoggedIn()) {
-      <a routerLink="/dashboard" routerLinkActive="active">Minhas Viagens</a>
-      <a routerLink="/search" routerLinkActive="active">Buscar Destino</a>
+      <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">
+        <span class="icon">🗺️</span> Central de Viagens
+      </a>
+      <a routerLink="/search" routerLinkActive="active" (click)="closeMenu()">
+        <span class="icon">🔍</span> Buscar Destino
+      </a>
+      <a routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">
+        <span class="icon">⚙️</span> Configurações da Conta
+      </a>
     }
   </div>
 
   <div class="nav-actions">
     @if (!isLoggedIn()) {
-      <a routerLink="/login" class="link-simples">Login</a>
-      <a routerLink="/register" class="btn-neon">Registrar</a>
+      <a routerLink="/login" class="link-simples" (click)="closeMenu()">Já tem uma conta? Faça login</a>
+      <a routerLink="/register" class="btn-neon w-full" (click)="closeMenu()">REGISTRAR</a>
     } @else {
-      <a routerLink="/profile" class="user-greeting">
-        Olá, <span>{{ getUserName() }}</span>
-      </a>
-      <button (click)="logout()" class="btn-neon btn-danger">
-        Sair
+      <button (click)="logout()" class="btn-neon btn-danger w-full">
+        Sair da Conta
       </button>
     }
   </div>
 </nav>
+
+@if (isMenuOpen()) {
+  <div class="menu-overlay" (click)="closeMenu()"></div>
+}
