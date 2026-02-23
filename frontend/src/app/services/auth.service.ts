@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -10,14 +11,13 @@ export class AuthService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
 
-  private apiUrl = 'http://localhost:5000/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private tokenKey = 'travel_planner_token';
   private userKey = 'travel_planner_user';
 
   isLoggedInSignal = signal<boolean>(false);
 
   constructor() {
-    // Inicializa o sinal assim que o app abre
     this.isLoggedInSignal.set(this.isLoggedIn());
   }
 
@@ -59,12 +59,10 @@ export class AuthService {
     );
   }
 
-  // Busca os dados do usuário logado
   getProfile() {
     return this.http.get<any>(`${this.apiUrl}/profile`);
   }
 
-  // Envia a requisição de troca de senha
   changePassword(data: any) {
     return this.http.put<any>(`${this.apiUrl}/change-password`, data);
   }

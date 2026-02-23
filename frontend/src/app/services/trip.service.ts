@@ -1,13 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TripService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5000/api/trips';
+
+  private baseApiUrl = environment.apiUrl;
+  private apiUrl = `${environment.apiUrl}/trips`;
 
   // Dicionário expandido: Mapeia o IATA para o centro da cidade
   private iataCoordinates: { [key: string]: { lat: number, lng: number } } = {
@@ -50,18 +53,15 @@ export class TripService {
   deleteTrip(id: string): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
 
   calculateSmartBudget(preferences: any): Observable<any> {
-    const cleanBaseUrl = this.apiUrl.replace('/trips', '');
-    return this.http.post(`${cleanBaseUrl}/budget/calculate`, preferences);
+    return this.http.post(`${this.baseApiUrl}/budget/calculate`, preferences);
   }
 
-  // Busca de POIs passando IATA e transformando em Coordenadas
   getPointsOfInterest(iataCode: string): Observable<any> {
     const coords = this.iataCoordinates[iataCode];
     if (!coords) {
       throw new Error('Destino não mapeado para coordenadas.');
     }
 
-    const cleanBaseUrl = this.apiUrl.replace('/trips', '');
-    return this.http.get(`${cleanBaseUrl}/locals/pois?lat=${coords.lat}&lng=${coords.lng}`);
+    return this.http.get(`${this.baseApiUrl}/locals/pois?lat=${coords.lat}&lng=${coords.lng}`);
   }
 }
