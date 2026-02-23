@@ -26,44 +26,45 @@ export class BudgetVisualizer implements OnChanges {
     }
   }
 
- createChart() { // Criação do gráfico usando Chart.js
-  if (!this.chartCanvas) return;
-  if (this.chartInstance) this.chartInstance.destroy();
+  createChart() {
+    if (!this.chartCanvas) return;
+    if (this.chartInstance) this.chartInstance.destroy();
 
-  const ctx = this.chartCanvas.nativeElement.getContext('2d');
+    const ctx = this.chartCanvas.nativeElement.getContext('2d');
 
-  const cyanNeon = '#00f3ff';
-  const purpleNeon = '#bc13fe';
-  const pinkNeon = '#ff0055';
+    /* --- PALETA MONOCROMÁTICA HIGH-TECH --- */
+    const cyanPrimary = '#00f3ff';   // Ciano Neon (Passagens)
+    const cyanMedium  = '#00b8c4';   // Ciano Médio (Hotel)
+    const cyanDeep    = '#007a82';   // Ciano Escuro (Gasto Diário)
 
-  this.chartInstance = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Passagens', 'Hotel', 'Gasto Diário'],
-      datasets: [{
-        data: [
-          this.budgetBreakdown.flight,
-          this.budgetBreakdown.hotel,
-          this.budgetBreakdown.dailyExpenses
-        ],
-        backgroundColor: [cyanNeon, purpleNeon, pinkNeon],
-        hoverOffset: 15,
-        borderWidth: 0,
-        borderRadius: 5,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '75%',
-      plugins: {
-        legend: { display: false }
+    this.chartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Passagens', 'Hospedagem', 'Gasto Diário'],
+        datasets: [{
+          data: [
+            this.budgetBreakdown.flight,
+            this.budgetBreakdown.hotel,
+            this.budgetBreakdown.dailyExpenses
+          ],
+          backgroundColor: [cyanPrimary, cyanMedium, cyanDeep],
+          hoverOffset: 15,
+          borderWidth: 0,
+          borderRadius: 8,
+        }]
       },
-      animation: {
-        animateScale: true,
-        animateRotate: true
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: {
+          legend: { display: false }
+        },
+        animation: {
+          animateScale: true,
+          animateRotate: true
+        }
       }
-    }
-  });
-}
+    });
+  }
 }

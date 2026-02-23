@@ -1,6 +1,4 @@
-<div class="card-dark visualizer-wrapper">
-
-  <div class="chart-container">
+<div class="visualizer-wrapper"> <div class="chart-container">
     <canvas #budgetChartCanvas></canvas>
   </div>
 
@@ -13,15 +11,15 @@
     </div>
 
     <div class="breakdown-item">
-      <span class="label">Hotel:</span>
-      <strong class="value text-purple">
+      <span class="label">Hospedagem:</span>
+      <strong class="value text-cyan">
         {{ budgetBreakdown.hotel | currency:currencyCode }}
       </strong>
     </div>
 
     <div class="breakdown-item">
       <span class="label">Gasto Diário:</span>
-      <strong class="value text-pink">
+      <strong class="value text-cyan">
         {{ budgetBreakdown.dailyExpenses | currency:currencyCode }}
       </strong>
     </div>

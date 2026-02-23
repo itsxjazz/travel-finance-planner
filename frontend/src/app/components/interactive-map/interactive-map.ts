@@ -55,9 +55,9 @@ export class InteractiveMap implements OnDestroy {
       const color = this.getCategoryColor(poi.category);
 
       const marker = this.L.circleMarker([poi.lat, poi.lon], {
-        radius: 10,
+        radius: 8,
         fillColor: color,
-        color: '#ffffff',
+        color: '#00f3ff',
         weight: 1.5,
         fillOpacity: 0.9
       });
@@ -85,11 +85,11 @@ export class InteractiveMap implements OnDestroy {
   private getCategoryColor(category: string): string {
     const cat = category.toUpperCase();
     const colors: { [key: string]: string } = {
-      'CULTURA': '#00f3ff',    // Ciano
-      'RESTAURANT': '#e67e22', // Laranja (Gastronomia)
-      'SHOPPING': '#bc13fe'    // Roxo (Compras)
+      'CULTURA': '#00f3ff',    // Ciano Neon Puro
+      'RESTAURANT': '#00b8c4', // Ciano Médio
+      'SHOPPING': '#007a82'    // Ciano Profundo
     };
-    return colors[cat] || '#d0d0d0'; // Cinza para desconhecidos
+    return colors[cat] || '#00b8c4';
   }
 
   private translateTag(category: string): string {

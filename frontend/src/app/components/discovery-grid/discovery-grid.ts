@@ -11,43 +11,50 @@ import { CommonModule } from '@angular/common';
 export class DiscoveryGrid {
   destinationName = input<string>('');
   rawPOIs = input<any[]>([]);
-
-  // Avisa o Maestro para adicionar ao roteiro
   addRequested = output<any>();
 
   activeFilter = signal<string>('Todos');
   currentPage = signal<number>(1);
   itemsPerPage = 10;
 
-  filteredPOIs = computed(() => { // Computed que retorna os POIs filtrados e paginados
+  // Filtra os POIs antes de paginar
+  private allFilteredPOIs = computed(() => {
     const filter = this.activeFilter();
-    const page = this.currentPage();
     const pois = this.rawPOIs();
+    if (filter === 'Todos') return pois;
 
-    let filtered = pois;
-    if (filter !== 'Todos') {
-      const filterMap: Record<string, string> = {
-        'Cultura': 'CULTURA', 'Gastronomia': 'RESTAURANT', 'Shopping': 'SHOPPING', 'Compras': 'SHOPPING'
-      };
-      filtered = pois.filter(poi => poi.category === filterMap[filter]);
-    }
-
-    const startIndex = (page - 1) * this.itemsPerPage;
-    return filtered.slice(startIndex, startIndex + this.itemsPerPage);
+    const filterMap: Record<string, string> = {
+      'Cultura': 'CULTURA', 'Gastronomia': 'RESTAURANT', 'Shopping': 'SHOPPING', 'Compras': 'SHOPPING'
+    };
+    return pois.filter(poi => poi.category === filterMap[filter]);
   });
 
-  setFilter(filter: string) { // Atualiza o filtro ativo e reseta para a primeira página
+  filteredPOIs = computed(() => { // Aplica a paginação aos POIs já filtrados
+    const pois = this.allFilteredPOIs();
+    const startIndex = (this.currentPage() - 1) * this.itemsPerPage;
+    return pois.slice(startIndex, startIndex + this.itemsPerPage);
+  });
+
+  totalPages = computed(() => { // Calcula o total de páginas com base nos itens filtrados
+    const count = this.allFilteredPOIs().length;
+    return Math.ceil(count / this.itemsPerPage);
+  });
+
+  pagesArray = computed(() => { // Gera um array de páginas para o template
+    return Array.from({ length: this.totalPages() }, (_, i) => i + 1);
+  });
+
+  setFilter(filter: string) { // Define o filtro ativo e reseta para a primeira página
     this.activeFilter.set(filter);
     this.currentPage.set(1);
   }
 
-  setPage(page: number) {
+  setPage(page: number) { // Define a página ativa
     this.currentPage.set(page);
-    // Faz o scroll suave para o topo do grid ao mudar de página
     window.scrollTo({ top: 800, behavior: 'smooth' });
   }
 
-  translateCategory(category: string): string { // Função de tradução para exibir os nomes das categorias de forma amigável
+  translateCategory(category: string): string { // Traduz as categorias para exibição
     const categories: Record<string, string> = {
       'CULTURA': 'Cultura', 'RESTAURANT': ' Gastronomia', 'SHOPPING': 'Compras'
     };

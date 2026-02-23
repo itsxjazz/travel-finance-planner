@@ -1,14 +1,13 @@
-<div class="discovery-container card-dark">
-  <header class="discovery-header">
-    <h2 class="title">Experiências Locais</h2>
+<div class="discovery-container"> <header class="discovery-header">
+    <h2 class="title">Experiências <span class="text-cyan">Locais</span></h2>
 
     <div class="filter-group">
-      @for (f of ['Todos', 'Cultura', 'Gastronomia', 'Shopping']; track f) {
+      @for (f of ['Todos', 'Cultura', 'Gastronomia', 'Compras']; track f) {
       <button
         (click)="setFilter(f)"
         [class.active]="activeFilter() === f"
         class="filter-btn">
-        {{ f === 'Todos' ? 'Todos' : (f === 'Cultura' ? 'Cultura' : (f === 'Gastronomia' ? ' Gastronomia' : 'Compras')) }}
+        {{ f }}
       </button>
       }
     </div>
@@ -21,7 +20,7 @@
         <span class="category-badge" [attr.data-category]="poi.category">
           {{ translateCategory(poi.category) }}
         </span>
-        <span class="rank">⭐ {{ poi.rank }}</span>
+        <span class="rank">★ {{ poi.rank }}</span>
       </div>
 
       <div class="poi-info">
@@ -41,8 +40,9 @@
     }
   </div>
 
+  @if (totalPages() > 1) {
   <footer class="pagination-footer">
-    @for (p of [1,2,3,4,5,6,7,8,9,10]; track p) {
+    @for (p of pagesArray(); track p) {
     <button
       (click)="setPage(p)"
       [class.active]="currentPage() === p"
@@ -51,4 +51,5 @@
     </button>
     }
   </footer>
+  }
 </div>

@@ -1,8 +1,7 @@
 <div class="search-container">
-
   <header class="search-header">
     <h1 class="neon-title">Para onde <span>vamos?</span></h1>
-    <p class="subtitle">Digite o destino internacional que você deseja explorar.</p>
+    <p class="subtitle">Busque o país que será o palco da sua próxima aventura.</p>
   </header>
 
   <div class="search-group">
@@ -23,18 +22,18 @@
   </div>
 
   <div *ngIf="hasSearched() && searchResults().length === 0" class="error-card card-dark">
-
     <div class="error-content">
-      <h2 class="error-title">Destino não encontrado</h2>
+      <h2 class="error-title">Destino não localizado</h2>
       <p class="error-text">
-        Verifique a ortografia ou tente a busca em inglês. Nosso radar cobre atualmente os 27 destinos globais mais procurados.
+        Verifique a ortografia ou tente a busca em inglês.
+        Nosso radar cobre atualmente os 27 destinos globais mais procurados.
       </p>
 
       <div class="suggestion-footer">
         <p>Seu destino dos sonhos ainda não está na lista?</p>
         <a href="mailto:devjessicarodrigues@gmail.com?subject=Sugestão de Destino - NextDestination"
            class="btn-neon btn-small">
-          Sugerir Novo Destino
+           Sugerir Novo Destino
         </a>
       </div>
     </div>
@@ -50,7 +49,7 @@
       <div class="card-info">
         <h3>{{ country.translations?.por?.common || country.name.common }}</h3>
         <span class="currency">
-          Moeda local: <strong>{{ getCurrencyCode(country) }}</strong>
+          Moeda local: <strong class="text-cyan">{{ getCurrencyCode(country) }}</strong>
         </span>
 
         <button (click)="selectCountry(country)" class="btn-action">
@@ -60,5 +59,4 @@
 
     </div>
   </div>
-
 </div>

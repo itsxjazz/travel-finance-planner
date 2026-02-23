@@ -45,25 +45,31 @@
           </div>
           <div class="info-row">
             <span class="label">Aporte Mensal:</span>
-            <span class="value text-purple">{{ trip.monthlyContributionBrl | currency:'BRL' }}</span>
+            <span class="value text-cyan">{{ trip.monthlyContributionBrl | currency:'BRL' }}</span>
           </div>
         </div>
 
-        <div *ngIf="trip.itinerary && trip.itinerary.length > 0" class="itinerary-badge">
-          {{ trip.itinerary.length }} {{ trip.itinerary.length === 1 ? 'local' : 'locais' }} no roteiro
+        <div class="itinerary-status" *ngIf="trip.itinerary && trip.itinerary.length > 0">
+          <span class="dot"></span>
+          <span class="text">
+            <strong>{{ trip.itinerary.length }}</strong>
+            {{ trip.itinerary.length === 1 ? 'local explorado' : 'locais no roteiro' }}
+          </span>
         </div>
 
         <div class="date-badge">
-          <span class="badge-title">DATA ESTIMADA</span>
-          <span class="badge-date">{{ trip.estimatedTravelDate | date:'MMMM / yyyy':'':'pt-BR' }}</span>
+          <div class="badge-content">
+            <span class="badge-title">Embarque Previsto</span>
+            <span class="badge-date">{{ trip.estimatedTravelDate | date:'MMMM / yyyy':'':'pt-BR' }}</span>
+          </div>
         </div>
 
         <div class="card-actions">
           <button (click)="editTrip(trip)" class="btn-action edit">
-            Editar
+            EDITAR
           </button>
           <button (click)="deleteTrip(trip._id)" class="btn-action delete">
-            Excluir
+            EXCLUIR
           </button>
         </div>
       </div>

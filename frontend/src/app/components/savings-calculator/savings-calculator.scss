@@ -2,7 +2,7 @@
   padding: 24px;
 }
 
-.calc-header {
+.calc-header { // CABEÇALHO DO CALCULADOR
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -14,37 +14,46 @@
     margin: 0;
     color: var(--text-primary, #ffffff);
     font-size: 1.1rem;
+    font-weight: 700;
   }
 
+  /* BADGE DO CDI */
   .cdi-badge {
-    background: rgba(39, 174, 96, 0.1);
-    border: 1px solid #27ae60;
-    color: #27ae60;
+    background: rgba(0, 243, 255, 0.05);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    color: var(--cyan-neon);
     padding: 6px 14px;
     border-radius: 8px;
     font-size: 0.85rem;
     display: flex;
     align-items: center;
     gap: 6px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--cyan-neon);
+      background: rgba(0, 243, 255, 0.1);
+    }
 
     .cdi-input {
       width: 45px;
       border: none;
       background: transparent;
       font-weight: 800;
-      color: #27ae60;
+      color: var(--cyan-neon);
       text-align: center;
       outline: none;
-      border-bottom: 1px dashed #27ae60;
+      border-bottom: 1px dashed var(--cyan-neon);
       padding: 0;
       font-size: 0.9rem;
+
       &::-webkit-inner-spin-button,
       &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     }
   }
 }
 
-.input-grid { // GRID DE INPUTS
+.input-grid { // GRADE DE INPUTS
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
@@ -65,10 +74,10 @@
   }
 }
 
-.neon-input { // ESTILO DOS INPUTS
+.neon-input {
   width: 100%;
-  background-color: #1a1a2e;
-  border: 1px solid #2a2a3d;
+  background-color: var(--bg-input, #1a1a2e);
+  border: 1px solid var(--border-color, #2a2a3d);
   border-radius: 8px;
   padding: 12px 16px;
   color: #ffffff;
@@ -77,8 +86,8 @@
   transition: all 0.3s ease;
 
   &:focus {
-    border-color: #00f3ff;
-    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+    border-color: var(--cyan-neon);
+    box-shadow: var(--glow-cyan);
   }
 
   &::placeholder {
@@ -88,8 +97,8 @@
 
 /* PAINEL DE PROJEÇÃO */
 .projection-panel {
-  background: rgba(39, 174, 96, 0.05);
-  border-left: 4px solid #27ae60;
+  background: rgba(0, 243, 255, 0.03);
+  border-left: 4px solid var(--cyan-neon);
   border-radius: 4px 12px 12px 4px;
   padding: 20px;
   animation: slideIn 0.4s ease-out;
@@ -101,11 +110,12 @@
 
     .section-title {
       font-size: 0.7rem;
-      color: #27ae60;
+      color: var(--cyan-neon);
       font-weight: 800;
       text-transform: uppercase;
       display: block;
       margin-bottom: 12px;
+      letter-spacing: 1px;
     }
 
     .detail-row {
@@ -119,27 +129,35 @@
         font-size: 1rem;
         margin-bottom: 12px;
         color: #ffffff;
+
+        strong {
+          color: var(--cyan-neon);
+          text-shadow: var(--glow-cyan);
+        }
       }
     }
   }
 
-  .achievement-info { // INFORMAÇÕES DE ALCANCE DA META
+  .achievement-info {
     .time-to-goal {
       font-size: 1.2rem;
       margin: 0;
       color: #ffffff;
 
       span {
-        color: #00f3ff;
-        text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        color: var(--cyan-neon);
+        text-shadow: var(--glow-cyan);
+        font-weight: 800;
       }
     }
 
     .target-date {
-      color: #a0a0b5;
+      color: var(--text-muted);
       font-size: 0.9rem;
       margin-top: 4px;
       text-transform: capitalize;
+
+      strong { color: #ffffff; }
     }
   }
 }
@@ -149,6 +167,5 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.text-cyan { color: #00f3ff; font-weight: 800; }
-.text-green { color: #27ae60; font-weight: 700; }
+.text-cyan { color: var(--cyan-neon); font-weight: 800; }
 .text-muted { color: #7a7a9a; }

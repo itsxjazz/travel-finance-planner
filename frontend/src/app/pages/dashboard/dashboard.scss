@@ -1,4 +1,4 @@
-/* --- CONTAINER PRINCIPAL --- */
+/* --- CONTAINER E GRID --- */
 .dashboard-container {
   max-width: 1200px;
   width: 100%;
@@ -6,70 +6,31 @@
   padding: 80px 24px;
   text-align: center;
   box-sizing: border-box;
-  overflow-x: hidden;
 
-  @media (max-width: 480px) {
-    padding: 40px 16px;
-  }
+  @media (max-width: 480px) { padding: 40px 16px; }
 }
 
-/* --- HEADER DO DASHBOARD --- */
 .dashboard-header {
   margin-bottom: 60px;
-
   .neon-title {
     font-size: 3.5rem;
     font-weight: 800;
     color: var(--text-primary);
-    margin: 0;
-    line-height: 1.1;
-
-    span {
-      color: var(--cyan-neon);
-      text-shadow: var(--glow-cyan);
-    }
-
-    @media (max-width: 480px) {
-      font-size: 2.2rem;
-    }
+    span { color: var(--cyan-neon); text-shadow: var(--glow-cyan); }
+    @media (max-width: 480px) { font-size: 2.2rem; }
   }
-
-  .subtitle {
-    color: var(--text-secondary);
-    font-size: 1.15rem;
-    margin-top: 16px;
-    opacity: 0.8;
-
-    @media (max-width: 480px) {
-      font-size: 1rem;
-    }
-  }
+  .subtitle { color: var(--text-secondary); opacity: 0.8; margin-top: 16px; }
 }
 
-/* --- GRID DE CARDS --- */
 .trips-grid {
   display: grid;
   gap: 32px;
-  grid-template-columns: minmax(0, 1fr);
-  text-align: left;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 400px));
   justify-content: center;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, minmax(0, 400px)); /* Cards mais robustos e centralizados */
-    justify-content: center;
-  }
-
-  @media (min-width: 1200px) {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
 }
 
-/* --- O CARD DA VIAGEM --- */
+/* --- CARD --- */
 .trip-card {
-  width: 100%;
-  max-width: 400px;
   transition: transform 0.3s ease, border-color 0.3s ease;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -77,11 +38,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  text-align: left;
 
   &:hover {
     transform: translateY(-8px);
     border-color: var(--cyan-neon);
-    box-shadow: 0 10px 30px rgba(0, 243, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 243, 255, 0.15);
   }
 
   .card-header {
@@ -92,26 +54,17 @@
     border-bottom: 1px solid var(--border-color);
     background: rgba(255, 255, 255, 0.02);
 
-    .flag-wrapper img {
-      width: 48px;
-      height: 32px;
-      object-fit: cover;
-      border-radius: 4px;
-    }
-
+    .flag-wrapper img { width: 48px; height: 32px; object-fit: cover; border-radius: 4px; }
     .destination-info {
       h3 { font-size: 1.3rem; margin: 0; color: #fff; }
-      .iata { color: var(--text-muted); font-size: 0.8rem; font-weight: 700; }
+      .iata { color: var(--text-muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
     }
   }
 
-  .card-body {
-    padding: 24px;
-    flex-grow: 1;
-  }
+  .card-body { padding: 24px; flex-grow: 1; display: flex; flex-direction: column; }
 }
 
-/* --- PROGRESSO E FINANCEIRO --- */
+/* --- PROGRESSO --- */
 .progress-section {
   margin-bottom: 24px;
   .progress-label {
@@ -121,46 +74,92 @@
     margin-bottom: 10px;
     color: var(--text-secondary);
   }
-  .progress-bar-bg {
-    height: 8px;
-    background: var(--bg-input);
-    border-radius: 10px;
-    overflow: hidden;
-  }
+  .progress-bar-bg { height: 8px; background: var(--bg-input); border-radius: 10px; overflow: hidden; }
   .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--cyan-neon), var(--purple-neon));
+    background: linear-gradient(90deg, var(--cyan-neon), #b2f9ff);
     box-shadow: var(--glow-cyan);
+    transition: width 1s ease;
   }
 }
 
+/* --- FINANCEIRO --- */
 .finance-info {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   .info-row {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
+    padding: 8px 0;
     font-size: 0.9rem;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
     .label { color: var(--text-secondary); }
     .value { color: #fff; font-weight: 600; }
   }
 }
 
-.date-badge {
-  background: rgba(188, 19, 254, 0.05);
-  padding: 16px;
-  border-radius: 12px;
-  text-align: center;
-  border: 1px solid rgba(188, 19, 254, 0.1);
+/* --- STATUS DO ITINERÁRIO --- */
+.itinerary-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 24px;
-  .badge-title { display: block; font-size: 0.7rem; color: var(--purple-neon); font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; }
-  .badge-date { font-size: 1.1rem; color: #fff; font-weight: 700; text-transform: capitalize; }
+  padding: 10px 14px;
+  background: rgba(0, 243, 255, 0.03);
+  border: 1px solid rgba(0, 243, 255, 0.1);
+  border-radius: 8px;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--cyan-neon);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--cyan-neon);
+  }
+
+  .text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    strong { color: var(--cyan-neon); }
+  }
 }
 
+/* --- DATA BADGE --- */
+.date-badge {
+  background: rgba(0, 243, 255, 0.05);
+  padding: 16px 20px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 4px solid var(--cyan-neon);
+  margin-bottom: 24px;
+  margin-top: auto;
+
+  .badge-content {
+    .badge-title {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--cyan-neon);
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .badge-date {
+      font-size: 1.15rem;
+      color: #fff;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+  }
+}
+
+/* --- AÇÕES --- */
 .card-actions {
   display: flex;
   gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+
   .btn-action {
     flex: 1;
     padding: 12px;
@@ -171,6 +170,15 @@
     font-weight: 700;
     cursor: pointer;
     transition: 0.3s;
-    &:hover { border-color: var(--cyan-neon); background: rgba(0, 243, 255, 0.05); }
+    &:hover { border-color: var(--cyan-neon); background: rgba(0, 243, 255, 0.05); color: var(--cyan-neon); }
+    &.delete:hover { border-color: #ff0055; background: rgba(255,0,85,0.05); color: #ff0055; }
   }
 }
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+.text-cyan { color: var(--cyan-neon); }

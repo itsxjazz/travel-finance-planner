@@ -1,7 +1,7 @@
 @if (isLoading()) {
 <div class="loading-overlay">
   <div class="spinner-neon">🌍</div>
-  <p>Sincronizando com o MongoDB Atlas...</p>
+  <p>Sincronizando com o Banco de dados...</p>
 </div>
 }
 
@@ -51,7 +51,7 @@
                    placeholder="Ex: 5000" class="neon-input">
             <div class="goal-summary">
               <span class="rate-info">Cotação: <strong>{{ exchangeRate() | currency:'BRL' }}</strong></span>
-              <span class="total-brl">Total em Reais: <strong>{{ brlGoal() | currency:'BRL' }}</strong></span>
+              <span class="total-brl">Total em Reais: <strong class="text-cyan">{{ brlGoal() | currency:'BRL' }}</strong></span>
             </div>
           </div>
         </section>
@@ -72,7 +72,7 @@
       </div>
 
       <div class="column-stack">
-          <app-currency-chart [countryCode]="tripDetails.countryCode"></app-currency-chart>
+        <app-currency-chart [countryCode]="tripDetails.countryCode"></app-currency-chart>
 
         <section class="card-dark">
           <h3 class="title">Divisão do Orçamento</h3>
