@@ -12,7 +12,6 @@ import { Router } from '@angular/router';
 export class Home {
   private router = inject(Router);
 
-  // Função disparada pelo botão principal
   startPlanning() {
     this.router.navigate(['/search']);
   }

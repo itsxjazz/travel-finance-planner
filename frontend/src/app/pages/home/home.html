@@ -1,54 +1,70 @@
 <div class="home-wrapper">
+  <div class="bg-grid"></div>
+  <div class="glow-orb"></div>
 
-  <section class="hero-section">
-    <div class="container hero-container">
-      <div class="hero-content">
-        <h1 class="hero-title">
-          Viaje pelo mundo na sua próxima <span>conquista financeira</span>
-        </h1>
+  <main class="hero-container">
+    <div class="content-wrapper">
+      <div class="trust-badge">
+        <svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span class="badge-text">Segurança e Precisão Financeira</span>
+      </div>
 
-        <p class="hero-description">
-          O <strong>NextDestination</strong> é o seu planejador de viagens inteligente.
-          Saiba exatamente quanto guardar por mês para embarcar na data certa.
-        </p>
+      <h1 class="hero-title">
+        Sua próxima viagem <br>
+        <span class="highlight">planejada com precisão.</span>
+      </h1>
 
-        <div class="hero-actions">
-          <button (click)="startPlanning()" class="btn-neon btn-lg">
-            Começar Planejamento
-          </button>
-        </div>
+      <p class="hero-description">
+        O NextDestination consolida dados globais e lógica financeira para que você
+        viaje com a certeza do seu orçamento.
+      </p>
+
+      <div class="cta-group">
+        <button (click)="startPlanning()" class="btn-primary">
+          Iniciar Planejamento
+          <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
       </div>
     </div>
-  </section>
 
-  <section class="features-section">
-    <div class="container">
-      <div class="features-grid">
-
-        <div class="feature-card card-dark">
-          <div class="feature-icon">🔍</div>
-          <h3>Busca Global</h3>
-          <p>Encontre qualquer destino e conecte-se instantaneamente aos dados oficiais via API.</p>
+    <section class="features-grid">
+      <div class="feature-card">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
         </div>
-
-        <div class="feature-card card-dark">
-          <div class="feature-icon">📈</div>
-          <h3>Matemática Real</h3>
-          <p>Simule o desconto do IR e acompanhe gráficos de moedas usando dados históricos.</p>
-        </div>
-
-        <div class="feature-card card-dark">
-          <div class="feature-icon">☁️</div>
-          <h3>Sincronização na Nuvem</h3>
-          <p>Salve suas metas em um banco seguro e edite seus planos de qualquer lugar.</p>
-        </div>
-
+        <h3>Gestão de Custos</h3>
+        <p>Cálculos automáticos de conversão e taxas.</p>
       </div>
-    </div>
-  </section>
 
-  <footer class="home-footer">
-    <p>Desenvolvido com <span>Angular</span>, <span>Node.js</span> e <span>MongoDB</span> por Jessica.</p>
-  </footer>
+      <div class="feature-card">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <h3>Curadoria de Locais</h3>
+        <p>Pontos de interesse integrados.</p>
+      </div>
 
+      <div class="feature-card">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#00ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+            <polyline points="16 7 22 7 22 13"></polyline>
+          </svg>
+        </div>
+        <h3>Metas de Economia</h3>
+        <p>Acompanhe o rendimento do seu aporte mensal.</p>
+      </div>
+    </section>
+  </main>
 </div>
