@@ -43,7 +43,7 @@
       width: 60px;
       height: 60px;
       margin-bottom: 16px;
-      filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.5)); /* Reforçando o glow do logo */
+      filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.5));
 
       @media (max-width: 480px) {
         width: 48px;
@@ -172,15 +172,16 @@
     font-size: 0.85rem;
   }
 
-  .text-purple {
-    color: var(--purple-neon);
+  .text-cyan {
+    color: var(--cyan-neon);
     font-weight: 700;
     text-decoration: none;
     margin-left: 8px;
-    transition: text-shadow 0.3s ease;
+    transition: all 0.3s ease;
 
     &:hover {
-      text-shadow: var(--glow-purple);
+      text-shadow: var(--glow-cyan);
+      opacity: 0.8;
     }
   }
 }
