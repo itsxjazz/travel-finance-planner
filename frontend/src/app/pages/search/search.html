@@ -21,7 +21,7 @@
     </button>
   </div>
 
-  <div *ngIf="hasSearched() && searchResults().length === 0" class="error-card card-dark">
+  <div *ngIf="hasSearched() && searchResults().length === 0" class="error-card">
     <div class="error-content">
       <h2 class="error-title">Destino não localizado</h2>
       <p class="error-text">
@@ -32,7 +32,7 @@
       <div class="suggestion-footer">
         <p>Seu destino dos sonhos ainda não está na lista?</p>
         <a href="mailto:devjessicarodrigues@gmail.com?subject=Sugestão de Destino - NextDestination"
-           class="btn-neon btn-small">
+           class="btn-action btn-small">
            Sugerir Novo Destino
         </a>
       </div>
@@ -40,8 +40,7 @@
   </div>
 
   <div *ngIf="searchResults().length > 0" class="results-grid">
-    <div *ngFor="let country of searchResults()" class="country-card card-dark">
-
+    <div *ngFor="let country of searchResults()" class="country-card">
       <div class="flag-container">
         <img [src]="country.flags.svg" [alt]="country.name.common" class="flag-img">
       </div>
@@ -56,7 +55,6 @@
           Planejar Viagem
         </button>
       </div>
-
     </div>
   </div>
 </div>
