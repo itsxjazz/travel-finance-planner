@@ -130,7 +130,8 @@ export class Planner implements OnInit {
 
   fetchRate() { // Busca a cotação atual do destino para converter os valores
     this.currencyService.getExchangeRate(this.tripDetails.countryCode).subscribe(rate => {
-      this.exchangeRate.set(Math.round(rate * 100) / 100);
+      // Mantém a precisão total para moedas desvalorizadas
+      this.exchangeRate.set(rate);
     });
   }
 
@@ -205,9 +206,9 @@ export class Planner implements OnInit {
         this.currencyService.getExchangeRateFromUSD(destCurrency).subscribe({
           next: (rate) => {
             const localBreakdown = {
-              flight: Math.round(usdBreakdown.flight * rate),
-              hotel: Math.round(usdBreakdown.hotel * rate),
-              dailyExpenses: Math.round(usdBreakdown.dailyExpenses * rate)
+              flight: usdBreakdown.flight * rate,
+              hotel: usdBreakdown.hotel * rate,
+              dailyExpenses: usdBreakdown.dailyExpenses * rate
             };
             this.budgetResult.set({
               breakdown: localBreakdown,

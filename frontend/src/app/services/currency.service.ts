@@ -1,39 +1,43 @@
+// currency.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { environment } from '../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class CurrencyService {
   private http = inject(HttpClient);
-  private baseUrl = 'https://economia.awesomeapi.com.br/last';
+  private apiBase = `${environment.apiUrl}/currency`;
 
-  // Busca a cotação atual da moeda estrangeira em relação ao Real
+  // 1. Busca a cotação atual (ex: ARS-BRL)
   getExchangeRate(currencyCode: string): Observable<number> {
-    // Exemplo de URL: https://economia.awesomeapi.com.br/last/JPY-BRL
-    return this.http.get<any>(`${this.baseUrl}/${currencyCode}-BRL`).pipe(
-      map(response => {
-        // A API responde com um objeto dinâmico: { JPYBRL: { bid: "0.034" } }
+    const pair = `${currencyCode}-BRL`;
+    return this.http.get<any>(`${this.apiBase}/last/${pair}`).pipe(
+      map(data => {
         const key = `${currencyCode}BRL`;
-        return parseFloat(response[key].bid);
+        if (!data[key]) throw new Error('Moeda não encontrada');
+        return parseFloat(data[key].bid);
       })
     );
   }
 
-  getHistoricalRates(countryCode: string): Observable<any[]> {
-  // O endpoint /daily/ traz o histórico. 360 é o número de dias.
-  const url = `https://economia.awesomeapi.com.br/json/daily/${countryCode}-BRL/360`;
-  return this.http.get<any[]>(url);
-}
+  // 2. Busca histórico dos últimos 360 dias
+  getHistoricalRates(currencyCode: string): Observable<any[]> {
+    const pair = `${currencyCode}-BRL`;
+    return this.http.get<any[]>(`${this.apiBase}/daily/${pair}/360`);
+  }
+
+  // 3. Busca cotação USD -> Moeda Estrangeira (para o Amadeus)
   getExchangeRateFromUSD(currencyCode: string): Observable<number> {
-  if (currencyCode === 'USD') return new Observable(obs => obs.next(1));
-  
-  return this.http.get<any>(`https://economia.awesomeapi.com.br/last/USD-${currencyCode}`).pipe(
-    map(response => {
-      const key = `USD${currencyCode}`;
-      return parseFloat(response[key].bid);
-    })
-  );
-}
+    if (currencyCode === 'USD') return new Observable(obs => { obs.next(1); obs.complete(); });
+
+    const pair = `USD-${currencyCode}`;
+    return this.http.get<any>(`${this.apiBase}/last/${pair}`).pipe(
+      map(data => {
+        const key = `USD${currencyCode}`;
+        if (!data[key]) throw new Error('Par USD não encontrado');
+        return parseFloat(data[key].bid);
+      })
+    );
+  }
 }

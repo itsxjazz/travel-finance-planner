@@ -35,9 +35,7 @@
 
       <div class="column-stack">
         <section class="card-dark">
-          <app-budget-estimator
-            [destinationName]="tripDetails?.destination"
-            [savedPreferences]="budgetPreferences()"
+          <app-budget-estimator [destinationName]="tripDetails?.destination" [savedPreferences]="budgetPreferences()"
             (estimateRequested)="generateBudget($event)">
           </app-budget-estimator>
         </section>
@@ -47,25 +45,21 @@
         <section class="card-dark">
           <div class="goal-input-group">
             <label>Valor total em <strong>{{ tripDetails.countryCode }}</strong>:</label>
-            <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)"
-                   placeholder="Ex: 5000" class="neon-input">
+            <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)" placeholder="Ex: 5000"
+              class="neon-input">
             <div class="goal-summary">
-              <span class="rate-info">Cotação: <strong>{{ exchangeRate() | currency:'BRL' }}</strong></span>
-              <span class="total-brl">Total em Reais: <strong class="text-cyan">{{ brlGoal() | currency:'BRL' }}</strong></span>
+              <span class="rate-info"> Cotação: <strong>{{ exchangeRate() | number:'1.2-4' }}</strong> </span>
+              <span class="total-brl">Total em Reais: <strong class="text-cyan">{{ brlGoal() | currency:'BRL'
+                  }}</strong> </span>
             </div>
           </div>
         </section>
 
         <section class="card-dark no-padding">
-          <app-savings-calculator
-            [targetAmountBrl]="brlGoal()"
-            [cdiRate]="cdiRate()"
-            [currentSavings]="currentSavings()"
-            [monthlyContribution]="monthlyContribution()"
-            [indexPercentage]="indexPercentage()"
-            (savingsChange)="currentSavings.set($event)"
-            (contributionChange)="monthlyContribution.set($event)"
-            (indexChange)="indexPercentage.set($event)"
+          <app-savings-calculator [targetAmountBrl]="brlGoal()" [cdiRate]="cdiRate()"
+            [currentSavings]="currentSavings()" [monthlyContribution]="monthlyContribution()"
+            [indexPercentage]="indexPercentage()" (savingsChange)="currentSavings.set($event)"
+            (contributionChange)="monthlyContribution.set($event)" (indexChange)="indexPercentage.set($event)"
             (dateCalculated)="estimatedTravelDate.set($event)">
           </app-savings-calculator>
         </section>
@@ -78,19 +72,17 @@
           <h3 class="title">Divisão do Orçamento</h3>
 
           @if (isCalculating()) {
-            <div class="empty-state-box">
-              <div class="spinner-neon small">⏳</div>
-              <p>Analisando voos e hotéis no Amadeus...</p>
-            </div>
+          <div class="empty-state-box">
+            <div class="spinner-neon small">⏳</div>
+            <p>Analisando voos e hotéis no Amadeus...</p>
+          </div>
           } @else if (budgetResult()) {
-            <app-budget-visualizer
-              [budgetBreakdown]="budgetResult().breakdown"
-              [currencyCode]="tripDetails.countryCode">
-            </app-budget-visualizer>
+          <app-budget-visualizer [budgetBreakdown]="budgetResult().breakdown" [currencyCode]="tripDetails.countryCode">
+          </app-budget-visualizer>
           } @else {
-            <div class="empty-state-box">
-              <p>Aguardando Orçamento Inteligente. Gere a cotação no painel ao lado.</p>
-            </div>
+          <div class="empty-state-box">
+            <p>Aguardando Orçamento Inteligente. Gere a cotação no painel ao lado.</p>
+          </div>
           }
         </section>
       </div>
@@ -116,25 +108,21 @@
 
         <aside class="itinerary-aside">
           @if (itinerary().length > 0) {
-            <app-trip-itinerary
-              [items]="itinerary()"
-              (removeRequested)="removeFromItinerary($event)">
-            </app-trip-itinerary>
+          <app-trip-itinerary [items]="itinerary()" (removeRequested)="removeFromItinerary($event)">
+          </app-trip-itinerary>
           } @else {
-            <div class="card-dark empty-itinerary">
-              <h3 class="title">Roteiro Personalizado</h3>
-              <div class="empty-state-box">
-                <p>Seu roteiro está vazio. Explore a grade abaixo e adicione locais para visitar!</p>
-              </div>
+          <div class="card-dark empty-itinerary">
+            <h3 class="title">Roteiro Personalizado</h3>
+            <div class="empty-state-box">
+              <p>Seu roteiro está vazio. Explore a grade abaixo e adicione locais para visitar!</p>
             </div>
+          </div>
           }
         </aside>
       </div>
 
       <section class="discovery-section">
-        <app-discovery-grid
-          [destinationName]="tripDetails.destination"
-          [rawPOIs]="rawPointsOfInterest()"
+        <app-discovery-grid [destinationName]="tripDetails.destination" [rawPOIs]="rawPointsOfInterest()"
           (addRequested)="addToItinerary($event)">
         </app-discovery-grid>
       </section>
