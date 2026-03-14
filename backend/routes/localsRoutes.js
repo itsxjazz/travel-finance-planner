@@ -20,8 +20,8 @@ router.get('/pois', async (req, res) => {
             params: {
                 categories: categories,
                 filter: `circle:${lng},${lat},15000`, // Raio de 15km
-                // bias: `proximity:${lng},${lat}`,
-                limit: 200, // Limite de 200 opções
+                bias: `proximity:${lng},${lat}`,
+                limit: 100, // Limite de 100 opções
                 apiKey: apiKey
             }
         });
@@ -51,15 +51,12 @@ router.get('/pois', async (req, res) => {
                     lat: props.lat,
                     lon: props.lon,
                     // Link dinâmico para o Google Maps
-                    mapUrl: `https://www.google.com/search?q=https://www.google.com/maps/search/%3Fapi%3D1%26query%3D${props.lat},${props.lon}`,
-                    rank: (Math.random() * (5 - 4.2) + 4.2).toFixed(1)
+                    mapUrl: `https://www.google.com/maps/search/?api=1&query=${props.lat},${props.lon}`, rank: (Math.random() * (5 - 4.2) + 4.2).toFixed(1)
                 };
             });
 
-        const shuffled = formattedData.sort(() => 0.5 - Math.random());
-
         console.log(`[GEOAPIFY] Sucesso! ${formattedData.length} locais encontrados para o destino.`);
-        res.json({ data: shuffled });
+        res.json({ data: formattedData });
 
     } catch (error) {
         console.error('Erro na Geoapify API:', error.message);
