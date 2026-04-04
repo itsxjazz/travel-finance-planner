@@ -1,12 +1,11 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
-    <h1 class="neon-title">Central de <span>Viagens</span></h1>
+    <h1 class="neon-title">Central de <span>viagens</span></h1>
     <p class="subtitle">Acompanhe os planejamentos das suas viagens.</p>
   </header>
 
   <div *ngIf="isLoading()" class="loading-state">
     <div class="neon-spinner"></div>
-    <span>Conectando ao banco de dados..</span>
   </div>
 
   <div *ngIf="!isLoading() && savedTrips().length === 0" class="empty-state card-dark">

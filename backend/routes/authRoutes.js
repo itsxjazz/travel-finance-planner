@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
                 token: generateToken(user._id),
             });
         } else {
-            res.status(401).json({ message: 'Email ou senha inválidos.' });
+            res.status(401).json({ message: 'E-mail ou senha inválidos.' });
         }
     } catch (error) {
         res.status(500).json({ message: 'Erro no servidor.', error: error.message });

@@ -4,15 +4,6 @@
   flex-direction: column;
 }
 
-.card-label { // TÍTULO DO GRÁFICO
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-bottom: 20px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
 .chart-container { // CONTAINER DO GRÁFICO
   height: 180px;
   position: relative;

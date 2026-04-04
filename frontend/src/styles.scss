@@ -1,4 +1,6 @@
-/* ==========================================================================
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+/* ========================================================================== 
    VARIÁVEIS GLOBAIS - TEMA CIANO (CLEAN DARK)
    ========================================================================== */
 :root {
@@ -88,6 +90,25 @@ body {
   &:hover {
     border-color: rgba(0, 243, 255, 0.3);
   }
+}
+
+.section-title,
+.card-title {
+  font-size: 1.1rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 16px;
+  letter-spacing: 0.01em;
+}
+
+.global-topbar .topbar-brand-name {
+  font-size: 20.8px !important;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: var(--glow-cyan);
+  white-space: nowrap;
 }
 
 /* Scrollbar Estilo Dark */

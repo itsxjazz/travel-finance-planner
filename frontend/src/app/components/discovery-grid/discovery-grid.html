@@ -1,6 +1,6 @@
-<div class="discovery-container"> <header class="discovery-header">
-    <h2 class="title">Experiências <span class="text-cyan">Locais</span></h2>
-
+<div class="discovery-container">
+  <h3 class="section-title">Experiências Locais </h3>
+      
     <div class="filter-group">
       @for (f of ['Todos', 'Cultura', 'Gastronomia', 'Compras']; track f) {
       <button
@@ -11,7 +11,6 @@
       </button>
       }
     </div>
-  </header>
 
   <div class="pois-grid">
     @for (poi of filteredPOIs(); track poi.id) {

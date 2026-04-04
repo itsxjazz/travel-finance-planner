@@ -96,6 +96,27 @@
         box-shadow: var(--glow-cyan);
       }
 
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+        box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+        background-color: var(--bg-input) !important;
+        background-image: none !important;
+        color: var(--text-primary) !important;
+        -webkit-text-fill-color: var(--text-primary) !important;
+      }
+
+      &:-webkit-autofill::first-line {
+        color: var(--text-primary) !important;
+      }
+
+      &:-internal-autofill-selected {
+        background-color: var(--bg-input) !important;
+        color: var(--text-primary) !important;
+      }
+
       /* Estado Inválido (Vermelho/Pink Neon) */
       &.is-invalid {
         border-color: var(--pink-neon);

@@ -28,6 +28,13 @@
     </button>
   </header>
 
+  @if (saveSuccess()) {
+  <div class="save-toast" aria-live="polite">
+    <span class="toast-pill">✔ Salvo</span>
+    <span class="toast-text">Planejamento salvo com sucesso.</span>
+  </div>
+  }
+
   <div class="tab-content">
 
     @if (activeTab() === 'finance') {
@@ -45,7 +52,7 @@
         <section class="card-dark">
           <div class="goal-input-group">
             <label>Valor total em <strong>{{ tripDetails.countryCode }}</strong>:</label>
-            <input type="text" [value]="localGoal()" (input)="handleInput($event, localGoal)" placeholder="Ex: 5000"
+            <input type="text" [value]="formatBRL(localGoal())" (input)="handleInput($event, localGoal)" placeholder="Ex: 5000"
               class="neon-input">
             <div class="goal-summary">
               <span class="rate-info"> Cotação: <strong>{{ exchangeRate() | number:'1.2-4' }}</strong> </span>
@@ -69,11 +76,11 @@
         <app-currency-chart [countryCode]="tripDetails.countryCode"></app-currency-chart>
 
         <section class="card-dark">
-          <h3 class="title">Divisão do Orçamento</h3>
+          <h3 class="section-title">Divisão do Orçamento</h3>
 
           @if (isCalculating()) {
           <div class="empty-state-box">
-            <div class="spinner-neon small">⏳</div>
+            <div class="spinner-neon small" style="color: var(--cyan-neon); text-shadow: var(--glow-cyan);"></div>
             <p>Analisando voos e hotéis no Amadeus...</p>
           </div>
           } @else if (budgetResult()) {
@@ -96,7 +103,7 @@
 
         <div class="card-dark map-card">
           <header class="map-header">
-            <h3 class="title">Mapa de Exploração Local</h3>
+            <h3 class="section-title">Mapa de Exploração Local</h3>
             <div class="map-legend">
               <span class="legend-item"><i class="dot culture"></i> Cultura</span>
               <span class="legend-item"><i class="dot food"></i> Gastronomia</span>
@@ -112,7 +119,7 @@
           </app-trip-itinerary>
           } @else {
           <div class="card-dark empty-itinerary">
-            <h3 class="title">Roteiro Personalizado</h3>
+            <h3 class="section-title">Roteiro Personalizado</h3>
             <div class="empty-state-box">
               <p>Seu roteiro está vazio. Explore a grade abaixo e adicione locais para visitar!</p>
             </div>

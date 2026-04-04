@@ -14,10 +14,26 @@
   z-index: 1000;
 
   .topbar-brand {
-    display: flex; align-items: center; gap: 12px; cursor: pointer; text-decoration: none;
-    .mini-logo { height: 28px; filter: drop-shadow(0 0 8px var(--cyan-neon)); }
-    .brand-name {
-      color: var(--cyan-neon); font-weight: 800; font-size: 1.1rem; text-shadow: var(--glow-cyan);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    min-width: 0;
+
+    .mini-logo {
+      height: 28px;
+      filter: drop-shadow(0 0 8px var(--cyan-neon));
+    }
+
+    .topbar-brand-name {
+      color: var(--cyan-neon);
+      font-weight: 800;
+      font-size: 1.3rem;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      text-shadow: var(--glow-cyan);
+      white-space: nowrap;
       @media (max-width: 600px) { display: none; }
     }
   }
@@ -71,7 +87,7 @@
     .nav-brand {
       display: flex; align-items: center; gap: 12px;
       .logo-img { height: 32px; filter: drop-shadow(0 0 5px var(--cyan-neon)); }
-      .brand-name { color: var(--cyan-neon); font-weight: 800; font-size: 1.2rem; }
+      .brand-name { color: var(--cyan-neon); font-weight: 800; font-size: 1.3rem; }
     }
     .close-sidebar { background: none; border: none; color: #64748b; cursor: pointer; &:hover { color: #fff; } }
   }

@@ -2,31 +2,20 @@
   margin-top: 40px;
   padding: 32px;
 
+  h3.section-title {
+    font-size: 1.1rem;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 16px;
+    letter-spacing: 0.01em;
+  }
+
   @media (max-width: 480px) {
     padding: 16px;
   }
 }
 
-.discovery-header { // Cabeçalho com título e filtros
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 20px;
-
-  .title {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin: 0;
-
-    span {
-      color: var(--cyan-neon);
-      text-shadow: var(--glow-cyan);
-    }
-  }
-}
 
 /* --- FILTROS --- */
 .filter-group {
@@ -76,6 +65,7 @@
   flex-direction: column;
   transition: all 0.3s ease;
   min-height: 220px;
+  margin-top: 24px;
 
   &:hover {
     transform: translateY(-5px);

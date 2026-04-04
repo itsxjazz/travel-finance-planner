@@ -53,16 +53,9 @@ export class InteractiveMap implements OnDestroy {
 
     currentPois.forEach(poi => {
       const color = this.getCategoryColor(poi.category);
+      const icon = this.createCategoryIcon(poi.category, color);
+      const marker = this.L.marker([poi.lat, poi.lon], { icon });
 
-      const marker = this.L.circleMarker([poi.lat, poi.lon], {
-        radius: 8,
-        fillColor: color,
-        color: '#00f3ff',
-        weight: 1.5,
-        fillOpacity: 0.9
-      });
-
-      // Tradução visual no Popup
       const displayTag = this.translateTag(poi.category);
 
       marker.bindPopup(`
@@ -90,6 +83,65 @@ export class InteractiveMap implements OnDestroy {
       'SHOPPING': '#007a82'    // Ciano Profundo
     };
     return colors[cat] || '#00b8c4';
+  }
+
+  private createCategoryIcon(category: string, color: string) {
+    const iconHtml = `
+      <div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${color};border:2px solid rgba(255,255,255,0.18);box-shadow:0 0 16px rgba(0,243,255,0.28);">
+        ${this.getCategorySvg(category)}
+      </div>
+    `;
+
+    return this.L.divIcon({
+      html: iconHtml,
+      className: 'custom-leaflet-marker',
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+      popupAnchor: [0, -38]
+    });
+  }
+
+  private getCategorySvg(category: string): string {
+    const cat = category.toUpperCase();
+    switch (cat) {
+      case 'CULTURA':
+        return `
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 20h16" />
+            <path d="M6 20V8" />
+            <path d="M18 20V8" />
+            <path d="M8 12h8" />
+            <path d="M10 16h4" />
+            <path d="M12 4l6 4H6l6-4z" />
+          </svg>
+        `;
+      case 'RESTAURANT':
+        return `
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v7" />
+            <path d="M11 2v7" />
+            <path d="M14 2v7" />
+            <path d="M17 2v7" />
+            <path d="M8 9h9" />
+            <path d="M10 9v10" />
+            <path d="M14 9v10" />
+            <path d="M10 19h4" />
+          </svg>
+        `;
+      case 'SHOPPING':
+        return `
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 7h12v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7z" />
+            <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+          </svg>
+        `;
+      default:
+        return `
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+          </svg>
+        `;
+    }
   }
 
   private translateTag(category: string): string {

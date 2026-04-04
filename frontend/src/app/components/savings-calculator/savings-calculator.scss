@@ -7,14 +7,12 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-wrap: nowrap;
+  gap: 16px;
 
-  .card-label {
+  .section-title {
     margin: 0;
-    color: var(--text-primary, #ffffff);
-    font-size: 1.1rem;
-    font-weight: 700;
+    flex-shrink: 0;
   }
 
   /* BADGE DO CDI */
@@ -24,7 +22,7 @@
     color: var(--cyan-neon);
     padding: 6px 14px;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -33,6 +31,14 @@
     &:hover {
       border-color: var(--cyan-neon);
       background: rgba(0, 243, 255, 0.1);
+    }
+
+    span:first-child {
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      text-transform: none;
     }
 
     .cdi-input {
@@ -65,11 +71,12 @@
     gap: 8px;
 
     label {
-      font-size: 0.75rem;
-      color: var(--text-muted, #a0a0b5);
-      text-transform: uppercase;
+      font-size: 1rem;
+      color: var(--text-primary);
+      text-transform: none;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.01em;
+      white-space: normal;
     }
   }
 }
@@ -140,7 +147,7 @@
 
   .achievement-info {
     .time-to-goal {
-      font-size: 1.2rem;
+      font-size: 1rem;
       margin: 0;
       color: #ffffff;
 
@@ -169,3 +176,4 @@
 
 .text-cyan { color: var(--cyan-neon); font-weight: 800; }
 .text-muted { color: #7a7a9a; }
+  

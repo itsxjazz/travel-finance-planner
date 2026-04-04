@@ -59,15 +59,26 @@
 }
 
 /* --- LABELS E INPUTS NEON --- */
-label, .stars-label {
+label {
   display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.01em;
   margin-bottom: 8px;
-  white-space: nowrap;
+  white-space: normal;
+}
+
+.stars-label {
+  display: block;
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  margin-bottom: 8px;
+  white-space: normal;
 }
 
 .neon-input, .neon-select, .static-value {
@@ -85,6 +96,23 @@ label, .stars-label {
 
   &.centered { text-align: center; }
   &.iata-input { text-transform: uppercase; font-weight: 800; color: var(--cyan-neon); letter-spacing: 2px;}
+}
+
+.neon-select {
+  padding-right: 40px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 10px 6px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.2) !important;
+  opacity: 0.95;
+  background-color: transparent !important;
 }
 
 /* --- REMOÇÃO DAS SETAS (SPIN BUTTONS) DOS INPUTS NUMBERS --- */

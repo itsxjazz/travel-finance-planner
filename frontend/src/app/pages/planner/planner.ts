@@ -236,6 +236,12 @@ export class Planner implements OnInit {
     this.itinerary.update(current => current.filter(item => item.id !== poiId));
   }
 
+  formatBRL(value: number): string { // Formata um número para o padrão brasileiro (1.234,56)
+    if (!value || isNaN(value)) return '0,00';
+    const fixed = typeof value === 'string' ? parseFloat(value) : value;
+    return fixed.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   handleSaveSuccess() { // Feedback visual após salvar a viagem
     this.isSaving.set(false);
     this.saveSuccess.set(true);

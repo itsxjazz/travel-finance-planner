@@ -7,12 +7,12 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: nowrap;
 
-  .title {
+  .section-title {
     margin: 0;
-    font-size: 1.1rem;
-    color: #ffffff;
-    font-weight: 700;
+    flex-shrink: 0;
   }
 
   .count-badge {

@@ -40,9 +40,20 @@
         content: '';
         width: 8px;
         height: 8px;
-        background: var(--cyan-neon);
         border-radius: 2px;
         box-shadow: var(--glow-cyan);
+      }
+
+      &.flight::before {
+        background: #00f3ff;
+      }
+
+      &.hotel::before {
+        background: #00b8c4;
+      }
+
+      &.daily::before {
+        background: #007a82;
       }
     }
 
