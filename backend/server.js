@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const localsRoutes = require('./routes/localsRoutes');
 const currencyRoutes = require('./routes/currencyRoutes');
 const hotelRoutes = require('./routes/hotelRoutes');
+const flightRoutes = require('./routes/flightRoutes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/currency', currencyRoutes);
 app.use('/api/locals', localsRoutes);
 app.use('/api/hotels', hotelRoutes);
+app.use('/api/flights', flightRoutes);
 
 // Conexão com o MongoDB
 mongoose.connect(process.env.MONGO_URI)
