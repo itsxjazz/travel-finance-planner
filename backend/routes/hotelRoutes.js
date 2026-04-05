@@ -26,12 +26,15 @@ router.get('/:cityCode', async (req, res) => {
         roomQuantity: '1',
         bestRateOnly: 'true'
       }),
-      // API de Reputação/Sentimentos 
-      amadeus.eReputation.hotelSentiments.get({ hotelIds })
+      // API de Reputação/Sentimentos protegida com .catch isolado
+      amadeus.eReputation.hotelSentiments.get({ hotelIds }).catch(err => {
+        console.warn(`Aviso: Ratings não disponíveis para os hotéis em ${cityCode} no Sandbox.`);
+        return { data: [] }; // Retorna vazio em caso de erro, evitando o erro 500
+      })
     ]);
 
     // Criar um mapa de ratings para busca rápida por hotelId 
-    const ratingsMap = new Map(hotelRatings.data.map(r => [r.hotelId, r]));
+    const ratingsMap = new Map((hotelRatings.data || []).map(r => [r.hotelId, r]));
 
     const formattedHotels = hotelOffers.data
       .filter(offer => offer.offers && offer.offers.length > 0)
@@ -54,14 +57,19 @@ router.get('/:cityCode', async (req, res) => {
           beds: firstOffer.room.typeEstimated?.beds || 1,
           bedType: firstOffer.room.typeEstimated?.bedType || 'Double',
           cancellation: firstOffer.policies?.cancellation?.type === 'FULL_STAY' ? 'Não Reembolsável' : 'Cancelamento Grátis',
-          fullDescription: firstOffer.room.description?.text || 'Acomodação premium com excelente localização.'
+          fullDescription: firstOffer.room.description?.text || 'Acomodação premium com excelente localização e serviços exclusivos.'
         };
       });
 
     res.json(formattedHotels);
   } catch (error) {
-    console.error('Erro Amadeus:', error.message);
-    res.status(500).json({ message: 'Erro ao buscar hotéis.' });
+    // Tratamento para cidades bloqueadas/inexistentes no Sandbox da Amadeus
+    if (error.response && error.response.statusCode === 400) {
+      return res.status(404).json({ message: 'Destino não suportado no ambiente de testes da Amadeus.' });
+    }
+    
+    console.error('Erro na rota de hotéis:', error.response?.data || error.message);
+    res.status(500).json({ message: 'Erro interno ao buscar ofertas de hotéis.' });
   }
 });
 
