@@ -100,14 +100,11 @@
     </div>
     }
 
- @if (activeTab() === 'hotels') {
-  <div class="hospedagem-view fade-in">
-    <app-hotels 
-      [location]="tripDetails.destination" 
-      [stars]="budgetPreferences()?.hotelStars || 3">
-    </app-hotels>
-  </div>
-}
+  @if (activeTab() === 'hotels') {
+    <div class="hospedagem-view fade-in">
+        <app-hotels [cityCode]="'PAR'"></app-hotels>
+    </div>
+  }
 
     @if (activeTab() === 'explore') {
     <div class="exploration-view fade-in">

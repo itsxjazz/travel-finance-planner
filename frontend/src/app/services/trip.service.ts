@@ -65,7 +65,6 @@ export class TripService {
     return this.http.get(`${this.baseApiUrl}/locals/pois?lat=${coords.lat}&lng=${coords.lng}`);
   }
 
-  getHotels(location: string, stars: number): Observable<any> {
-    return this.http.get<any[]>(`${environment.apiUrl}/hotels/${location}?stars=${stars}`);
-  }
+ getHotels(cityCode: string): Observable<any[]> {
+  return this.http.get<any[]>(`${environment.apiUrl}/hotels/${cityCode}`);  }
 }

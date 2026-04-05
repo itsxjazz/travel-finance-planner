@@ -251,7 +251,7 @@ export class Planner implements OnInit {
   }
 
   get destinationIataCode(): string {
-    if (!this.tripDetails?.destination) return 'LON';
-    return IATA_CODES[this.tripDetails.destination] || 'LON';
+    if (!this.tripDetails?.destination) return 'PAR';
+    return IATA_CODES[this.tripDetails.destination] || 'PAR';
   }
 }

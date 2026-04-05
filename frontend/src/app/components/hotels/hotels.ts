@@ -10,8 +10,7 @@ import { TripService } from '../../services/trip.service';
   styleUrl: './hotels.scss'
 })
 export class Hotels implements OnInit {
-  @Input() location!: string;
-  @Input() stars: number = 3;
+  @Input() cityCode!: string; // Recebe 'PAR', 'LON', 'NYC'...
   
   private tripService = inject(TripService);
 
@@ -20,23 +19,22 @@ export class Hotels implements OnInit {
   errorMessage = signal<string>('');
 
   ngOnInit() {
-    if (this.location) {
+    if (this.cityCode) {
       this.fetchHotels();
     }
   }
 
   fetchHotels() {
-    this.isLoading.set(true); // Garante que o loading inicia
-    
-    this.tripService.getHotels(this.location, this.stars).subscribe({
+    this.isLoading.set(true);
+    this.tripService.getHotels(this.cityCode).subscribe({
       next: (data) => {
         this.hotelsList.set(data);
-        this.isLoading.set(false); // <- Desliga o loading quando dá sucesso
+        this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Erro na aba de hotéis:', err); // Unimos os dois erros aqui
+        console.error('Erro ao buscar hotéis:', err);
         this.errorMessage.set('Os hotéis para este destino estão indisponíveis no momento. O Amadeus Test Environment possui cobertura limitada.');
-        this.isLoading.set(false); // <- Desliga o loading quando dá erro
+        this.isLoading.set(false);
       }
     });
   }
