@@ -7,18 +7,44 @@ const amadeus = new Amadeus({
   clientSecret: process.env.AMADEUS_CLIENT_SECRET
 });
 
+function cleanHotelDescription(text) {
+  if (!text || text.length < 5) {
+    return 'Acomodação premium com excelente localização e serviços exclusivos.';
+  }
+
+  // 1. Corrige vírgulas sem espaço (ex: "BED,NSMK,STND" -> "BED, NSMK, STND")
+  let cleaned = text.replace(/,([^\s])/g, ', $1');
+
+  // 2. Remove espaços duplos
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+  // 3. Converte tudo para minúsculo e capitaliza apenas a 1ª letra de cada frase
+  cleaned = cleaned.toLowerCase().replace(/(^\w|[\.\?!]\s*\w)/g, (match) => {
+    return match.toUpperCase();
+  });
+
+  // 4. Substitui siglas legadas do Amadeus por termos legíveis
+  cleaned = cleaned
+    .replace(/\bnsmk\b/gi, 'não fumante')
+    .replace(/\bstnd\b/gi, 'padrão')
+    .replace(/\baircon\b/gi, 'ar condicionado')
+    .replace(/\bdble\b/gi, 'casal')
+    .replace(/\bgovt military rate\b/gi, 'tarifa especial')
+    .replace(/\bpromotion rate\b/gi, 'tarifa promocional');
+
+  return cleaned;
+}
+
 router.get('/:cityCode', async (req, res) => {
   try {
     const { cityCode } = req.params;
 
-    // 1. Busca hotéis na cidade
     const hotelsSearch = await amadeus.referenceData.locations.hotels.byCity.get({ cityCode });
     const hotelIds = hotelsSearch.data.slice(0, 10).map(h => h.hotelId).join(',');
 
     if (!hotelIds) return res.status(404).json({ message: 'Nenhum hotel encontrado.' });
 
-    // 2. Busca Ofertas, Sentimentos e Imagens do Unsplash em paralelo
-    const unsplashUrl = `https://api.unsplash.com/search/photos?query=luxury%20hotel&orientation=landscape&per_page=10&client_id=${process.env.UNSPLASH_ACCESS_KEY}`;
+    const unsplashUrl = `https://api.unsplash.com/search/photos?query=hotel%20${cityCode}&orientation=landscape&per_page=10&client_id=${process.env.UNSPLASH_ACCESS_KEY}`;
 
     const [hotelOffers, hotelRatings, unsplashResponse] = await Promise.all([
       amadeus.shopping.hotelOffersSearch.get({
@@ -35,7 +61,6 @@ router.get('/:cityCode', async (req, res) => {
     const ratingsMap = new Map((hotelRatings.data || []).map(r => [r.hotelId, r]));
     const unsplashPhotos = unsplashResponse.results || [];
 
-    // 3. Formatar os Dados
     const formattedHotels = hotelOffers.data
       .filter(offer => offer.offers && offer.offers.length > 0)
       .map((offer, index) => {
@@ -43,8 +68,9 @@ router.get('/:cityCode', async (req, res) => {
         const ratingData = ratingsMap.get(offer.hotel.hotelId);
         const starRating = ratingData ? Math.round(ratingData.overallRating / 20) : 3;
         
-        // Pega a foto correspondente ao índice
         const photoUrl = unsplashPhotos[index]?.urls?.regular || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80';
+
+        const rawDescription = firstOffer.room.description?.text || '';
 
         return {
           hotelId: offer.hotel.hotelId,
@@ -53,11 +79,13 @@ router.get('/:cityCode', async (req, res) => {
           currency: firstOffer.price.currency,
           rating: starRating,
           reviewCount: ratingData?.numberOfReviews || 0,
-          roomType: firstOffer.room.typeEstimated?.category?.replace(/_/g, ' ') || 'Standard',
+          roomType: firstOffer.room.typeEstimated?.category?.replace(/_/g, ' ') || 'Tipo de quarto não especificado',
           beds: firstOffer.room.typeEstimated?.beds || 1,
-          bedType: firstOffer.room.typeEstimated?.bedType || 'Double',
+          bedType: firstOffer.room.typeEstimated?.bedType || 'Tipo de cama não especificado',
           cancellation: firstOffer.policies?.cancellation?.type === 'FULL_STAY' ? 'Não Reembolsável' : 'Cancelamento Grátis',
-          fullDescription: firstOffer.room.description?.text || 'Acomodação premium com excelente localização e serviços exclusivos.',
+          
+          fullDescription: cleanHotelDescription(rawDescription),
+          
           photoUrl: photoUrl 
         };
       });

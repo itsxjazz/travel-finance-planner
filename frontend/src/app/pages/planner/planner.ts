@@ -255,5 +255,5 @@ get destinationIataCode(): string {
     const normalizedDest = this.tripDetails.destination.trim();
   
   return IATA_CODES[normalizedDest] || 'PAR';
-}
+  }
 }
