@@ -7,12 +7,18 @@ const amadeus = new Amadeus({
   clientSecret: process.env.AMADEUS_CLIENT_SECRET
 });
 
+function formatHotelName(name) {
+  if (!name) return '';
+  // Transforma em minúsculo e capitaliza a 1ª letra de cada palavra
+  return name.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function cleanHotelDescription(text) {
   if (!text || text.length < 5) {
     return 'Acomodação premium com excelente localização e serviços exclusivos.';
   }
 
-  // 1. Corrige vírgulas sem espaço (ex: "BED,NSMK,STND" -> "BED, NSMK, STND")
+  // 1. Corrige vírgulas sem espaço
   let cleaned = text.replace(/,([^\s])/g, ', $1');
 
   // 2. Remove espaços duplos
@@ -22,6 +28,8 @@ function cleanHotelDescription(text) {
   cleaned = cleaned.toLowerCase().replace(/(^\w|[\.\?!]\s*\w)/g, (match) => {
     return match.toUpperCase();
   });
+
+  return cleaned; 
 }
 
 router.get('/:cityCode', async (req, res) => {
@@ -63,7 +71,7 @@ router.get('/:cityCode', async (req, res) => {
 
         return {
           hotelId: offer.hotel.hotelId,
-          name: offer.hotel.name,
+          name: formatHotelName(offer.hotel.name),
           price: firstOffer.price.total,
           currency: firstOffer.price.currency,
           rating: starRating,
