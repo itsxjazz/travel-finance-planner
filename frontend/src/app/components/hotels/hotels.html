@@ -1,0 +1,43 @@
+<div class="hotels-container fade-in">
+  <header class="section-header">
+    <h3 class="title">Hotéis Sugeridos</h3>
+    <p>Recomendações baseadas nas tarifas em tempo real do Amadeus</p>
+  </header>
+
+  @if (isLoading()) {
+    <div class="empty-state-box">
+      <p>Buscando os melhores hotéis na região...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="empty-state-box">
+      <p class="text-cyan">{{ errorMessage() }}</p>
+    </div>
+  } @else if (hotelsList().length > 0) {
+    <div class="hotels-grid">
+      @for (hotel of hotelsList(); track hotel.hotelId) {
+        <div class="hotel-card card-dark">
+          
+          <div class="hotel-image">
+            <img [src]="hotel.photoUrl" [alt]="hotel.name">
+            <div class="price-badge">
+              {{ hotel.price | currency:hotel.currency }} / noite
+            </div>
+          </div>
+          
+          <div class="hotel-info">
+            <h4 class="text-cyan" [title]="hotel.name">{{ hotel.name }}</h4>
+            <div class="hotel-meta">
+              <span>⭐ Premium</span>
+              <button class="btn-neon-outline">Detalhes</button>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state-box">
+      <p>Não encontramos ofertas ativas para este destino.</p>
+    </div>
+  }
+</div>

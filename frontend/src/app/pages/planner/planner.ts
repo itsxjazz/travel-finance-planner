@@ -19,6 +19,7 @@ import { InteractiveMap } from '../../components/interactive-map/interactive-map
 import { SavingsCalculator } from '../../components/savings-calculator/savings-calculator';
 import { TripItinerary } from '../../components/trip-itinerary/trip-itinerary';
 import { DiscoveryGrid } from '../../components/discovery-grid/discovery-grid';
+import { Hotels } from '../../components/hotels/hotels';
 
 @Component({
   selector: 'app-planner',
@@ -32,7 +33,8 @@ import { DiscoveryGrid } from '../../components/discovery-grid/discovery-grid';
     InteractiveMap,
     SavingsCalculator,
     TripItinerary,
-    DiscoveryGrid
+    DiscoveryGrid,
+    Hotels
   ],
   templateUrl: './planner.html',
   styleUrl: './planner.scss'
@@ -45,7 +47,7 @@ export class Planner implements OnInit {
   private router = inject(Router);
 
   // --- CONTROLE DE UI (ABAS) ---
-  activeTab = signal<'finance' | 'explore'>('finance');
+  activeTab = signal<'finance' | 'hotels' | 'explore'>('finance');
 
   // Dados da Viagem
   tripDetails: any = null;
@@ -246,5 +248,11 @@ export class Planner implements OnInit {
     this.isSaving.set(false);
     this.saveSuccess.set(true);
     setTimeout(() => this.saveSuccess.set(false), 3000);
+  }
+
+  // Adicione este bloco no final da classe Planner
+  get destinationIataCode(): string {
+    if (!this.tripDetails?.destination) return 'PAR';
+    return IATA_CODES[this.tripDetails.destination] || 'PAR';
   }
 }

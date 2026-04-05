@@ -18,6 +18,9 @@
       <button (click)="activeTab.set('finance')" [class.active]="activeTab() === 'finance'">
         Financeiro
       </button>
+      <button (click)="activeTab.set('hotels')" [class.active]="activeTab() === 'hotels'">
+       Hospedagem
+      </button>
       <button (click)="activeTab.set('explore')" [class.active]="activeTab() === 'explore'">
         Exploração
       </button>
@@ -94,6 +97,12 @@
         </section>
       </div>
 
+    </div>
+    }
+
+   @if (activeTab() === 'hotels') {
+    <div class="hospedagem-view fade-in">
+      <app-hotels [cityCode]="destinationIataCode"></app-hotels>
     </div>
     }
 
