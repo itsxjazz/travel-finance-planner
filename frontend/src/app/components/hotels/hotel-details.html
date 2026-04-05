@@ -12,7 +12,9 @@
       <div class="stars-row">
         <div class="stars-container">
           @for (s of [].constructor(hotel.rating); track $index) {
-            <span class="star">⭐</span>
+            <svg class="star-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
+            </svg>
           }
         </div>
         <span class="review-tag">{{ hotel.reviewCount }} avaliações Amadeus</span>
@@ -21,7 +23,12 @@
 
     <div class="modal-body">
       <section class="description-box">
-        <h4 class="section-title"><span class="icon">ℹ️</span> Sobre a Acomodação</h4>
+        <h4 class="section-title">
+          <svg class="icon-cyan" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+          Sobre a Acomodação
+        </h4>
         <div class="content-text">
           {{ hotel.fullDescription || 'Acomodação premium com excelente localização e serviços exclusivos.' }}
         </div>
@@ -30,16 +37,29 @@
       <div class="details-grid">
         <div class="detail-card">
           <span class="label">Categoria</span>
-          <span class="value">🚪 {{ hotel.roomType | titlecase }}</span>
+          <span class="value icon-text-align">
+            <svg class="icon-cyan" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+            </svg>
+            {{ hotel.roomType | titlecase }}
+          </span>
         </div>
         <div class="detail-card">
           <span class="label">Acomodação</span>
-          <span class="value">🛏️ {{ hotel.beds }}x {{ hotel.bedType | titlecase }}</span>
+          <span class="value icon-text-align">
+            <svg class="icon-cyan" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.118v.093c0 .53-.47.969-1.028.969h-.104c-.559 0-1.028-.44-1.028-.97v-.092h-8.25v.092c0 .53-.47.97-1.028.97h-.104c-.559 0-1.028-.44-1.028-.97v-.093c-1.085-.082-1.872-1.024-1.872-2.118v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.027-.392.05-.59.07m-15.12 0c.198.02.396.043.59.07m15.12 0c-.194-.027-.392-.05-.59-.07m-15.12 0c.198-.02.396-.043.59-.07m-11.24-.03A12.455 12.455 0 0112 12.75c2.39 0 4.62.67 6.42 1.83m-12.84 0a12.45 12.45 0 0112.84 0M7.5 12.75v-1.5a1.5 1.5 0 011.5-1.5h6a1.5 1.5 0 011.5 1.5v1.5M7.5 12.75A12.45 12.45 0 0112 11.25" />
+            </svg>
+            {{ hotel.beds }}x {{ hotel.bedType | titlecase }}
+          </span>
         </div>
         <div class="detail-card full-width">
           <span class="label">Política de Reserva</span>
-          <span class="value" [class.text-danger]="hotel.cancellation === 'Não Reembolsável'">
-            📋 {{ hotel.cancellation }}
+          <span class="value icon-text-align" [class.text-danger]="hotel.cancellation === 'Não Reembolsável'">
+            <svg class="icon-cyan" [class.text-danger]="hotel.cancellation === 'Não Reembolsável'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+            </svg>
+            {{ hotel.cancellation }}
           </span>
         </div>
       </div>

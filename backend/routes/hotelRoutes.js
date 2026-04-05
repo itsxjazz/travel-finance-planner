@@ -22,17 +22,6 @@ function cleanHotelDescription(text) {
   cleaned = cleaned.toLowerCase().replace(/(^\w|[\.\?!]\s*\w)/g, (match) => {
     return match.toUpperCase();
   });
-
-  // 4. Substitui siglas legadas do Amadeus por termos legíveis
-  cleaned = cleaned
-    .replace(/\bnsmk\b/gi, 'não fumante')
-    .replace(/\bstnd\b/gi, 'padrão')
-    .replace(/\baircon\b/gi, 'ar condicionado')
-    .replace(/\bdble\b/gi, 'casal')
-    .replace(/\bgovt military rate\b/gi, 'tarifa especial')
-    .replace(/\bpromotion rate\b/gi, 'tarifa promocional');
-
-  return cleaned;
 }
 
 router.get('/:cityCode', async (req, res) => {
