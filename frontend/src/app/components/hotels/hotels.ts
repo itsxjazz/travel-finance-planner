@@ -26,56 +26,29 @@ export class Hotels implements OnInit {
     }
   }
 
-fetchHotels() {
-  this.isLoading.set(true);
-  this.tripService.getHotels(this.cityCode).subscribe({
-    next: (data) => {
-      const hotelsWithImages = data.map((hotel: any) => {
-        
-        // Limpa o nome e transforma em tags para o buscador
-        const searchTerm = hotel.name
-          .toLowerCase()
-          .replace(/[^a-z0-9 ]/g, '') // Remove caracteres especiais
-          .split(' ')
-          .filter((word: string) => word.length > 2) // Remove preposições curtas
-          .slice(0, 3) // Pega as 3 palavras principais para não confundir o buscador
-          .join(',');
-
-        return {
-          ...hotel,
-          photoUrl: `https://loremflickr.com/800/600/${searchTerm},hotel/all?lock=${hotel.hotelId}`
-        };
-      });
-
-      this.hotelsList.set(hotelsWithImages);
-      this.isLoading.set(false);
-    },
-    error: (err) => {
-      console.error('Erro ao buscar hotéis:', err);
-      this.errorMessage.set('Hospedagens indisponíveis no momento para este destino.');
-      this.isLoading.set(false);
+  fetchHotels() {
+    this.isLoading.set(true);
+    
+    this.tripService.getHotels(this.cityCode).subscribe({
+      next: (data) => {
+        // O data já vem do Node.js com a photoUrl do Unsplash embutida
+        this.hotelsList.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao buscar hotéis no Amadeus:', err);
+        this.errorMessage.set('Hospedagens indisponíveis no momento para este destino.');
+        this.isLoading.set(false);
       }
     });
   }
 
   showDetails(hotel: any) {
-    const detalhes = `
-  🏨 ${hotel.name.toUpperCase()}
-  ⭐ Classificação: ${hotel.rating} Estrelas
+    this.selectedHotel.set(hotel);
+  }
 
-  🛏️ DETALHES DA ACOMODAÇÃO:
-  - Tipo: ${hotel.roomType}
-  - Camas: ${hotel.beds}x ${hotel.bedType}
-  - Descrição: ${hotel.fullDescription}
-
-  💳 POLÍTICAS E TARIFAS:
-  - Preço Total: ${hotel.currency} ${hotel.price}
-  - Cancelamento: ${hotel.cancellation}
-
-  📍 LOCALIZAÇÃO:
-  - Coordenadas: ${hotel.latitude}, ${hotel.longitude}
-    `;
-
-    alert(detalhes);
+  handleImageError(event: any) {
+    // Fallback de segurança caso a URL do Unsplash venha quebrada
+    event.target.src = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80';
   }
 }
