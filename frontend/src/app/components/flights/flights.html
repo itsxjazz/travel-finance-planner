@@ -1,0 +1,124 @@
+<div class="flights-container fade-in">
+  
+  <header class="section-header">
+    <h3 class="section-title">Voos de Ida</h3>
+    <p class="subtitle">Escolha seu ponto de partida e data para começar.</p>
+  </header>
+
+  <section class="estimator-form card-dark search-box-styling">
+    <div class="form-row flight-search-row">
+      <div class="form-group">
+        <label>Origem (IATA)</label>
+        <input type="text" [(ngModel)]="originOut" placeholder="Ex: GRU" maxlength="3" class="neon-input iata-input">
+      </div>
+      <div class="form-group">
+        <label>Destino (IATA)</label>
+        <input type="text" [(ngModel)]="destOut" placeholder="Ex: PAR" maxlength="3" class="neon-input iata-input">
+      </div>
+      <div class="form-group">
+        <label>Data de Ida</label>
+        <input type="date" [(ngModel)]="dateOut" class="neon-input white-calendar">
+      </div>
+      <div class="form-group button-align">
+        <button (click)="fetchOutbound()" class="btn-neon w-full" [disabled]="isLoadingOut()">
+          {{ isLoadingOut() ? 'Carregando...' : 'Pesquisar Voos' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="flights-list">
+    @if (isLoadingOut()) {
+      <div class="empty-state-box loading-state">
+        <div class="spinner-neon small"></div>
+        <p>Buscando os melhores voos de ida...</p>
+      </div>
+    } @else if (flightsOut().length > 0) {
+      @for (flight of flightsOut(); track flight.id) {
+        <div class="flight-row-card">
+          <div class="airline-section">
+            <div class="logo-wrapper"><img [src]="getAirlineLogo(flight.airlineCode)" (error)="handleLogoError($event)"></div>
+            <div class="airline-info">
+              <span class="airline-name">{{ flight.airlineName | titlecase }}</span>
+              <span class="stops-badge" [class.direct]="flight.stops === 0">
+                  {{ flight.stops === 0 ? 'Voo Direto' : flight.stops + ' Parada(s)' }}
+              </span>
+            </div>
+          </div>
+          <div class="itinerary-section">
+            <div class="time-block"><span>{{ flight.departure.at | date:'HH:mm' }}</span><small>{{ flight.departure.iataCode }}</small></div>
+            <div class="route-visual">
+              <small>{{ formatDuration(flight.duration) }}</small>
+              <div class="visual-line"><div class="dot"></div><div class="line"></div><span>✈</span><div class="line"></div><div class="dot outline"></div></div>
+            </div>
+            <div class="time-block"><span>{{ flight.arrival.at | date:'HH:mm' }}</span><small>{{ flight.arrival.iataCode }}</small></div>
+          </div>
+          <div class="price-section"><div class="price-tag"><small>{{ flight.currency }}</small><strong>{{ flight.price }}</strong></div></div>
+        </div>
+      }
+    } @else if (hasSearchedOut()) {
+       <div class="empty-state-box"><p>Nenhum voo de ida encontrado para esta data.</p></div>
+    }
+  </div>
+
+  <header class="section-header return-search">
+    <h3 class="section-title">Voos de Volta</h3>
+    <p class="subtitle">Escolha o voo ideal para o seu retorno.</p>
+  </header>
+
+  <section class="estimator-form card-dark search-box-styling">
+    <div class="form-row flight-search-row">
+      <div class="form-group">
+        <label>Origem (IATA)</label>
+        <input type="text" [(ngModel)]="originIn" placeholder="Ex: PAR" maxlength="3" class="neon-input iata-input">
+      </div>
+      <div class="form-group">
+        <label>Destino (IATA)</label>
+        <input type="text" [(ngModel)]="destIn" placeholder="Ex: GRU" maxlength="3" class="neon-input iata-input">
+      </div>
+      <div class="form-group">
+        <label>Data de Volta</label>
+        <input type="date" [(ngModel)]="dateIn" class="neon-input white-calendar">
+      </div>
+      <div class="form-group button-align">
+        <button (click)="fetchInbound()" class="btn-neon w-full" [disabled]="isLoadingIn()">
+          {{ isLoadingIn() ? 'Carregando...' : 'Pesquisar Voos' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="flights-list">
+    @if (isLoadingIn()) {
+      <div class="empty-state-box loading-state">
+        <div class="spinner-neon small"></div>
+        <p>Buscando os melhores voos de volta...</p>
+      </div>
+    } @else if (flightsIn().length > 0) {
+      @for (flight of flightsIn(); track flight.id) {
+        <div class="flight-row-card">
+          <div class="airline-section">
+            <div class="logo-wrapper"><img [src]="getAirlineLogo(flight.airlineCode)" (error)="handleLogoError($event)"></div>
+            <div class="airline-info">
+              <span class="airline-name">{{ flight.airlineName | titlecase }}</span>
+              <span class="stops-badge" [class.direct]="flight.stops === 0">
+                  {{ flight.stops === 0 ? 'Voo Direto' : flight.stops + ' Parada(s)' }}
+              </span>
+            </div>
+          </div> 
+          <div class="itinerary-section">
+            <div class="time-block"><span>{{ flight.departure.at | date:'HH:mm' }}</span><small>{{ flight.departure.iataCode }}</small></div>
+            <div class="route-visual">
+              <small>{{ formatDuration(flight.duration) }}</small>
+              <div class="visual-line"><div class="dot"></div><div class="line"></div><span>✈</span><div class="line"></div><div class="dot outline"></div></div>
+            </div>
+            <div class="time-block"><span>{{ flight.arrival.at | date:'HH:mm' }}</span><small>{{ flight.arrival.iataCode }}</small></div>
+          </div>
+          <div class="price-section"><div class="price-tag"><small>{{ flight.currency }}</small><strong>{{ flight.price }}</strong></div></div>
+        </div>
+      }
+    } @else if (hasSearchedIn()) {
+       <div class="empty-state-box"><p>Nenhum voo de volta encontrado para esta data.</p></div>
+    }
+  </div>
+</div>

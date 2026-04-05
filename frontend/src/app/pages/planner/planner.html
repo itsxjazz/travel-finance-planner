@@ -21,6 +21,9 @@
       <button (click)="activeTab.set('hotels')" [class.active]="activeTab() === 'hotels'">
        Hospedagem
       </button>
+      <button (click)="activeTab.set('flights')" [class.active]="activeTab() === 'flights'">
+       Voos
+      </button>
       <button (click)="activeTab.set('explore')" [class.active]="activeTab() === 'explore'">
         Exploração
       </button>
@@ -105,6 +108,16 @@
         <app-hotels [cityCode]="'PAR'"></app-hotels>
     </div>
   }
+
+  @if (activeTab() === 'flights') {
+  <div class="flights-view fade-in">
+    <app-flights 
+      [originIata]="originIata()" 
+      [destinationIata]="destinationIataCode" 
+      [departureDate]="estimatedTravelDate()">
+    </app-flights>
+  </div>
+}
 
     @if (activeTab() === 'explore') {
     <div class="exploration-view fade-in">

@@ -20,6 +20,7 @@ import { SavingsCalculator } from '../../components/savings-calculator/savings-c
 import { TripItinerary } from '../../components/trip-itinerary/trip-itinerary';
 import { DiscoveryGrid } from '../../components/discovery-grid/discovery-grid';
 import { Hotels } from '../../components/hotels/hotels';
+import { Flights } from '../../components/flights/flights';
 
 @Component({
   selector: 'app-planner',
@@ -34,7 +35,8 @@ import { Hotels } from '../../components/hotels/hotels';
     SavingsCalculator,
     TripItinerary,
     DiscoveryGrid,
-    Hotels
+    Hotels,
+    Flights
   ],
   templateUrl: './planner.html',
   styleUrl: './planner.scss'
@@ -47,7 +49,7 @@ export class Planner implements OnInit {
   private router = inject(Router);
 
   // --- CONTROLE DE UI (ABAS) ---
-  activeTab = signal<'finance' | 'hotels' | 'explore'>('finance');
+  activeTab = signal<'finance' | 'hotels' | 'flights' | 'explore'>('finance');
 
   // Dados da Viagem
   tripDetails: any = null;
@@ -73,6 +75,7 @@ export class Planner implements OnInit {
   budgetResult = signal<any>(null);
   budgetPreferences = signal<any>(null);
   isCalculating = signal<boolean>(false);
+  originIata = signal<string>('GRU');
 
   // Roteiro
   itinerary = signal<any[]>([]);
@@ -113,22 +116,22 @@ export class Planner implements OnInit {
     }
   }
 
-  private initializeData() { // Inicializa os sinais com os dados da viagem
-    this.localGoal.set(this.tripDetails.financialGoalLocal || 0);
-    this.currentSavings.set(this.tripDetails.currentSavingsBrl || 0);
-    this.monthlyContribution.set(this.tripDetails.monthlyContributionBrl || 0);
-    if (this.tripDetails.itinerary) this.itinerary.set(this.tripDetails.itinerary);
-    if (this.tripDetails.budgetResult) this.budgetResult.set(this.tripDetails.budgetResult);
-    if (this.tripDetails.budgetPreferences) this.budgetPreferences.set(this.tripDetails.budgetPreferences);
-    if (this.tripDetails.estimatedTravelDate) {
-      this.estimatedTravelDate.set(this.tripDetails.estimatedTravelDate);
-    }
-
-    this.fetchRate();
-    this.fetchCDI();
-    this.loadPOIs();
-    this.isLoading.set(false);
+  private initializeData() { // Inicializa os sinais com os dados da viagem restaurada
+  this.localGoal.set(this.tripDetails.financialGoalLocal || 0);
+  this.currentSavings.set(this.tripDetails.currentSavingsBrl || 0);
+  this.monthlyContribution.set(this.tripDetails.monthlyContributionBrl || 0);
+  if (this.tripDetails.itinerary) this.itinerary.set(this.tripDetails.itinerary);
+  if (this.tripDetails.budgetResult) this.budgetResult.set(this.tripDetails.budgetResult);
+  if (this.tripDetails.budgetPreferences) this.budgetPreferences.set(this.tripDetails.budgetPreferences);
+  if (this.tripDetails.estimatedTravelDate) {
+    this.estimatedTravelDate.set(this.tripDetails.estimatedTravelDate);
   }
+
+  this.fetchRate();
+  this.fetchCDI();
+  this.loadPOIs();
+  this.isLoading.set(false);
+}
 
   fetchRate() { // Busca a cotação atual do destino para converter os valores
     this.currencyService.getExchangeRate(this.tripDetails.countryCode).subscribe(rate => {
