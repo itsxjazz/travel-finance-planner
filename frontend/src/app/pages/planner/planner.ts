@@ -250,9 +250,8 @@ export class Planner implements OnInit {
     setTimeout(() => this.saveSuccess.set(false), 3000);
   }
 
-  // Adicione este bloco no final da classe Planner
   get destinationIataCode(): string {
-    if (!this.tripDetails?.destination) return 'PAR';
-    return IATA_CODES[this.tripDetails.destination] || 'PAR';
+    if (!this.tripDetails?.destination) return 'LON';
+    return IATA_CODES[this.tripDetails.destination] || 'LON';
   }
 }
