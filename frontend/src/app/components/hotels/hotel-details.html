@@ -1,0 +1,65 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content fade-zoom" (click)="$event.stopPropagation()">
+    
+    <button class="close-btn" (click)="onClose()">×</button>
+
+    <header class="modal-header">
+      <div class="header-top">
+        <span class="badge-status">Disponível</span>
+        <h2 class="neon-text-blue">{{ hotel.name }}</h2>
+      </div>
+      
+      <div class="stars-row">
+        <div class="stars-container">
+          @for (s of [].constructor(hotel.rating); track $index) {
+            <span class="star">⭐</span>
+          }
+        </div>
+        <span class="review-tag">{{ hotel.reviewCount }} avaliações Amadeus</span>
+      </div>
+    </header>
+
+    <div class="modal-body">
+      <section class="description-box">
+        <h4 class="section-title"><span class="icon">ℹ️</span> Sobre a Acomodação</h4>
+        <div class="content-text">
+          {{ hotel.fullDescription || 'Acomodação premium com excelente localização e serviços exclusivos.' }}
+        </div>
+      </section>
+
+      <div class="details-grid">
+        <div class="detail-card">
+          <span class="label">Categoria</span>
+          <span class="value">🚪 {{ hotel.roomType | titlecase }}</span>
+        </div>
+        <div class="detail-card">
+          <span class="label">Acomodação</span>
+          <span class="value">🛏️ {{ hotel.beds }}x {{ hotel.bedType | titlecase }}</span>
+        </div>
+        <div class="detail-card full-width">
+          <span class="label">Política de Reserva</span>
+          <span class="value" [class.text-danger]="hotel.cancellation === 'Não Reembolsável'">
+            📋 {{ hotel.cancellation }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <div class="price-container">
+        <span class="price-label">Valor Estimado / Noite</span>
+        <div class="price-value">
+          <span class="currency">{{ hotel.currency }}</span>
+          <span class="amount">{{ hotel.price }}</span>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button class="btn-neon-action" (click)="onClose()">
+          <span>Adicionar ao Roteiro</span>
+        </button>
+      </div>
+    </footer>
+
+  </div>
+</div>

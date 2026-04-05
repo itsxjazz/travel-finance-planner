@@ -7,57 +7,61 @@ const amadeus = new Amadeus({
   clientSecret: process.env.AMADEUS_CLIENT_SECRET
 });
 
-// Rota: GET /api/hotels/:cityCode
 router.get('/:cityCode', async (req, res) => {
   try {
     const { cityCode } = req.params;
 
-    // PASSO 1: Buscar hotéis disponíveis na cidade
-    const hotelsSearch = await amadeus.referenceData.locations.hotels.byCity.get({
-      cityCode: cityCode
-    });
+    // 1. Busca hotéis na cidade
+    const hotelsSearch = await amadeus.referenceData.locations.hotels.byCity.get({ cityCode });
+    const hotelIds = hotelsSearch.data.slice(0, 10).map(h => h.hotelId).join(',');
 
-    // Primeiros 10 IDs de hotéis para não sobrecarregar a próxima chamada
-    const hotelIds = hotelsSearch.data
-      .slice(0, 10)
-      .map(hotel => hotel.hotelId)
-      .join(',');
+    if (!hotelIds) return res.status(404).json({ message: 'Nenhum hotel encontrado.' });
 
-    if (!hotelIds) {
-      return res.status(404).json({ message: 'Nenhum hotel encontrado nesta cidade.' });
-    }
+    // 2. Busca ofertas e sentimentos em paralelo para performance
+    const [hotelOffers, hotelRatings] = await Promise.all([
+      amadeus.shopping.hotelOffersSearch.get({
+        hotelIds: hotelIds,
+        adults: '1',
+        checkInDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        roomQuantity: '1',
+        bestRateOnly: 'true'
+      }),
+      // API de Reputação/Sentimentos 
+      amadeus.eReputation.hotelSentiments.get({ hotelIds })
+    ]);
 
-    // PASSO 2: Buscar ofertas de preços para esses hotéis específicos
-    // Nota: O Amadeus v3 exige checkInDate. Data simulada para o orçamento.
-    const hotelOffers = await amadeus.shopping.hotelOffersSearch.get({
-      hotelIds: hotelIds,
-      adults: '1',
-      checkInDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Daqui a 7 dias
-      roomQuantity: '1',
-      paymentPolicy: 'NONE',
-      bestRateOnly: 'true'
-    });
+    // Criar um mapa de ratings para busca rápida por hotelId 
+    const ratingsMap = new Map(hotelRatings.data.map(r => [r.hotelId, r]));
 
-    // FORMATAR OS DADOS: Unindo nome, preço e detalhes
     const formattedHotels = hotelOffers.data
-      .filter(offer => offer.offers && offer.offers.length > 0) // <--- Filtra só os que têm oferta!
+      .filter(offer => offer.offers && offer.offers.length > 0)
       .map(offer => {
+        const firstOffer = offer.offers[0];
+        const ratingData = ratingsMap.get(offer.hotel.hotelId);
+        
+        // Converte score 0-100 para escala de 5 estrelas 
+        const starRating = ratingData ? Math.round(ratingData.overallRating / 20) : 3;
+
         return {
           hotelId: offer.hotel.hotelId,
           name: offer.hotel.name,
-          latitude: offer.hotel.latitude,
-          longitude: offer.hotel.longitude,
-          price: offer.offers[0].price.total,
-          currency: offer.offers[0].price.currency,
-          photoUrl: `https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=500` 
+          price: firstOffer.price.total,
+          currency: firstOffer.price.currency,
+          // Novas Informações Detalhadas 
+          rating: starRating,
+          reviewCount: ratingData?.numberOfReviews || 0,
+          roomType: firstOffer.room.typeEstimated?.category?.replace(/_/g, ' ') || 'Standard',
+          beds: firstOffer.room.typeEstimated?.beds || 1,
+          bedType: firstOffer.room.typeEstimated?.bedType || 'Double',
+          cancellation: firstOffer.policies?.cancellation?.type === 'FULL_STAY' ? 'Não Reembolsável' : 'Cancelamento Grátis',
+          fullDescription: firstOffer.room.description?.text || 'Acomodação premium com excelente localização.'
         };
       });
 
     res.json(formattedHotels);
-
   } catch (error) {
-    console.error('Erro Amadeus Hotels:', error.code === 'ECONNRESET' ? 'Timeout' : error.message);
-    res.status(500).json({ message: 'Erro ao buscar ofertas de hotéis.' });
+    console.error('Erro Amadeus:', error.message);
+    res.status(500).json({ message: 'Erro ao buscar hotéis.' });
   }
 });
 

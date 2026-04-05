@@ -5,7 +5,8 @@
   </header>
 
   @if (isLoading()) {
-    <div class="empty-state-box">
+    <div class="empty-state-box loading-state">
+      <div class="spinner-neon small" style="color: var(--cyan-neon); text-shadow: var(--glow-cyan);"></div>
       <p>Buscando os melhores hotéis na região...</p>
     </div>
   } @else if (errorMessage()) {
@@ -14,30 +15,37 @@
     </div>
   } @else if (hotelsList().length > 0) {
     <div class="hotels-grid">
-      @for (hotel of hotelsList(); track hotel.hotelId) {
-        <div class="hotel-card card-dark">
-          
-          <div class="hotel-image">
-            <img [src]="hotel.photoUrl" [alt]="hotel.name">
-            <div class="price-badge">
-              {{ hotel.price | currency:hotel.currency }} / noite
-            </div>
-          </div>
-          
-          <div class="hotel-info">
-            <h4 class="text-cyan" [title]="hotel.name">{{ hotel.name }}</h4>
-            <div class="hotel-meta">
-              <span>⭐ Premium</span>
-              <button class="btn-neon-outline">Detalhes</button>
-            </div>
-          </div>
-
+    @for (hotel of hotelsList(); track hotel.hotelId) {
+    <div class="hotel-card card-dark">
+        
+        <div class="hotel-image">
+        <img [src]="hotel.photoUrl" [alt]="hotel.name" loading="lazy">
+        <div class="price-badge">
+            {{ hotel.price | currency:hotel.currency:'symbol':'1.0-0' }} / noite
         </div>
-      }
     </div>
+        
+        <div class="hotel-info">
+        <h4 class="text-cyan">{{ hotel.name }}</h4>
+        
+        <div class="hotel-meta">
+            <button class="btn-neon-outline" (click)="selectedHotel.set(hotel)">Detalhes</button>         
+        </div>
+        </div>
+
+    </div>
+    }
+</div>
   } @else {
     <div class="empty-state-box">
       <p>Não encontramos ofertas ativas para este destino.</p>
     </div>
   }
+
+  @if (selectedHotel()) {
+  <app-hotel-details 
+    [hotel]="selectedHotel()" 
+    (close)="selectedHotel.set(null)">
+  </app-hotel-details>
+}
 </div>
