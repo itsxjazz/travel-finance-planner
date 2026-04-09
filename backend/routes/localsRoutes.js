@@ -72,63 +72,90 @@ const axios = require('axios');
 
 router.get('/pois', async (req, res) => {
     try {
-        const cityName = req.query.iataCode; 
-        if (!cityName) return res.status(400).json({ message: 'Nome do destino é obrigatório.' });
+        const { lat, lng } = req.query;
+        if (!lat || !lng) return res.status(400).json({ message: 'Coordenadas obrigatórias.' });
 
-        // PASSO 1: Converter Nome da Cidade em Coordenadas (Geocoding)
-        const geoRes = await axios.get(`https://nominatim.openstreetmap.org/search`, {
-            params: { q: cityName, format: 'json', limit: 1 }
-        });
-
-        if (!geoRes.data || geoRes.data.length === 0) {
-            return res.status(404).json({ message: 'Coordenadas não encontradas para este destino.' });
-        }
-
-        const { lat, lon } = geoRes.data[0];
-
-        // PASSO 2: Chamar a Travel Places API (GraphQL) com as coordenadas descobertas
+        const latFloat = parseFloat(lat);
+        const lngFloat = parseFloat(lng);
         const query = `
           query MyQuery {
             getPlaces(
-              lat: ${lat}, lng: ${lon},
-              maxDistMeters: 15000, limit: 50,
-              includeGallery: true, includeAbstract: true
+              lat: ${latFloat}
+              lng: ${lngFloat}
+              maxDistMeters: 15000
+              limit: 60
+              includeGallery: true
+              includeAbstract: true
             ) {
-              id, name, abstract, categories, distance,
-              gallery { url }
+              id
+              name
+              abstract
+              categories
+              distance
+              lat
+              lng
+              gallery {
+                url
+              }
             }
           }
         `;
 
         const response = await axios.post('https://travel-places.p.rapidapi.com/', 
-            { query },
+            { query: query },
             {
                 headers: {
                     'Content-Type': 'application/json',
                     'x-rapidapi-host': 'travel-places.p.rapidapi.com',
-                    'x-rapidapi-key': process.env.RAPIDAPI_KEY
+                    'x-rapidapi-key': process.env.RAPIDAPI_KEY 
                 }
             }
         );
 
-        const rawPlaces = response.data?.data?.getPlaces || [];
+        if (!response.data || !response.data.data || !response.data.data.getPlaces) {
+            return res.json({ data: [] });
+        }
 
-        // PASSO 3: Formatar para o DiscoveryGrid 
-        const formattedData = rawPlaces.map(place => ({
-            id: place.id,
-            name: place.name,
-            category: place.categories?.includes('Museums') ? 'CULTURA' : 'CULTURA', 
-            address: `${(place.distance / 1000).toFixed(1)}km do centro`,
-            description: place.abstract || 'Ponto turístico disponível para visitação.',
-            photo: place.gallery?.[0]?.url || 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=800',
-            mapUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}`
-        }));
+        const rawPlaces = response.data.data.getPlaces;
 
+        const formattedData = rawPlaces
+            .filter(place => place.name)
+            .map(place => {
+                const cats = place.categories || [];
+                let category = 'CULTURA';
+                const catsUpper = cats.map(c => c.toUpperCase());
+                
+                if (catsUpper.includes('BEACHES') || catsUpper.includes('NATURE')) {
+                    category = 'NATUREZA';
+                } else if (catsUpper.includes('MUSEUMS') || catsUpper.includes('HISTORIC') || catsUpper.includes('CULTURE')) {
+                    category = 'CULTURA';
+                } else {
+                    category = 'RESTAURANT'; // Fallback para preencher o mapa com outras opções
+                }
+
+                const photoUrl = (place.gallery && place.gallery.length > 0) 
+                                 ? place.gallery[0].url 
+                                 : 'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=1000&auto=format&fit=crop';
+
+                return {
+                    id: place.id,
+                    name: place.name,
+                    category: category,
+                    address: `${(place.distance / 1000).toFixed(1)}km do centro`,
+                    description: place.abstract || 'Ponto turístico local. Veja no mapa para mais detalhes.',
+                    photo: photoUrl,
+                    lat: place.lat,
+                    lon: place.lng, 
+                    mapUrl: `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}` // Link do Maps corrigido e mais preciso
+                };
+            });
+
+        console.log(`[TRAVEL PLACES API] Sucesso! ${formattedData.length} locais encontrados.`);
         res.json({ data: formattedData });
 
     } catch (error) {
-        console.error('Erro no processamento de locais:', error.message);
-        res.status(500).json({ message: 'Erro interno ao buscar atrações.' });
+        console.error('Erro na Travel Places API:', error.message);
+        res.status(500).json({ message: 'Erro ao buscar atrações turísticas.' });
     }
 });
 

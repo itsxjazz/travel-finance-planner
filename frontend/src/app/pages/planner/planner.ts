@@ -87,7 +87,9 @@ export class Planner implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       this.restoreSession();
       if (this.tripDetails) {
-        this.initializeData();
+        setTimeout(() => {
+          this.initializeData();
+        }, 0);
       } else {
         this.router.navigate(['/search']);
       }
@@ -147,7 +149,9 @@ export class Planner implements OnInit {
   loadPOIs() {
   if (!this.tripDetails?.destination) return;
 
-  this.tripService.getPointsOfInterest(this.tripDetails.destination).subscribe({
+  const iataCode = this.destinationIataCode;
+
+  this.tripService.getPointsOfInterest(iataCode).subscribe({
     next: (response: any) => {
       this.rawPointsOfInterest.set(response.data || []);
       this.isLoading.set(false);
@@ -261,9 +265,9 @@ export class Planner implements OnInit {
 
 get destinationIataCode(): string {
   if (!this.tripDetails?.destination) return '';
-    const normalizedDest = this.tripDetails.destination.trim();
-  
-  return IATA_CODES[normalizedDest] || '';
+  const dest = this.tripDetails.destination.trim();  
+
+  return IATA_CODES[dest] || '';
   }
 
   get destinationCityName(): string {
