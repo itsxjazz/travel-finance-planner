@@ -1,100 +1,107 @@
 const express = require('express');
 const router = express.Router();
-const Amadeus = require('amadeus');
+const axios = require('axios');
 
-const amadeus = new Amadeus({
-  clientId: process.env.AMADEUS_CLIENT_ID,
-  clientSecret: process.env.AMADEUS_CLIENT_SECRET
+const HEADERS = {
+    'x-rapidapi-host': 'booking-com.p.rapidapi.com',
+    'x-rapidapi-key': process.env.RAPIDAPI_KEY
+};
+
+
+router.get('/:location', async (req, res) => {
+    try {
+        const { location } = req.params;
+        const stars = req.query.stars || '3';
+
+        const locResponse = await axios.get('https://booking-com.p.rapidapi.com/v1/hotels/locations', {
+            params: { name: location, locale: 'pt-br' },
+            headers: HEADERS
+        });
+
+        if (!locResponse.data || locResponse.data.length === 0) {
+            return res.status(404).json({ message: 'Destino não encontrado.' });
+        }
+
+        const destId = locResponse.data[0].dest_id;
+        const destType = locResponse.data[0].dest_type;
+
+        const checkin = new Date(); checkin.setDate(checkin.getDate() + 14);
+        const checkout = new Date(checkin); checkout.setDate(checkout.getDate() + 1);
+
+        const hotelsRes = await axios.get('https://booking-com.p.rapidapi.com/v1/hotels/search', {
+            params: {
+                locale: 'pt-br',
+                dest_id: destId,
+                dest_type: destType,
+                checkin_date: checkin.toISOString().split('T')[0],
+                checkout_date: checkout.toISOString().split('T')[0],
+                adults_number: 2,
+                room_number: 1,
+                filter_by_currency: 'BRL',
+                order_by: 'popularity',
+                units: 'metric',
+                categories_filter_ids: `class::${stars}`
+            },
+            headers: HEADERS
+        });
+
+        if (!hotelsRes.data.result || hotelsRes.data.result.length === 0) {
+             return res.status(404).json({ message: `Sem hotéis disponíveis.` });
+        }
+
+        const formattedHotels = hotelsRes.data.result.slice(0, 6).map(hotel => ({
+            hotelId: hotel.hotel_id,
+            name: hotel.hotel_name,
+            price: hotel.min_total_price, 
+            currency: hotel.currencycode || 'BRL',
+            rating: parseInt(stars) || 3,
+            cancellation: hotel.is_free_cancellable ? 'Cancelamento Grátis' : 'Verifique Políticas',
+            photoUrl: hotel.max_photo_url || hotel.main_photo_url,
+            roomType: hotel.accommodation_type_name || 'Quarto Standard',
+            reviewCount: hotel.review_nr || 0,
+            distance: hotel.distance_to_cc ? parseFloat(hotel.distance_to_cc).toFixed(1) : 'alguns'
+        }));
+
+        res.json(formattedHotels);
+
+    } catch (error) {
+        console.error('Erro na Busca:', error.message);
+        res.status(500).json({ message: 'Erro ao buscar hotéis.' });
+    }
 });
 
-function formatHotelName(name) {
-  if (!name) return '';
-  // Transforma em minúsculo e capitaliza a 1ª letra de cada palavra
-  return name.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-}
 
-function cleanHotelDescription(text) {
-  if (!text || text.length < 5) {
-    return 'Acomodação premium com excelente localização e serviços exclusivos.';
-  }
+router.get('/details/:hotelId', async (req, res) => {
+    try {
+        const { hotelId } = req.params;
 
-  // 1. Corrige vírgulas sem espaço
-  let cleaned = text.replace(/,([^\s])/g, ', $1');
+        const [descResponse, photosResponse] = await Promise.all([
+            axios.get('https://booking-com.p.rapidapi.com/v1/hotels/description', {
+                params: { hotel_id: hotelId, locale: 'pt-br' },
+                headers: HEADERS
+            }),
+            axios.get('https://booking-com.p.rapidapi.com/v1/hotels/photos', {
+                params: { hotel_id: hotelId, locale: 'pt-br' },
+                headers: HEADERS
+            })
+        ]);
 
-  // 2. Remove espaços duplos
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        const description = descResponse.data.description || 'Descrição completa indisponível no momento.';
 
-  // 3. Converte tudo para minúsculo e capitaliza apenas a 1ª letra de cada frase
-  cleaned = cleaned.toLowerCase().replace(/(^\w|[\.\?!]\s*\w)/g, (match) => {
-    return match.toUpperCase();
-  });
+        const gallery = photosResponse.data
+            .map(photo => photo.url_max || photo.url_original)
+            .filter(url => url) // remove nulos
+            .slice(0, 10);
 
-  return cleaned; 
-}
+        res.json({
+            fullDescription: description,
+            photos: gallery
+        });
 
-router.get('/:cityCode', async (req, res) => {
-  try {
-    const { cityCode } = req.params;
-
-    const hotelsSearch = await amadeus.referenceData.locations.hotels.byCity.get({ cityCode });
-    const hotelIds = hotelsSearch.data.slice(0, 10).map(h => h.hotelId).join(',');
-
-    if (!hotelIds) return res.status(404).json({ message: 'Nenhum hotel encontrado.' });
-
-    const unsplashUrl = `https://api.unsplash.com/search/photos?query=hotel%20${cityCode}&orientation=landscape&per_page=10&client_id=${process.env.UNSPLASH_ACCESS_KEY}`;
-
-    const [hotelOffers, hotelRatings, unsplashResponse] = await Promise.all([
-      amadeus.shopping.hotelOffersSearch.get({
-        hotelIds: hotelIds,
-        adults: '1',
-        checkInDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        roomQuantity: '1',
-        bestRateOnly: 'true'
-      }),
-      amadeus.eReputation.hotelSentiments.get({ hotelIds }).catch(() => ({ data: [] })),
-      fetch(unsplashUrl).then(res => res.json()).catch(() => ({ results: [] }))
-    ]);
-
-    const ratingsMap = new Map((hotelRatings.data || []).map(r => [r.hotelId, r]));
-    const unsplashPhotos = unsplashResponse.results || [];
-
-    const formattedHotels = hotelOffers.data
-      .filter(offer => offer.offers && offer.offers.length > 0)
-      .map((offer, index) => {
-        const firstOffer = offer.offers[0];
-        const ratingData = ratingsMap.get(offer.hotel.hotelId);
-        const starRating = ratingData ? Math.round(ratingData.overallRating / 20) : 3;
-        
-        const photoUrl = unsplashPhotos[index]?.urls?.regular || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80';
-
-        const rawDescription = firstOffer.room.description?.text || '';
-
-        return {
-          hotelId: offer.hotel.hotelId,
-          name: formatHotelName(offer.hotel.name),
-          price: firstOffer.price.total,
-          currency: firstOffer.price.currency,
-          rating: starRating,
-          reviewCount: ratingData?.numberOfReviews || 0,
-          roomType: firstOffer.room.typeEstimated?.category?.replace(/_/g, ' ') || 'Tipo de quarto não especificado',
-          beds: firstOffer.room.typeEstimated?.beds || 1,
-          bedType: firstOffer.room.typeEstimated?.bedType || 'Tipo de cama não especificado',
-          cancellation: firstOffer.policies?.cancellation?.type === 'FULL_STAY' ? 'Não Reembolsável' : 'Cancelamento Grátis',
-          
-          fullDescription: cleanHotelDescription(rawDescription),
-          
-          photoUrl: photoUrl 
-        };
-      });
-
-    res.json(formattedHotels);
-  } catch (error) {
-    if (error.response && error.response.statusCode === 400) {
-      return res.status(404).json({ message: 'Destino não suportado no ambiente de testes da Amadeus.' });
+    } catch (error) {
+        console.error('Erro ao buscar detalhes:', error.message);
+        res.status(500).json({ message: 'Erro interno ao carregar detalhes.' });
     }
-    console.error('Erro na rota de hotéis:', error.message);
-    res.status(500).json({ message: 'Erro interno ao buscar ofertas de hotéis.' });
-  }
 });
 
 module.exports = router;

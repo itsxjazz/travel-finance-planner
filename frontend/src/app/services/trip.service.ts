@@ -46,10 +46,14 @@ export class TripService {
     return this.http.get(`${this.baseApiUrl}/locals/pois?lat=${coords.lat}&lng=${coords.lng}`);
   }
 
-  // --- MÉTODOS AMADEUS (HOTÉIS E VOOS) ---
+  // --- MÉTODOS (HOTÉIS E VOOS) ---
   getHotels(cityCode: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseApiUrl}/hotels/${cityCode}`);
   }
+
+  getHotelDetails(hotelId: string) {
+  return this.http.get<any>(`${this.apiUrl}/hotels/details/${hotelId}`);
+}
 
   getFlights(origin: string, destination: string, date: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseApiUrl}/flights/search`, {

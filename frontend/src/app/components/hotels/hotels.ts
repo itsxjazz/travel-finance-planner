@@ -19,10 +19,12 @@ export class Hotels implements OnInit {
   isLoading = signal<boolean>(true);
   errorMessage = signal<string>('');
   selectedHotel = signal<any>(null);
+  
+  isLoadingDetails = signal<boolean>(false);
 
   ngOnInit() {
     if (this.cityCode) {
-      this.fetchHotels();
+      this.fetchHotels(); 
     }
   }
 
@@ -31,12 +33,11 @@ export class Hotels implements OnInit {
     
     this.tripService.getHotels(this.cityCode).subscribe({
       next: (data) => {
-        // O data já vem do Node.js com a photoUrl do Unsplash embutida
         this.hotelsList.set(data);
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Erro ao buscar hotéis no Amadeus:', err);
+        console.error('Erro ao buscar hotéis:', err);
         this.errorMessage.set('Hospedagens indisponíveis no momento para este destino.');
         this.isLoading.set(false);
       }
@@ -44,11 +45,24 @@ export class Hotels implements OnInit {
   }
 
   showDetails(hotel: any) {
-    this.selectedHotel.set(hotel);
-  }
+    this.isLoadingDetails.set(true); 
 
-  handleImageError(event: any) {
-    // Fallback de segurança caso a URL do Unsplash venha quebrada
-    event.target.src = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80';
+    this.tripService.getHotelDetails(hotel.hotelId).subscribe({
+      next: (realData) => {
+        const hotelCompleto = {
+          ...hotel,
+          fullDescription: realData.fullDescription,
+          gallery: realData.photos
+        };
+        
+        this.selectedHotel.set(hotelCompleto);
+        this.isLoadingDetails.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao buscar detalhes profundos:', err);
+        this.selectedHotel.set(hotel);
+        this.isLoadingDetails.set(false);
+      }
+    });
   }
 }
