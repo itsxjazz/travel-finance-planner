@@ -144,14 +144,20 @@ export class Planner implements OnInit {
     this.taxService.getRate('CDI').subscribe((rate: number) => this.cdiRate.set(rate));
   }
 
-  loadPOIs() { // Busca os pontos de interesse do destino
-    if (!this.tripDetails?.destination) return;
-    const iataCode = IATA_CODES[this.tripDetails.destination] || 'PAR';
-    this.tripService.getPointsOfInterest(iataCode).subscribe({
-      next: (response: any) => this.rawPointsOfInterest.set(response.data || []),
-      error: (err) => console.error('Erro ao buscar POIs:', err)
-    });
-  }
+  loadPOIs() {
+  if (!this.tripDetails?.destination) return;
+
+  this.tripService.getPointsOfInterest(this.tripDetails.destination).subscribe({
+    next: (response: any) => {
+      this.rawPointsOfInterest.set(response.data || []);
+      this.isLoading.set(false);
+    },
+    error: (err) => {
+      console.error('Erro ao buscar POIs:', err);
+      this.isLoading.set(false);
+    }
+  });
+}
 
   handleInput(event: any, signalRef: any) { // Formata os inputs financeiros para aceitar apenas números e vírgula
     let value = event.target.value;

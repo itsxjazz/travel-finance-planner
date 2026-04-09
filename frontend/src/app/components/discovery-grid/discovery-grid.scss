@@ -195,4 +195,27 @@
       box-shadow: var(--glow-cyan);
     }
   }
+
+  .address {
+  display: flex;
+  align-items: center;
+  gap: 6px; 
+  font-size: 0.8rem;
+  color: #00f3ff;
+  margin-bottom: 0.8rem;
+
+  .icon-cyan-small {
+    width: 14px;
+    height: 14px;
+    color: var(--neon-cyan);
+    filter: drop-shadow(0 0 3px rgba(0, 243, 255, 0.6));
+    flex-shrink: 0; // Impede que o ícone diminua se o endereço for longo
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+  }
+ }
 }
