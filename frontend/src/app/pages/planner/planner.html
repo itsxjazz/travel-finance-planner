@@ -103,21 +103,21 @@
     </div>
     }
 
-  @if (activeTab() === 'hotels') {
-    <div class="hospedagem-view fade-in">
-        <app-hotels [cityCode]="'PAR'"></app-hotels>
-    </div>
-  }
+      @if (activeTab() === 'hotels') {
+          <div class="hospedagem-view fade-in">
+              <app-hotels [cityName]="destinationCityName"></app-hotels>
+          </div>
+        }
 
-  @if (activeTab() === 'flights') {
-  <div class="flights-view fade-in">
-    <app-flights 
-      [originIata]="originIata()" 
-      [destinationIata]="destinationIataCode" 
-      [departureDate]="estimatedTravelDate()">
-    </app-flights>
-  </div>
-}
+        @if (activeTab() === 'flights') {
+        <div class="flights-view fade-in">
+          <app-flights 
+            [originIata]="originIata()" 
+            [destinationIata]="destinationIataCode" 
+            [departureDate]="estimatedTravelDate()">
+          </app-flights>
+        </div>
+      }
 
     @if (activeTab() === 'explore') {
     <div class="exploration-view fade-in">

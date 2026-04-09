@@ -11,7 +11,7 @@ import { HotelDetails } from './hotel-details';
   styleUrl: './hotels.scss'
 })
 export class Hotels implements OnInit {
-  @Input() cityCode!: string; 
+  @Input() cityName!: string; 
   
   private tripService = inject(TripService);
 
@@ -23,7 +23,7 @@ export class Hotels implements OnInit {
   isLoadingDetails = signal<boolean>(false);
 
   ngOnInit() {
-    if (this.cityCode) {
+    if (this.cityName) {
       this.fetchHotels(); 
     }
   }
@@ -31,7 +31,7 @@ export class Hotels implements OnInit {
   fetchHotels() {
     this.isLoading.set(true);
     
-    this.tripService.getHotels(this.cityCode).subscribe({
+    this.tripService.getHotels(this.cityName).subscribe({
       next: (data) => {
         this.hotelsList.set(data);
         this.isLoading.set(false);

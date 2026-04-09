@@ -254,9 +254,15 @@ export class Planner implements OnInit {
   }
 
 get destinationIataCode(): string {
-  if (!this.tripDetails?.destination) return 'PAR';
+  if (!this.tripDetails?.destination) return '';
     const normalizedDest = this.tripDetails.destination.trim();
   
-  return IATA_CODES[normalizedDest] || 'PAR';
+  return IATA_CODES[normalizedDest] || '';
   }
+
+  get destinationCityName(): string {
+  if (!this.tripDetails?.destination) return ''; 
+  
+  return this.tripDetails.destination.trim();
+}
 }
