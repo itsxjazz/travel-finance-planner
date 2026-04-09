@@ -52,7 +52,9 @@ export class Hotels implements OnInit {
         const hotelCompleto = {
           ...hotel,
           fullDescription: realData.fullDescription,
-          gallery: realData.photos
+          gallery: realData.photos,
+          roomType: realData.realRoomName,
+          bedType: realData.realBedType,
         };
         
         this.selectedHotel.set(hotelCompleto);
