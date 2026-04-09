@@ -52,7 +52,8 @@ export class TripService {
   }
 
   getHotelDetails(hotelId: string) {
-  return this.http.get<any>(`${this.apiUrl}/hotels/details/${hotelId}`);
+  const baseUrl = this.apiUrl.replace('/trips', ''); 
+  return this.http.get<any>(`${baseUrl}/hotels/details/${hotelId}`);
 }
 
   getFlights(origin: string, destination: string, date: string): Observable<any[]> {

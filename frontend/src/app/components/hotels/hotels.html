@@ -29,7 +29,18 @@
         <h4 class="text-cyan">{{ hotel.name }}</h4>
         
         <div class="hotel-meta">
-            <button class="btn-neon-outline" (click)="selectedHotel.set(hotel)">Detalhes</button>         
+          <button 
+            class="btn-neon-outline" 
+            (click)="showDetails(hotel)"
+            [disabled]="isLoadingDetails()"
+          >
+            @if (isLoadingDetails() && selectedHotel()?.hotelId === hotel.hotelId) {
+              <div class="spinner-neon small" style="color: var(--cyan-neon); margin-right: 8px;"></div>
+              Carregando...
+            } @else {
+              Detalhes
+            }
+          </button>
         </div>
         </div>
 

@@ -49,18 +49,30 @@ router.get('/:location', async (req, res) => {
              return res.status(404).json({ message: `Sem hotéis disponíveis.` });
         }
 
-        const formattedHotels = hotelsRes.data.result.slice(0, 6).map(hotel => ({
-            hotelId: hotel.hotel_id,
-            name: hotel.hotel_name,
-            price: hotel.min_total_price, 
-            currency: hotel.currencycode || 'BRL',
-            rating: parseInt(stars) || 3,
-            cancellation: hotel.is_free_cancellable ? 'Cancelamento Grátis' : 'Verifique Políticas',
-            photoUrl: hotel.max_photo_url || hotel.main_photo_url,
-            roomType: hotel.accommodation_type_name || 'Quarto Standard',
-            reviewCount: hotel.review_nr || 0,
-            distance: hotel.distance_to_cc ? parseFloat(hotel.distance_to_cc).toFixed(1) : 'alguns'
-        }));
+        const formattedHotels = hotelsRes.data.result.slice(0, 6).map(hotel => {
+            
+            const camaInfo = hotel.unit_configuration_label || '1 Cama de Casal';
+            
+            const nomeQuarto = hotel.default_language_room_name || hotel.accommodation_type_name || 'Quarto Standard';
+
+            return {
+                hotelId: hotel.hotel_id,
+                name: hotel.hotel_name,
+                price: hotel.min_total_price, 
+                currency: hotel.currencycode || 'BRL',
+                rating: parseInt(stars) || 3,
+                
+                cancellation: hotel.is_free_cancellable === 1 ? 'Cancelamento Grátis' : 'Verifique Políticas',
+                
+                photoUrl: hotel.max_photo_url || hotel.main_photo_url,
+                roomType: nomeQuarto,
+                reviewCount: hotel.review_nr || 0,
+                distance: hotel.distance_to_cc ? parseFloat(hotel.distance_to_cc).toFixed(1) : 'alguns',
+                
+                beds: 1, 
+                bedType: camaInfo.replace(/[0-9]/g, '').trim()
+            };
+        });
 
         res.json(formattedHotels);
 
