@@ -87,7 +87,12 @@ router.get('/details/:hotelId', async (req, res) => {
     try {
         const { hotelId } = req.params;
 
-        const [descResponse, photosResponse] = await Promise.all([
+        const checkin = new Date(); checkin.setDate(checkin.getDate() + 14);
+        const checkout = new Date(checkin); checkout.setDate(checkout.getDate() + 1);
+        const checkinStr = checkin.toISOString().split('T')[0];
+        const checkoutStr = checkout.toISOString().split('T')[0];
+
+        const [descRes, photosRes, roomsRes] = await Promise.all([
             axios.get('https://booking-com.p.rapidapi.com/v1/hotels/description', {
                 params: { hotel_id: hotelId, locale: 'pt-br' },
                 headers: HEADERS
@@ -95,24 +100,37 @@ router.get('/details/:hotelId', async (req, res) => {
             axios.get('https://booking-com.p.rapidapi.com/v1/hotels/photos', {
                 params: { hotel_id: hotelId, locale: 'pt-br' },
                 headers: HEADERS
+            }),
+            axios.get('https://booking-com.p.rapidapi.com/v1/hotels/room-list', {
+                params: { 
+                    hotel_id: hotelId, 
+                    checkin_date: checkinStr, 
+                    checkout_date: checkoutStr,
+                    adults_number_by_rooms: '2',
+                    units: 'metric',
+                    locale: 'pt-br',
+                    currency: 'BRL'
+                },
+                headers: HEADERS
             })
         ]);
 
-        const description = descResponse.data.description || 'Descrição completa indisponível no momento.';
-
-        const gallery = photosResponse.data
-            .map(photo => photo.url_max || photo.url_original)
-            .filter(url => url) // remove nulos
-            .slice(0, 10);
+        const firstRoom = roomsRes.data[0] || {};
+        
+        const realBeds = firstRoom.rooms?.[Object.keys(firstRoom.rooms)[0]]?.bed_configurations?.[0]?.buttons?.[0]?.name 
+                         || 'Configuração Standard';
 
         res.json({
-            fullDescription: description,
-            photos: gallery
+            fullDescription: descRes.data.description || 'Descrição completa no site.',
+            photos: photosRes.data.map(p => p.url_max).slice(0, 10),
+            realRoomName: firstRoom.block?.[0]?.room_name || 'Quarto Selecionado',
+            realBedType: realBeds,
+            facilities: firstRoom.facilities?.slice(0, 6).map(f => f.name) || []
         });
 
     } catch (error) {
-        console.error('Erro ao buscar detalhes:', error.message);
-        res.status(500).json({ message: 'Erro interno ao carregar detalhes.' });
+        console.error('Erro no Enriquecimento:', error.message);
+        res.status(500).json({ message: 'Erro ao buscar detalhes reais do quarto.' });
     }
 });
 
