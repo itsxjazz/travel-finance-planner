@@ -77,13 +77,14 @@ router.get('/pois', async (req, res) => {
 
         const latFloat = parseFloat(lat);
         const lngFloat = parseFloat(lng);
+
         const query = `
           query MyQuery {
             getPlaces(
               lat: ${latFloat}
               lng: ${lngFloat}
-              maxDistMeters: 15000
-              limit: 60
+              maxDistMeters: 10000
+              limit: 20
               includeGallery: true
               includeAbstract: true
             ) {
@@ -94,9 +95,7 @@ router.get('/pois', async (req, res) => {
               distance
               lat
               lng
-              gallery {
-                url
-              }
+              gallery
             }
           }
         `;
@@ -123,19 +122,21 @@ router.get('/pois', async (req, res) => {
             .map(place => {
                 const cats = place.categories || [];
                 let category = 'CULTURA';
-                const catsUpper = cats.map(c => c.toUpperCase());
                 
-                if (catsUpper.includes('BEACHES') || catsUpper.includes('NATURE')) {
+                const catsString = JSON.stringify(cats).toUpperCase();
+                
+                if (catsString.includes('BEACH') || catsString.includes('NATURE')) {
                     category = 'NATUREZA';
-                } else if (catsUpper.includes('MUSEUMS') || catsUpper.includes('HISTORIC') || catsUpper.includes('CULTURE')) {
+                } else if (catsString.includes('MUSEUM') || catsString.includes('HISTORIC') || catsString.includes('CULTURE')) {
                     category = 'CULTURA';
                 } else {
-                    category = 'RESTAURANT'; // Fallback para preencher o mapa com outras opções
+                    category = 'RESTAURANT';
                 }
 
-                const photoUrl = (place.gallery && place.gallery.length > 0) 
-                                 ? place.gallery[0].url 
-                                 : 'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=1000&auto=format&fit=crop';
+                let photoUrl = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=1000&auto=format&fit=crop';
+                if (place.gallery && place.gallery.length > 0) {
+                    photoUrl = typeof place.gallery[0] === 'string' ? place.gallery[0] : place.gallery[0].url || photoUrl;
+                }
 
                 return {
                     id: place.id,
@@ -146,7 +147,7 @@ router.get('/pois', async (req, res) => {
                     photo: photoUrl,
                     lat: place.lat,
                     lon: place.lng, 
-                    mapUrl: `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}` // Link do Maps corrigido e mais preciso
+                    mapUrl: `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
                 };
             });
 
@@ -154,7 +155,9 @@ router.get('/pois', async (req, res) => {
         res.json({ data: formattedData });
 
     } catch (error) {
-        console.error('Erro na Travel Places API:', error.message);
+        const errorMessage = error.response ? JSON.stringify(error.response.data, null, 2) : error.message;
+        console.error('⚠️ Detalhes do Erro 400 da Travel Places API:\n', errorMessage);
+        
         res.status(500).json({ message: 'Erro ao buscar atrações turísticas.' });
     }
 });
