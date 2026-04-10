@@ -112,11 +112,42 @@ router.get('/pois', async (req, res) => {
 
         const rawPlaces = response.data.data.getPlaces;
 
+        const categoriasEncontradas = new Set();
+        rawPlaces.forEach(place => {
+            if (place.categories) {
+                place.categories.forEach(cat => categoriasEncontradas.add(cat));
+            }
+        });
+        console.log(' CATEGORIAS NESTA CIDADE:', Array.from(categoriasEncontradas).join(', '));
+
+        // 1. BANCO DE IMAGENS
         const imagesDB = {
-            'CULTURA': 'https://images.unsplash.com/photo-1518398046578-8cca57782e17?q=80&w=800&auto=format&fit=crop',
-            'NATUREZA': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=800&auto=format&fit=crop',
-            'RESTAURANT': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop',
-            'GERAL': 'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=800&auto=format&fit=crop'
+            'CULTURA': [
+                'https://images.unsplash.com/photo-1518398046578-8cca57782e17?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1541194577687-8c63bf9e7ee3?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1564399579883-456a5d4400e0?q=80&w=800&auto=format&fit=crop'
+            ],
+            'NATUREZA': [
+                'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1426604966848-d7adac402bff?q=80&w=800&auto=format&fit=crop'
+            ],
+            'RESTAURANT': [
+                'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1505826759037-406b40feb4cd?q=80&w=800&auto=format&fit=crop'
+            ],
+            'GERAL': [
+                'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop'
+            ]
         };
 
         const formattedData = rawPlaces
@@ -135,6 +166,10 @@ router.get('/pois', async (req, res) => {
                     category = 'RESTAURANT';
                 }
 
+                // 2. LÓGICA DE DISTRIBUIÇÃO DAS FOTOS
+                const categoryPhotos = imagesDB[category] || imagesDB['GERAL'];
+                const selectedPhoto = categoryPhotos[index % categoryPhotos.length];
+
                 return {
                     id: place.id,
                     name: place.name,
@@ -142,11 +177,11 @@ router.get('/pois', async (req, res) => {
                     address: `${(place.distance / 1000).toFixed(1)}km do centro`,
                     description: place.abstract || 'Ponto turístico local em destaque. Veja no mapa para mais detalhes.',
                     
-                    photo: imagesDB[category] || imagesDB['GERAL'],
+                    photo: selectedPhoto,
                     
                     lat: place.lat,
                     lon: place.lng, 
-                    mapUrl: `https://www.google.com/maps/search/?api=1&query=$${place.lat},${place.lng}`
+                    mapUrl: `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
                 };
             });
 

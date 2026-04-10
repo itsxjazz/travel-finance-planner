@@ -49,6 +49,7 @@
 }
 
 /* --- GRID DE ATRAÇÕES --- */
+/* --- GRID DE ATRAÇÕES --- */
 .pois-grid {
   display: grid;
   gap: 24px;
@@ -60,12 +61,13 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  /* padding: 24px; -> REMOVIDO: para a imagem tocar as bordas do topo */
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
   min-height: 220px;
   margin-top: 24px;
+  overflow: hidden; /* CRÍTICO: Não deixa a imagem vazar da borda redonda */
 
   &:hover {
     transform: translateY(-5px);
@@ -74,96 +76,134 @@
     box-shadow: 0 10px 30px rgba(0, 243, 255, 0.1);
   }
 
-  .poi-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  /* --- NOVA ÁREA: IMAGEM NO TOPO --- */
+  .poi-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px; /* Trava a altura da foto */
+
+    .poi-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Preenche o espaço sem esticar/amassar a foto */
+      display: block;
+    }
 
     .category-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 0.7rem;
       font-weight: 800;
       text-transform: uppercase;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
       border: 1px solid transparent;
 
       &[data-category="CULTURA"] { color: #00f3ff; border-color: rgba(0, 243, 255, 0.2); }
       &[data-category="RESTAURANT"], &[data-category="GASTRONOMIA"] { color: #00b8c4; border-color: rgba(0, 184, 196, 0.2); }
       &[data-category="SHOPPING"] { color: #007a82; border-color: rgba(0, 122, 130, 0.2); }
-    }
-
-    .rank {
-      color: #ffcc00;
-      font-weight: 800;
-      font-size: 0.9rem;
-      text-shadow: 0 0 8px rgba(255, 204, 0, 0.3);
+      &[data-category="NATUREZA"] { color: #32ff7e; border-color: rgba(50, 255, 126, 0.2); }
     }
   }
 
+  /* --- ÁREA DE TEXTO --- */
   .poi-info {
+    padding: 20px 24px 10px 24px; /* Adicionamos o padding de volta aqui */
     flex-grow: 1;
+
     h4 {
       color: #ffffff;
       font-size: 1.25rem;
-      margin: 0 0 8px 0;
+      margin: 0 0 10px 0;
       font-weight: 700;
     }
+
     .address {
-      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px; 
       font-size: 0.85rem;
+      color: #00f3ff;
+      margin: 0 0 12px 0;
+
+      .icon-cyan-small {
+        width: 14px;
+        height: 14px;
+        /* Se a variável não carregar, usa o hex direto por segurança */
+        color: var(--cyan-neon, #00f3ff); 
+        filter: drop-shadow(0 0 3px rgba(0, 243, 255, 0.6));
+        flex-shrink: 0; 
+      }
+
+      span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .poi-description {
+      font-size: 0.85rem;
+      color: var(--text-secondary); /* Cinza claro */
       line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3; /* Corta o resumo na 3ª linha e põe '...' */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
       margin: 0;
     }
   }
-}
 
-/* --- BOTÕES DE AÇÃO --- */
-.poi-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
+  /* --- BOTÕES DE AÇÃO --- */
+  .poi-actions {
+    display: flex;
+    gap: 12px;
+    padding: 0 24px 24px 24px; /* Padding apenas no fundo e nos lados */
+    margin-top: 16px;
 
-  .btn-outline {
-    flex: 1;
-    text-align: center;
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: 0.3s;
+    .btn-outline {
+      flex: 1;
+      text-align: center;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: 0.3s;
 
-    &:hover {
-      border-color: #ffffff;
-      color: #ffffff;
+      &:hover {
+        border-color: #ffffff;
+        color: #ffffff;
+      }
+    }
+
+    .btn-neon-small {
+      flex: 2;
+      background: var(--cyan-neon);
+      color: var(--bg-main);
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.9rem;
+      transition: 0.3s;
+
+      &:hover {
+        box-shadow: var(--glow-cyan);
+        transform: scale(1.02);
+      }
     }
   }
-
-  .btn-neon-small {
-    flex: 2;
-    background: var(--cyan-neon);
-    color: var(--bg-main);
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 800;
-    font-size: 0.9rem;
-    transition: 0.3s;
-
-    &:hover {
-      box-shadow: var(--glow-cyan);
-      transform: scale(1.02);
-    }
-  }
 }
 
-/* --- PAGINAÇÃO --- */
+/* --- PAGINAÇÃO (Corrigida a indentação) --- */
 .pagination-footer {
   display: flex;
   justify-content: center;
@@ -195,27 +235,4 @@
       box-shadow: var(--glow-cyan);
     }
   }
-
-  .address {
-  display: flex;
-  align-items: center;
-  gap: 6px; 
-  font-size: 0.8rem;
-  color: #00f3ff;
-  margin-bottom: 0.8rem;
-
-  .icon-cyan-small {
-    width: 14px;
-    height: 14px;
-    color: var(--neon-cyan);
-    filter: drop-shadow(0 0 3px rgba(0, 243, 255, 0.6));
-    flex-shrink: 0; // Impede que o ícone diminua se o endereço for longo
-
-  span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    }
-  }
- }
 }
