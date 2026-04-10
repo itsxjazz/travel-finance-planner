@@ -75,18 +75,13 @@ router.get('/pois', async (req, res) => {
         const { lat, lng } = req.query;
         if (!lat || !lng) return res.status(400).json({ message: 'Coordenadas obrigatórias.' });
 
-        const latFloat = parseFloat(lat);
-        const lngFloat = parseFloat(lng);
-
         const query = `
-          query MyQuery {
+          query {
             getPlaces(
-              lat: ${latFloat}
-              lng: ${lngFloat}
-              maxDistMeters: 10000
+              lat: ${parseFloat(lat)},
+              lng: ${parseFloat(lng)},
+              maxDistMeters: 10000,
               limit: 20
-              includeGallery: true
-              includeAbstract: true
             ) {
               id
               name
@@ -95,7 +90,7 @@ router.get('/pois', async (req, res) => {
               distance
               lat
               lng
-              gallery
+              country
             }
           }
         `;
@@ -117,9 +112,16 @@ router.get('/pois', async (req, res) => {
 
         const rawPlaces = response.data.data.getPlaces;
 
+        const imagesDB = {
+            'CULTURA': 'https://images.unsplash.com/photo-1518398046578-8cca57782e17?q=80&w=800&auto=format&fit=crop',
+            'NATUREZA': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=800&auto=format&fit=crop',
+            'RESTAURANT': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop',
+            'GERAL': 'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=800&auto=format&fit=crop'
+        };
+
         const formattedData = rawPlaces
             .filter(place => place.name)
-            .map(place => {
+            .map((place, index) => {
                 const cats = place.categories || [];
                 let category = 'CULTURA';
                 
@@ -129,13 +131,8 @@ router.get('/pois', async (req, res) => {
                     category = 'NATUREZA';
                 } else if (catsString.includes('MUSEUM') || catsString.includes('HISTORIC') || catsString.includes('CULTURE')) {
                     category = 'CULTURA';
-                } else {
+                } else if (catsString.includes('RESTAURANT') || catsString.includes('FOOD')) {
                     category = 'RESTAURANT';
-                }
-
-                let photoUrl = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=1000&auto=format&fit=crop';
-                if (place.gallery && place.gallery.length > 0) {
-                    photoUrl = typeof place.gallery[0] === 'string' ? place.gallery[0] : place.gallery[0].url || photoUrl;
                 }
 
                 return {
@@ -143,11 +140,13 @@ router.get('/pois', async (req, res) => {
                     name: place.name,
                     category: category,
                     address: `${(place.distance / 1000).toFixed(1)}km do centro`,
-                    description: place.abstract || 'Ponto turístico local. Veja no mapa para mais detalhes.',
-                    photo: photoUrl,
+                    description: place.abstract || 'Ponto turístico local em destaque. Veja no mapa para mais detalhes.',
+                    
+                    photo: imagesDB[category] || imagesDB['GERAL'],
+                    
                     lat: place.lat,
                     lon: place.lng, 
-                    mapUrl: `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
+                    mapUrl: `https://www.google.com/maps/search/?api=1&query=$${place.lat},${place.lng}`
                 };
             });
 
@@ -155,10 +154,8 @@ router.get('/pois', async (req, res) => {
         res.json({ data: formattedData });
 
     } catch (error) {
-        const errorMessage = error.response ? JSON.stringify(error.response.data, null, 2) : error.message;
-        console.error('⚠️ Detalhes do Erro 400 da Travel Places API:\n', errorMessage);
-        
-        res.status(500).json({ message: 'Erro ao buscar atrações turísticas.' });
+        console.error('⚠️ Detalhes do Erro na API:', error.response?.data || error.message);
+        res.status(500).json({ message: 'Erro interno ao buscar atrações.' });
     }
 });
 
