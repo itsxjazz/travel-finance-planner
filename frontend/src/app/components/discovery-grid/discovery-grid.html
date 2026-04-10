@@ -2,7 +2,7 @@
   <h3 class="section-title">Experiências Locais </h3>
       
     <div class="filter-group">
-      @for (f of ['Todos', 'Cultura', 'Gastronomia', 'Compras']; track f) {
+      @for (f of ['Todos', 'Cultura', 'Gastronomia', 'Compras', 'Natureza']; track f) {
       <button
         (click)="setFilter(f)"
         [class.active]="activeFilter() === f"
@@ -17,27 +17,27 @@
     <div class="poi-card">
       
       <div class="poi-icon-header" [attr.data-category]="poi.category">
-        <div class="icon-circle">
-          @switch (poi.category) {
-            @case ('CULTURA') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M5 21V7m14 14V7M9 21v-9m6 9v-9M3 7l9-4 9 4v2H3V7z"/></svg>
-            }
-            @case ('NATUREZA') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 21h16M12 3l-8 18h16L12 3zm0 6v6"/></svg>
-            }
-            @case ('RESTAURANT') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4C11 7.31371 8.31371 10 5 10C4.44772 10 4 11V20H6V11C6 10.4477 6.44772 10 7 10C10.3137 10 13 7.31371 13 4M17 4V20M17 4C19.2091 4 21 5.79086 21 8C21 10.2091 19.2091 12 17 12"/></svg>
-            }
-            @case ('SHOPPING') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-            }
-            @default {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
-            }
+      <div class="icon-circle">
+        @switch (poi.category) {
+          @case ('CULTURA') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/></svg>
           }
-        </div>
-        <span class="category-badge">{{ translateCategory(poi.category) }}</span>
+          @case ('NATUREZA') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z"/><path d="M12 22v-3"/></svg>
+          }
+          @case ('RESTAURANT') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+          }
+          @case ('SHOPPING') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          }
+          @default {
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          }
+        }
       </div>
+      <span class="category-badge">{{ translateCategory(poi.category) }}</span>
+    </div>
 
       <div class="poi-info">
         <h4>{{ poi.name }}</h4>

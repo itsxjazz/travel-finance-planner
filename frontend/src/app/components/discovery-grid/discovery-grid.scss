@@ -87,15 +87,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 243, 255, 0.03); // Fundo levemente ciano
+      border: 1px solid rgba(0, 243, 255, 0.2); // Borda ciano
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
       transition: all 0.3s ease;
 
-      /* Trava o tamanho do SVG para ele não explodir na tela */
       svg {
         width: 24px;
         height: 24px;
-        transition: all 0.3s ease;
+        color: var(--cyan-neon); // Força a cor ciano no ícone
+        filter: drop-shadow(0 0 4px var(--cyan-neon));
       }
     }
 
@@ -106,32 +107,9 @@
       font-weight: 800;
       text-transform: uppercase;
       background: rgba(0, 0, 0, 0.4);
-      border: 1px solid transparent;
-    }
-
-    /* Cores dinâmicas baseadas na categoria */
-    &[data-category="CULTURA"] {
-      .icon-circle { border-color: rgba(0, 243, 255, 0.4); box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); }
-      svg { color: #00f3ff; filter: drop-shadow(0 0 4px #00f3ff); }
-      .category-badge { color: #00f3ff; border-color: rgba(0, 243, 255, 0.2); }
-    }
-    
-    &[data-category="NATUREZA"] {
-      .icon-circle { border-color: rgba(50, 255, 126, 0.4); box-shadow: 0 0 15px rgba(50, 255, 126, 0.1); }
-      svg { color: #32ff7e; filter: drop-shadow(0 0 4px #32ff7e); }
-      .category-badge { color: #32ff7e; border-color: rgba(50, 255, 126, 0.2); }
-    }
-    
-    &[data-category="RESTAURANT"] {
-      .icon-circle { border-color: rgba(255, 159, 67, 0.4); box-shadow: 0 0 15px rgba(255, 159, 67, 0.1); }
-      svg { color: #ff9f43; filter: drop-shadow(0 0 4px #ff9f43); }
-      .category-badge { color: #ff9f43; border-color: rgba(255, 159, 67, 0.2); }
-    }
-    
-    &[data-category="SHOPPING"] {
-      .icon-circle { border-color: rgba(197, 108, 253, 0.4); box-shadow: 0 0 15px rgba(197, 108, 253, 0.1); }
-      svg { color: #c56cfd; filter: drop-shadow(0 0 4px #c56cfd); }
-      .category-badge { color: #c56cfd; border-color: rgba(197, 108, 253, 0.2); }
+      color: var(--cyan-neon); // Texto da badge em ciano
+      border: 1px solid rgba(0, 243, 255, 0.2); // Borda da badge em ciano
+      backdrop-filter: blur(4px);
     }
   }
 

@@ -24,7 +24,7 @@ export class DiscoveryGrid {
     if (filter === 'Todos') return pois;
 
     const filterMap: Record<string, string> = {
-      'Cultura': 'CULTURA', 'Gastronomia': 'RESTAURANT', 'Shopping': 'SHOPPING', 'Compras': 'SHOPPING'
+      'Cultura': 'CULTURA', 'Gastronomia': 'RESTAURANT', 'Shopping': 'SHOPPING', 'Compras': 'SHOPPING', 'Natureza': 'NATUREZA'
     };
     return pois.filter(poi => poi.category === filterMap[filter]);
   });
@@ -56,7 +56,7 @@ export class DiscoveryGrid {
 
   translateCategory(category: string): string { // Traduz as categorias para exibição
     const categories: Record<string, string> = {
-      'CULTURA': 'Cultura', 'RESTAURANT': ' Gastronomia', 'SHOPPING': 'Compras'
+      'CULTURA': 'Cultura', 'RESTAURANT': ' Gastronomia', 'SHOPPING': 'Compras', 'NATUREZA': 'Natureza'
     };
     return categories[category] || category;
   }
