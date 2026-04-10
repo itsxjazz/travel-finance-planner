@@ -14,12 +14,29 @@
 
   <div class="pois-grid">
     @for (poi of filteredPOIs(); track poi.id) {
-      <div class="poi-card">
-      <div class="poi-image-wrapper">
-        <img [src]="poi.photo" [alt]="poi.name" class="poi-img" loading="lazy">
-        <span class="category-badge" [attr.data-category]="poi.category">
-          {{ translateCategory(poi.category) }}
-        </span>
+    <div class="poi-card">
+      
+      <div class="poi-icon-header" [attr.data-category]="poi.category">
+        <div class="icon-circle">
+          @switch (poi.category) {
+            @case ('CULTURA') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M5 21V7m14 14V7M9 21v-9m6 9v-9M3 7l9-4 9 4v2H3V7z"/></svg>
+            }
+            @case ('NATUREZA') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 21h16M12 3l-8 18h16L12 3zm0 6v6"/></svg>
+            }
+            @case ('RESTAURANT') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4C11 7.31371 8.31371 10 5 10C4.44772 10 4 11V20H6V11C6 10.4477 6.44772 10 7 10C10.3137 10 13 7.31371 13 4M17 4V20M17 4C19.2091 4 21 5.79086 21 8C21 10.2091 19.2091 12 17 12"/></svg>
+            }
+            @case ('SHOPPING') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            }
+            @default {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+            }
+          }
+        </div>
+        <span class="category-badge">{{ translateCategory(poi.category) }}</span>
       </div>
 
       <div class="poi-info">
@@ -31,8 +48,7 @@
           </svg>
           <span>{{ poi.address }}</span>
         </p>
-        
-        <p class="poi-description">{{ poi.description }}</p>
+        <p class="poi-description">{{ getDescription(poi.category) }}</p>
       </div>
 
       <div class="poi-actions">
@@ -41,9 +57,9 @@
           + Roteiro
         </button>
       </div>
+      
     </div>
-    }
-  </div>
+    } </div>
 
   @if (totalPages() > 1) {
   <footer class="pagination-footer">

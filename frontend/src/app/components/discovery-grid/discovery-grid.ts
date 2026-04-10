@@ -60,4 +60,15 @@ export class DiscoveryGrid {
     };
     return categories[category] || category;
   }
+
+  getDescription(category: string): string {
+    const frases: Record<string, string> = {
+        'CULTURA': 'Mergulhe na história e explore a arquitetura fascinante deste local.',
+        'NATUREZA': 'Desconecte-se um pouco e aproveite o ar livre neste refúgio natural.',
+        'RESTAURANT': 'Sinta o sabor local! Uma ótima parada para recarregar as energias.',
+        'SHOPPING': 'Leve um pedacinho da viagem com você ou apenas aproveite as vitrines.',
+        'GERAL': 'Uma das paradas recomendadas para enriquecer o seu roteiro de viagem.'
+    };
+    return frases[category] || frases['GERAL'];
+  }
 }

@@ -80,17 +80,10 @@ router.get('/pois', async (req, res) => {
             getPlaces(
               lat: ${parseFloat(lat)},
               lng: ${parseFloat(lng)},
-              maxDistMeters: 10000,
-              limit: 20
+              maxDistMeters: 15000,
+              limit: 50
             ) {
-              id
-              name
-              abstract
-              categories
-              distance
-              lat
-              lng
-              country
+              id, name, categories, distance, lat, lng
             }
           }
         `;
@@ -106,91 +99,35 @@ router.get('/pois', async (req, res) => {
             }
         );
 
-        if (!response.data || !response.data.data || !response.data.data.getPlaces) {
-            return res.json({ data: [] });
-        }
+        if (!response.data?.data?.getPlaces) return res.json({ data: [] });
 
-        const rawPlaces = response.data.data.getPlaces;
-
-        const categoriasEncontradas = new Set();
-        rawPlaces.forEach(place => {
-            if (place.categories) {
-                place.categories.forEach(cat => categoriasEncontradas.add(cat));
-            }
-        });
-        console.log(' CATEGORIAS NESTA CIDADE:', Array.from(categoriasEncontradas).join(', '));
-
-        // 1. BANCO DE IMAGENS
-        const imagesDB = {
-            'CULTURA': [
-                'https://images.unsplash.com/photo-1518398046578-8cca57782e17?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1541194577687-8c63bf9e7ee3?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1564399579883-456a5d4400e0?q=80&w=800&auto=format&fit=crop'
-            ],
-            'NATUREZA': [
-                'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1426604966848-d7adac402bff?q=80&w=800&auto=format&fit=crop'
-            ],
-            'RESTAURANT': [
-                'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1505826759037-406b40feb4cd?q=80&w=800&auto=format&fit=crop'
-            ],
-            'GERAL': [
-                'https://images.unsplash.com/photo-1488085061387-422e29b40080?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop'
-            ]
-        };
-
-        const formattedData = rawPlaces
+        const formattedData = response.data.data.getPlaces
             .filter(place => place.name)
-            .map((place, index) => {
-                const cats = place.categories || [];
+            .map(place => {
+                const cats = JSON.stringify(place.categories || []).toUpperCase();
                 let category = 'CULTURA';
                 
-                const catsString = JSON.stringify(cats).toUpperCase();
-                
-                if (catsString.includes('BEACH') || catsString.includes('NATURE')) {
-                    category = 'NATUREZA';
-                } else if (catsString.includes('MUSEUM') || catsString.includes('HISTORIC') || catsString.includes('CULTURE')) {
-                    category = 'CULTURA';
-                } else if (catsString.includes('RESTAURANT') || catsString.includes('FOOD')) {
-                    category = 'RESTAURANT';
-                }
-
-                // 2. LÓGICA DE DISTRIBUIÇÃO DAS FOTOS
-                const categoryPhotos = imagesDB[category] || imagesDB['GERAL'];
-                const selectedPhoto = categoryPhotos[index % categoryPhotos.length];
+                if (cats.includes('BEACH') || cats.includes('NATURE') || cats.includes('PARK')) category = 'NATUREZA';
+                else if (cats.includes('RESTAURANT') || cats.includes('FOOD') || cats.includes('CAFE') || cats.includes('BAR')) category = 'RESTAURANT';
+                else if (cats.includes('MALL') || cats.includes('MARKET') || cats.includes('SHOP')) category = 'SHOPPING';
 
                 return {
                     id: place.id,
                     name: place.name,
                     category: category,
                     address: `${(place.distance / 1000).toFixed(1)}km do centro`,
-                    description: place.abstract || 'Ponto turístico local em destaque. Veja no mapa para mais detalhes.',
-                    
-                    photo: selectedPhoto,
-                    
                     lat: place.lat,
                     lon: place.lng, 
-                    mapUrl: `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
+                    mapUrl: `http://googleusercontent.com/maps.google.com/?q=${place.lat},${place.lng}`
                 };
             });
 
-        console.log(`[TRAVEL PLACES API] Sucesso! ${formattedData.length} locais encontrados.`);
+        console.log(`[TRAVEL PLACES] Sucesso! ${formattedData.length} locais.`);
         res.json({ data: formattedData });
 
     } catch (error) {
-        console.error('⚠️ Detalhes do Erro na API:', error.response?.data || error.message);
-        res.status(500).json({ message: 'Erro interno ao buscar atrações.' });
+        console.error('Erro:', error.response?.data || error.message);
+        res.status(500).json({ message: 'Erro interno.' });
     }
 });
 
