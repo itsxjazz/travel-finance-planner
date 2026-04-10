@@ -81,32 +81,40 @@ router.get('/pois', async (req, res) => {
         // 1. CONFIGURAÇÃO: TRAVEL PLACES API (Foco: Cultura e Natureza)
         const travelQuery = `
           query {
-            getPlaces(lat: ${latFloat}, lng: ${lngFloat}, maxDistMeters: 15000, limit: 20) {
+            getPlaces(lat: ${latFloat}, lng: ${lngFloat}, maxDistMeters: 15000, limit: 15) {
               id name categories distance lat lng
             }
           }
         `;
         const requestTravelPlaces = axios.post('https://travel-places.p.rapidapi.com/', 
             { query: travelQuery },
-            { headers: { 'Content-Type': 'application/json', 'x-rapidapi-host': 'travel-places.p.rapidapi.com', 'x-rapidapi-key': process.env.RAPIDAPI_KEY } }
+            { 
+              headers: { 
+                'Content-Type': 'application/json', 
+                'x-rapidapi-host': 'travel-places.p.rapidapi.com', 
+                'x-rapidapi-key': process.env.RAPIDAPI_KEY 
+              },
+              timeout: 5000 
+            }
         );
 
         // 2. CONFIGURAÇÃO: GEOAPIFY API (Foco: Restaurantes e Compras)
         const geoCategories = [
-            'catering.restaurant', 'catering.cafe', 'catering.bar', 'catering.pub', // Gastronomia
-            'commercial.shopping_mall', 'commercial.marketplace', 'commercial.clothing' // Compras
+            'catering.restaurant', 'catering.cafe', 'catering.bar', 'catering.pub',
+            'commercial.shopping_mall', 'commercial.marketplace', 'commercial.clothing'
         ].join(',');
         
         const requestGeoapify = axios.get(`https://api.geoapify.com/v2/places`, {
             params: {
                 categories: geoCategories,
                 filter: `circle:${lngFloat},${latFloat},15000`, 
-                limit: 30, 
+                limit: 15, 
                 apiKey: process.env.GEOAPIFY_API_KEY
-            }
+            },
+            timeout: 5000
         });
 
-        // 3. EXECUÇÃO PARALELA (Dispara as duas APIs ao mesmo tempo)
+        // 3. EXECUÇÃO PARALELA
         const [travelResponse, geoResponse] = await Promise.allSettled([
             requestTravelPlaces, 
             requestGeoapify
@@ -114,13 +122,13 @@ router.get('/pois', async (req, res) => {
 
         let combinedData = [];
 
-        // --- PROCESSANDO RESULTADOS DA TRAVEL PLACES (Cultura/Natureza) ---
+        // --- PROCESSANDO RESULTADOS DA TRAVEL PLACES ---
         if (travelResponse.status === 'fulfilled' && travelResponse.value.data?.data?.getPlaces) {
             const travelData = travelResponse.value.data.data.getPlaces
                 .filter(place => place.name)
                 .map(place => {
                     const cats = JSON.stringify(place.categories || []).toUpperCase();
-                    let category = 'CULTURA'; // Padrão
+                    let category = 'CULTURA';
                     if (cats.includes('BEACH') || cats.includes('NATURE') || cats.includes('PARK')) category = 'NATUREZA';
 
                     return {
@@ -130,15 +138,13 @@ router.get('/pois', async (req, res) => {
                         address: `${(place.distance / 1000).toFixed(1)}km do centro`,
                         lat: place.lat,
                         lon: place.lng, 
-                        mapUrl: `http://googleusercontent.com/maps.google.com/?q=${place.lat},${place.lng}`
+                        mapUrl: `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
                     };
                 });
             combinedData = [...combinedData, ...travelData];
-        } else {
-            console.error('Falha ao buscar Travel Places:', travelResponse.reason?.message);
         }
 
-        // --- PROCESSANDO RESULTADOS DO GEOAPIFY (Gastronomia/Compras) ---
+        // --- PROCESSANDO RESULTADOS DO GEOAPIFY ---
         if (geoResponse.status === 'fulfilled' && geoResponse.value.data?.features) {
             const geoData = geoResponse.value.data.features
                 .filter(feature => feature.properties.name)
@@ -146,7 +152,7 @@ router.get('/pois', async (req, res) => {
                     const props = feature.properties;
                     const cats = props.categories || [];
                     
-                    let category = 'RESTAURANT'; // Padrão para essa busca
+                    let category = 'RESTAURANT';
                     if (cats.some(c => c.startsWith('commercial'))) category = 'SHOPPING';
 
                     return {
@@ -156,18 +162,16 @@ router.get('/pois', async (req, res) => {
                         address: props.formatted || `${(props.distance / 1000).toFixed(1)}km do centro`,
                         lat: props.lat,
                         lon: props.lon,
-                        mapUrl: `http://googleusercontent.com/maps.google.com/?q=${props.lat},${props.lon}`
+                        mapUrl: `https://www.google.com/maps/search/?api=1&query=${props.lat},${props.lon}`
                     };
                 });
             combinedData = [...combinedData, ...geoData];
-        } else {
-            console.error('Falha ao buscar Geoapify:', geoResponse.reason?.message);
         }
 
         // 4. RETORNO PARA O FRONTEND
         combinedData = combinedData.sort(() => Math.random() - 0.5);
 
-        console.log(`[API STITCHING] Sucesso! Entregando ${combinedData.length} locais combinados.`);
+        console.log(`[API STITCHING] Entregando ${combinedData.length} locais.`);
         res.json({ data: combinedData });
 
     } catch (error) {
