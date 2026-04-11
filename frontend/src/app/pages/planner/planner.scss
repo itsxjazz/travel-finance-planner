@@ -144,10 +144,16 @@
   border: 1px solid var(--border-color);
   gap: 4px;
   min-width: 0;
+  flex: 1; /* Faz as abas ocuparem o espaço disponível */
+  justify-content: center; /* Centraliza as abas internamente */
+  max-width: fit-content; /* Impede que se estique demais */
+  margin: 0 auto; /* Centraliza o switcher no header se o botão sumir */
 
   @media (max-width: 768px) {
     width: 100%;
     order: 2;
+    margin: 0;
+    max-width: none;
   }
 
   button {
@@ -404,7 +410,7 @@
       font-size: 0.85rem;
     }
 
-    .rate-info { color: var(--text-muted); }
+    .rate-info { color: var(--text-primary); font-weight: 600; }
     .total-brl strong { color: var(--cyan-neon); }
   }
 }
@@ -483,4 +489,36 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* --- BANNER DE VOLATILIDADE --- */
+.volatility-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: rgba(0, 243, 255, 0.05);
+  border: 1px solid rgba(0, 243, 255, 0.15);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  color: var(--cyan-neon);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+  svg {
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 5px var(--cyan-neon));
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 600px) {
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
 }

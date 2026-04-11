@@ -55,12 +55,69 @@
       &.daily::before {
         background: #007a82;
       }
+
+      .manual-badge {
+        font-size: 0.65rem;
+        color: rgba(0, 243, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 4px;
+        font-weight: 400;
+      }
+    }
+
+    .value-container {
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        background: rgba(0, 243, 255, 0.05);
+
+        .edit-icon {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
     }
 
     .value {
       color: #fff;
       font-weight: 800;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .edit-icon {
+      opacity: 0;
+      transform: translateX(-5px);
+      transition: all 0.2s ease;
+      color: var(--cyan-neon);
+    }
+
+    .edit-input {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--cyan-neon);
+      color: var(--cyan-neon);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 800;
+      width: 80px;
+      text-align: right;
+      outline: none;
+      box-shadow: 0 4px 10px -5px rgba(0, 243, 255, 0.3);
+
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
     }
   }
 }

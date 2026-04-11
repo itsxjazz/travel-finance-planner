@@ -1,4 +1,4 @@
-import { Component, Input, PLATFORM_ID, inject, OnDestroy, signal, effect } from '@angular/core';
+import { Component, Input, PLATFORM_ID, inject, OnDestroy, AfterViewInit, signal, effect } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 
 @Component({
@@ -8,59 +8,84 @@ import { isPlatformBrowser, CommonModule } from '@angular/common';
   templateUrl: './interactive-map.html',
   styleUrl: './interactive-map.scss'
 })
-export class InteractiveMap implements OnDestroy {
+export class InteractiveMap implements AfterViewInit, OnDestroy {
   private poisSignal = signal<any[]>([]);
 
   @Input() set pois(value: any[]) {
-    this.poisSignal.set(value);
+    this.poisSignal.set(value || []);
   }
 
   private platformId = inject(PLATFORM_ID);
-  private map: any;
-  private clusterGroup: any;
-  private L: any;
+  private map: any = null;
+  private clusterGroup: any = null;
+  private L: any = null;
 
   constructor() {
-    effect(async () => {
+    // Só atualizamos os marcadores se o mapa JÁ estiver pronto
+    effect(() => {
       const currentPois = this.poisSignal();
-      if (currentPois.length > 0 && isPlatformBrowser(this.platformId)) {
-        await this.ensureMapReady(currentPois[0]);
+      if (this.map && currentPois.length > 0) {
         this.updateMarkers(currentPois);
       }
     });
   }
 
-  private async ensureMapReady(firstPoi: any) {
-    if (!this.L) {
-      this.L = await import('leaflet');
-      // Expõe o Leaflet globalmente antes de importar o plugin
-      // (markercluster precisa do window.L para se registrar)
-      (window as any).L = this.L;
-      await import('leaflet.markercluster');
-    }
+  async ngAfterViewInit() {
+    // 1. Garante que só roda no Browser (não no SSR)
+    if (!isPlatformBrowser(this.platformId)) return;
 
-    if (!this.map) {
-      this.map = this.L.map('map-container').setView([firstPoi.lat, firstPoi.lon], 13);
+    // 2. Pequeno delay para garantir que o CSS e o *ngIf da aba renderizaram a div
+    setTimeout(async () => {
+      await this.initMap();
 
-      this.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© CARTO'
-      }).addTo(this.map);
-    }
-
-    setTimeout(() => {
-      if (this.map) this.map.invalidateSize();
-    }, 100);
+      // 3. Se os dados já chegaram do Service antes do mapa carregar, desenha os pins agora
+      const currentPois = this.poisSignal();
+      if (currentPois.length > 0) {
+        this.updateMarkers(currentPois);
+      }
+    }, 150);
   }
 
-  private updateMarkers(currentPois: any[]) {
-    if (!this.map || !this.L) return;
-
-    // Remove o cluster anterior se existir
-    if (this.clusterGroup) {
-      this.map.removeLayer(this.clusterGroup);
+  private async initMap() {
+    // Só importa o leaflet e o plugin se ainda não existirem globalmente
+    if (!this.L) {
+      if ((window as any).L) {
+        this.L = (window as any).L;
+      } else {
+        const leaflet = await import('leaflet');
+        this.L = leaflet.default ? leaflet.default : leaflet;
+        (window as any).L = this.L;
+        await import('leaflet.markercluster');
+      }
     }
 
-    // Cria novo grupo de cluster com visual neon customizado
+    // Se o mapa já existe na instância, não criamos de novo
+    if (this.map) {
+      this.map.invalidateSize();
+      return;
+    }
+
+    const container = document.getElementById('map-container');
+    if (!container) return; // Segurança caso a div não exista
+
+    // Centraliza num ponto padrão ou no primeiro POI
+    const firstPoi = this.poisSignal()[0];
+    const initialLat = firstPoi ? firstPoi.lat : 0;
+    const initialLon = firstPoi ? firstPoi.lon : 0;
+
+    this.map = this.L.map('map-container').setView([initialLat, initialLon], 13);
+
+    this.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© CARTO'
+    }).addTo(this.map);
+
+    // Cria o grupo de cluster apenas uma vez na inicialização
+    this.initClusterGroup();
+  }
+
+  private initClusterGroup() {
+    if (this.clusterGroup) return;
+
     this.clusterGroup = (this.L as any).markerClusterGroup({
       maxClusterRadius: 60,
       showCoverageOnHover: false,
@@ -97,6 +122,15 @@ export class InteractiveMap implements OnDestroy {
       }
     });
 
+    this.map.addLayer(this.clusterGroup);
+  }
+
+  private updateMarkers(currentPois: any[]) {
+    if (!this.map || !this.L || !this.clusterGroup) return;
+
+    // Limpa os pins antigos antes de colocar os novos
+    this.clusterGroup.clearLayers();
+
     currentPois.forEach(poi => {
       const icon = this.createCategoryIcon(poi.category);
       const marker = this.L.marker([poi.lat, poi.lon], { icon });
@@ -113,13 +147,18 @@ export class InteractiveMap implements OnDestroy {
       this.clusterGroup.addLayer(marker);
     });
 
-    this.map.addLayer(this.clusterGroup);
-
-    // Ajusta o zoom para mostrar todos os pontos
+    // Ajusta o zoom da câmera para mostrar todos os pontos novos
     try {
-      const bounds = this.clusterGroup.getBounds();
-      if (bounds.isValid()) this.map.fitBounds(bounds.pad(0.1));
+      if (currentPois.length > 0) {
+        const bounds = this.clusterGroup.getBounds();
+        if (bounds.isValid()) {
+          this.map.fitBounds(bounds.pad(0.1));
+        }
+      }
     } catch (e) { /* ignora se bounds inválido */ }
+
+    // Força o redesenho do mapa caso ele não tenha percebido que a aba mudou
+    this.map.invalidateSize();
   }
 
   private createCategoryIcon(category: string) {
@@ -177,6 +216,10 @@ export class InteractiveMap implements OnDestroy {
     if (this.map) {
       this.map.remove();
       this.map = null;
+    }
+    // Removemos também a instância do cluster para evitar memory leaks
+    if (this.clusterGroup) {
+      this.clusterGroup = null;
     }
   }
 }

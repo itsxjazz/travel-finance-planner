@@ -256,6 +256,30 @@ export class Planner implements OnInit {
     this.itinerary.update(current => current.filter(item => item.id !== poiId));
   }
 
+  onManualUpdate(event: { category: string, value: number }) {
+    this.budgetResult.update(current => {
+      if (!current) return current;
+
+      const newBreakdown = { ...current.breakdown, [event.category]: event.value };
+
+      // Marca a categoria específica como manual para persistência
+      if (event.category === 'flight') newBreakdown.isFlightManual = true;
+      if (event.category === 'hotel') newBreakdown.isHotelManual = true;
+      if (event.category === 'dailyExpenses') newBreakdown.isDailyManual = true;
+
+      const newTotal = newBreakdown.flight + newBreakdown.hotel + newBreakdown.dailyExpenses;
+
+      // Sincroniza o localGoal para atualizar o restante da UI reativamente
+      this.localGoal.set(newTotal);
+
+      return {
+        ...current,
+        breakdown: newBreakdown,
+        estimatedTotalUsd: newTotal // O nome do campo no banco é estimatedTotalUsd mas aqui representa o total na moeda local
+      };
+    });
+  }
+
   formatBRL(value: number): string { // Formata um número para o padrão brasileiro (1.234,56)
     if (!value || isNaN(value)) return '0,00';
     const fixed = typeof value === 'string' ? parseFloat(value) : value;

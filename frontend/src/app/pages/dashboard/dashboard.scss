@@ -96,59 +96,46 @@
   }
 }
 
-/* --- STATUS DO ITINERÁRIO --- */
-.itinerary-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-  padding: 10px 14px;
-  background: rgba(0, 243, 255, 0.03);
-  border: 1px solid rgba(0, 243, 255, 0.1);
-  border-radius: 8px;
-
-  .dot {
-    width: 8px;
-    height: 8px;
-    background: var(--cyan-neon);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--cyan-neon);
-  }
-
-  .text {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    strong { color: var(--cyan-neon); }
-  }
-}
-
-/* --- DATA BADGE --- */
-.date-badge {
-  background: rgba(0, 243, 255, 0.05);
-  padding: 16px 20px;
-  border-radius: 12px;
+/* --- METRICS ROW --- */
+.trip-metrics-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-left: 4px solid var(--cyan-neon);
-  margin-bottom: 24px;
+  padding: 18px 4px;
   margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 
-  .badge-content {
-    .badge-title {
-      display: block;
-      font-size: 0.7rem;
+  .metric-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    svg {
       color: var(--cyan-neon);
-      font-weight: 800;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-      text-transform: uppercase;
+      flex-shrink: 0;
     }
-    .badge-date {
-      font-size: 1rem;
-      color: #fff;
-      font-weight: 700;
-      text-transform: capitalize;
+
+    .metric-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .metric-label {
+        font-size: 0.7rem;
+        color: #9ca3af;
+        text-transform: none; // Alterado de uppercase para minúsculo/original
+        letter-spacing: 0.2px;
+        font-weight: 400;
+        line-height: 1.1;
+        margin-bottom: 2px;
+      }
+
+      .metric-value {
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        line-height: 1;
+      }
     }
   }
 }
@@ -172,6 +159,31 @@
     transition: 0.3s;
     &:hover { border-color: var(--cyan-neon); background: rgba(0, 243, 255, 0.05); color: var(--cyan-neon); }
     &.delete:hover { border-color: #ff0055; background: rgba(255,0,85,0.05); color: #ff0055; }
+  }
+}
+
+/* --- EMPTY STATE --- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  max-width: 600px;
+  margin: 40px auto;
+  text-align: center;
+  border: 1px dashed rgba(0, 243, 255, 0.2);
+
+  p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+
+  .btn-neon {
+    padding: 14px 32px;
+    font-size: 1rem;
+    margin-top: 12px; // Adiciona espaço extra como solicitado
   }
 }
 

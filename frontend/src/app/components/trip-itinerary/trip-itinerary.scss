@@ -65,17 +65,17 @@
 
     .item-name {
       margin: 0;
-      font-weight: 700;
-      color: #ffffff;
-      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.95rem;
     }
   }
 
   /* --- BOTÃO REMOVER --- */
   .btn-remove {
     background: transparent;
-    border: 1px solid rgba(255, 0, 85, 0.3);
-    color: rgba(255, 0, 85, 0.7);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
     font-weight: 700;
     cursor: pointer;
     padding: 8px 16px;

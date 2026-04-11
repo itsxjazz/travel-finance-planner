@@ -4,9 +4,12 @@
   top: 0; left: 0;
   width: 100%;
   height: 72px;
-  background: rgba(10, 10, 15, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.85) 0%, rgba(15, 23, 42, 0.85) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  border-bottom: 1px solid rgba(0, 243, 255, 0.15); /* Ciano com baixa opacidade para efeito vidro/luz */
+  box-shadow: 0 4px 30px rgba(0, 243, 255, 0.05); /* Brilho sutil escapando do painel */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -21,19 +24,25 @@
     text-decoration: none;
     min-width: 0;
 
-    .mini-logo {
-      height: 28px;
-      filter: drop-shadow(0 0 8px var(--cyan-neon));
-    }
-
     .topbar-brand-name {
-      color: var(--cyan-neon);
-      font-weight: 800;
-      font-size: 1.3rem;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 1.4rem;
       line-height: 1;
       letter-spacing: 0.02em;
-      text-shadow: var(--glow-cyan);
       white-space: nowrap;
+      
+      .fin {
+        font-weight: 400;
+        color: var(--text-primary);
+      }
+      
+      .go {
+        font-weight: 800;
+        color: var(--cyan-neon);
+        text-shadow: var(--glow-cyan);
+      }
+      
       @media (max-width: 600px) { display: none; }
     }
   }
@@ -99,18 +108,49 @@
   .sidebar-bg-logo {
     position: absolute; inset: 0;
     background: linear-gradient(to bottom, rgba(2, 6, 23, 0.9), #020617),
-                url("../../../../public/logo.svg") no-repeat center;
+                url("../../../../public/fingo-icon.svg") no-repeat center;
     background-size: cover, 140%; opacity: 0.05; z-index: -1;
   }
 
   .sidebar-header {
-    display: flex; justify-content: space-between; margin-bottom: 60px;
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 60px;
     .nav-brand {
       display: flex; align-items: center; gap: 12px;
-      .logo-img { height: 32px; filter: drop-shadow(0 0 5px var(--cyan-neon)); }
-      .brand-name { color: var(--cyan-neon); font-weight: 800; font-size: 1.3rem; }
+      .brand-name { 
+        font-size: 1.4rem; 
+        font-family: 'Inter', sans-serif;
+        
+        .fin {
+          font-weight: 400;
+          color: var(--text-primary);
+        }
+        
+        .go {
+          font-weight: 800;
+          color: var(--cyan-neon);
+          text-shadow: var(--glow-cyan);
+        }
+      }
     }
-    .close-sidebar { background: none; border: none; color: #64748b; cursor: pointer; &:hover { color: #fff; } }
+    .close-sidebar {
+      background: rgba(255, 255, 255, 0.05);
+      border: none;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: 0.3s;
+
+      &:hover {
+        background: rgba(255, 68, 68, 0.2);
+        color: #ff4444;
+        transform: rotate(90deg);
+      }
+    }
   }
 
   .nav-links {
@@ -167,9 +207,25 @@
       color: var(--text-secondary); padding: 14px; border-radius: var(--radius-md);
       display: flex; align-items: center; justify-content: center; gap: 10px;
       font-weight: 600; cursor: pointer; transition: 0.3s;
-      &:hover { border-color: var(--cyan-neon); color: var(--cyan-neon); background: rgba(0, 243, 255, 0.02); }
+      &:hover { border-color: #ff0055; color: #ff0055; background: rgba(255, 0, 85, 0.05); box-shadow: 0 0 15px rgba(255, 0, 85, 0.2); }
     }
   }
 }
 
 .menu-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(4px); z-index: 1500; }
+
+/* --- ÍCONE FINGO (CSS Mask) --- */
+.fingo-brand-icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--cyan-neon);
+  -webkit-mask-image: url('/fingo-icon.svg');
+  mask-image: url('/fingo-icon.svg');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  filter: drop-shadow(0 0 5px rgba(0, 243, 255, 0.6));
+}

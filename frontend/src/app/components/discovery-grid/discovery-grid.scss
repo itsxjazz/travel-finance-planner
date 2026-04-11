@@ -89,14 +89,12 @@
       justify-content: center;
       background: rgba(0, 243, 255, 0.03); // Fundo levemente ciano
       border: 1px solid rgba(0, 243, 255, 0.2); // Borda ciano
-      box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
       transition: all 0.3s ease;
 
       svg {
         width: 24px;
         height: 24px;
         color: var(--cyan-neon); // Força a cor ciano no ícone
-        filter: drop-shadow(0 0 4px var(--cyan-neon));
       }
     }
 
@@ -119,25 +117,24 @@
     flex-grow: 1;
 
     h4 {
-      color: #ffffff;
-      font-size: 1.25rem;
-      margin: 0 0 10px 0;
-      font-weight: 700;
+      color: var(--text-primary);
+      font-size: 1rem;
+      margin: 0 0 8px 0;
+      font-weight: 600;
     }
 
     .address {
       display: flex;
       align-items: center;
       gap: 6px; 
-      font-size: 0.85rem;
-      color: #00f3ff;
-      margin: 0 0 12px 0;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin: 0 0 10px 0;
 
       .icon-cyan-small {
         width: 14px;
         height: 14px;
-        color: var(--cyan-neon, #00f3ff); 
-        filter: drop-shadow(0 0 3px rgba(0, 243, 255, 0.6));
+        color: var(--text-secondary); 
         flex-shrink: 0; 
       }
 

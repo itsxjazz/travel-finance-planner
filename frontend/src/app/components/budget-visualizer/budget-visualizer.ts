@@ -1,5 +1,6 @@
-import { Component, Input, ElementRef, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -7,7 +8,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-budget-visualizer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './budget-visualizer.html',
   styleUrl: './budget-visualizer.scss'
 })
@@ -16,8 +17,13 @@ export class BudgetVisualizer implements OnChanges {
   @Input() budgetBreakdown: any;
   @Input() currencyCode: string = 'USD';
 
+  @Output() onManualUpdate = new EventEmitter<{category: string, value: number}>();
+
   @ViewChild('budgetChartCanvas') chartCanvas!: ElementRef;
   chartInstance: any;
+
+  editingCategory: string | null = null;
+  tempValue: number = 0;
 
   // Escuta as mudanças nos valores para desenhar ou atualizar o gráfico
   ngOnChanges(changes: SimpleChanges) {
@@ -66,5 +72,29 @@ export class BudgetVisualizer implements OnChanges {
         }
       }
     });
+  }
+
+  startEdit(category: string, currentValue: number) {
+    this.editingCategory = category;
+    this.tempValue = currentValue;
+  }
+
+  cancelEdit() {
+    this.editingCategory = null;
+  }
+
+  saveEdit(category: string) {
+    if (this.tempValue >= 0) {
+      this.onManualUpdate.emit({ category, value: this.tempValue });
+    }
+    this.editingCategory = null;
+  }
+
+  handleKey(event: KeyboardEvent, category: string) {
+    if (event.key === 'Enter') {
+      this.saveEdit(category);
+    } else if (event.key === 'Escape') {
+      this.cancelEdit();
+    }
   }
 }
