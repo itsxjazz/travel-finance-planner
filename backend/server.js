@@ -31,11 +31,10 @@ app.use('/api/locals', localsRoutes);
 app.use('/api/hotels', hotelRoutes);
 app.use('/api/flights', flightRoutes);
 
-// Middleware Global de Tratamento de Erros e Estabilidade (Fallbacks Gerais)
-app.use((err, req, res, next) => {
-    console.error('Global Error Handler:', err.message || err);
-    res.status(500).json({ error: "Serviço temporariamente instável", code: "API_TIMEOUT" });
-});
+const errorHandler = require('./middleware/errorHandler');
+
+// Middleware Global de Tratamento de Erros Profissional (Fallbacks Gerais)
+app.use(errorHandler);
 
 // Conexão com o MongoDB
 mongoose.connect(process.env.MONGO_URI)
