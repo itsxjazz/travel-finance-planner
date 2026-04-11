@@ -27,7 +27,21 @@ const checkCacheFlights = async (req, res, next) => {
         const cachedSearch = await SearchCache.findOne({ cacheKey });
         if (cachedSearch) {
             console.log(`[CACHE] Entregando voos de ${origin} para ${destination} sem gastar API.`);
-            return res.json(cachedSearch.data); // Retornara exatamente { flights: [...] } armazenado no MongoDB
+            
+            // Fix for old cache formats (raw Kiwi response or {flights: []} object)
+            let returnData = [];
+            if (Array.isArray(cachedSearch.data)) {
+                returnData = cachedSearch.data;
+            } else if (cachedSearch.data && Array.isArray(cachedSearch.data.flights)) {
+                returnData = cachedSearch.data.flights;
+            } else {
+                // If it's a raw unmapped kiwi response, delete cache and proceed to fetch fresh
+                await SearchCache.deleteOne({ cacheKey });
+                req.flightData = { origin, destination, departureDate, cacheKey };
+                return next();
+            }
+            
+            return res.json(returnData);
         }
 
         req.flightData = { origin, destination, departureDate, cacheKey };
@@ -65,41 +79,64 @@ router.get('/search', checkCacheFlights, searchLimiter, async (req, res) => {
         });
 
         // Acessível normalmente quando API funciona
-        const itineraries = response.data.itineraries || [];
+        // The Kiwi one-way endpoint on rapid API might return data directly or wrapped
+        const itineraries = response.data.itineraries || response.data.data?.itineraries || [];
 
         // MAP: Convertendo Data Bruta pro formato Angular (Básico focado em preço e cia)
         const mappedFlights = itineraries.map(itinerary => {
             const sectors = itinerary.sector?.sectorSegments || [];
             const firstSegment = sectors[0]?.segment || {};
+            const lastSegment = sectors[sectors.length - 1]?.segment || {};
 
-            const airline = firstSegment.carrier?.name || 'Companhia Desconhecida';
+            const airlineCode = firstSegment.carrier?.code || '';
+            const airlineName = firstSegment.carrier?.name || 'Companhia Desconhecida';
             const price = parseFloat(itinerary.price?.amount || 0);
+
+            const departureAt = firstSegment.source?.localTime || '';
+            const departureIataCode = firstSegment.source?.station?.code || '';
+
+            const arrivalAt = lastSegment.destination?.localTime || '';
+            const arrivalIataCode = lastSegment.destination?.station?.code || '';
+
+            const durationRaw = itinerary.sector?.duration || 0;
+            const durationHours = Math.floor(durationRaw / 3600);
+            const durationMinutes = Math.floor((durationRaw % 3600) / 60);
+            const durationStr = `PT${durationHours}H${durationMinutes}M`;
+
+            const stops = Math.max(0, sectors.length - 1);
 
             return {
                 id: itinerary.id || itinerary.legacyId || Math.random().toString(36).substring(7),
-                airline,
+                airlineCode,
+                airlineName,
+                stops,
+                departure: {
+                    at: departureAt,
+                    iataCode: departureIataCode
+                },
+                duration: durationStr,
+                arrival: {
+                    at: arrivalAt,
+                    iataCode: arrivalIataCode
+                },
                 price,
-                currency: "BRL",
-                origin: origin.toUpperCase(),
-                destination: destination.toUpperCase()
+                currency: "BRL"
             };
         });
 
         // Garantia de precos crescentes
         mappedFlights.sort((a, b) => a.price - b.price);
 
-        const resultStruct = { flights: mappedFlights };
-
-        // Save do objeto limpo
+        // Save do array mapeado em data
         await SearchCache.create({
             cacheKey,
             origin,
             destination,
             departureDate,
-            data: resultStruct
+            data: mappedFlights
         });
 
-        res.json(resultStruct);
+        res.json(mappedFlights);
 
     } catch (error) {
         // Correcao de Cota Rate Limit Kiwi Localizada

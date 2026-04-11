@@ -105,9 +105,10 @@ router.get('/pois', async (req, res) => {
             params: {
                 categories: geoCategories,
                 filter: `circle:${lngFloat},${latFloat},15000`, 
-                limit: 30, 
+                limit: 150, // Aumentando o limite para garantir restaurantes e compras
                 apiKey: process.env.GEOAPIFY_API_KEY
-            }
+            },
+            timeout: 12000 // Garantindo que tem tempo para responder
         });
 
         // 3. EXECUÇÃO PARALELA
@@ -117,6 +118,9 @@ router.get('/pois', async (req, res) => {
         ]);
 
         let combinedData = [];
+        let travelCount = 0;
+        let geoapifyCount = 0;
+        let categoryCounts = { CULTURA: 0, NATUREZA: 0, RESTAURANT: 0, SHOPPING: 0 };
 
         // --- PROCESSANDO RESULTADOS DA TRAVEL PLACES ---
         if (travelResponse.status === 'fulfilled' && travelResponse.value.data?.data?.getPlaces) {
@@ -127,6 +131,7 @@ router.get('/pois', async (req, res) => {
                     let category = 'CULTURA';
                     if (cats.includes('BEACH') || cats.includes('NATURE') || cats.includes('PARK')) category = 'NATUREZA';
 
+                    categoryCounts[category]++;
                     return {
                         id: place.id,
                         name: place.name,
@@ -138,6 +143,7 @@ router.get('/pois', async (req, res) => {
                     };
                 });
             combinedData = [...combinedData, ...travelData];
+            travelCount = travelData.length;
         } else if (travelResponse.status === 'rejected') {
             console.error('[TRAVEL PLACES ERRO SILENCIOSO]:', travelResponse.reason?.message || travelResponse.reason);
         }
@@ -159,6 +165,7 @@ router.get('/pois', async (req, res) => {
                         category = 'CULTURA';
                     }
 
+                    categoryCounts[category]++;
                     return {
                         id: props.place_id,
                         name: props.name,
@@ -170,6 +177,7 @@ router.get('/pois', async (req, res) => {
                     };
                 });
             combinedData = [...combinedData, ...geoData];
+            geoapifyCount = geoData.length;
         } else if (geoResponse.status === 'rejected') {
             const errReason = geoResponse.reason?.response?.data || geoResponse.reason?.message || geoResponse.reason;
             console.error('[GEOAPIFY ERRO SILENCIOSO]:', errReason);
@@ -178,7 +186,11 @@ router.get('/pois', async (req, res) => {
         // 4. RETORNO PARA O FRONTEND
         combinedData = combinedData.sort(() => Math.random() - 0.5);
 
-        console.log(`[API STITCHING] Entregando ${combinedData.length} locais.`);
+        console.log(`[API STITCHING] Detalhes do retorno:
+        - Travel Places: ${travelCount} locais
+        - Geoapify: ${geoapifyCount} locais
+        - Categorias: Cultura(${categoryCounts.CULTURA}), Natureza(${categoryCounts.NATUREZA}), Restaurante(${categoryCounts.RESTAURANT}), Compras(${categoryCounts.SHOPPING})
+        - Total entregue: ${combinedData.length} locais`);
         res.json({ data: combinedData });
 
     } catch (error) {
