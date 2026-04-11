@@ -65,6 +65,7 @@ router.get('/:location', checkCacheHotels, searchLimiter, async (req, res) => {
                 checkout_date: checkoutDateStr,
                 adults_number: 2,
                 room_number: 1,
+                filter_by_currency: 'EUR',
                 order_by: 'popularity',
                 units: 'metric',
                 categories_filter_ids: `class::${stars}`
@@ -94,7 +95,9 @@ router.get('/:location', checkCacheHotels, searchLimiter, async (req, res) => {
         res.json(formattedHotels);
 
     } catch (error) {
-        console.error('Erro na Busca:', error.message);
+        const apiStatus = error.response?.status;
+        const apiBody = JSON.stringify(error.response?.data || error.message);
+        console.error(`[HOTEL BUSCA ERRO] Status: ${apiStatus} | Body: ${apiBody}`);
         res.status(500).json({ message: 'Erro ao buscar hotéis.' });
     }
 });
@@ -143,6 +146,7 @@ router.get('/details/:hotelId', checkCacheDetails, searchLimiter, async (req, re
                     checkout_date: checkoutDateStr,
                     adults_number_by_rooms: '2',
                     units: 'metric',
+                    currency: 'EUR',
                     locale: 'pt-br'
                 },
                 headers: HEADERS

@@ -1,4 +1,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+@import 'leaflet/dist/leaflet.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+
+/* Override padrão do markercluster para o tema neon */
+.neon-cluster-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-cluster-anim .leaflet-marker-icon,
+.leaflet-cluster-anim .leaflet-marker-shadow {
+  transition: transform 0.3s ease-out, opacity 0.3s ease-in;
+}
+
+/* Popup do mapa no tema escuro */
+.leaflet-popup-content-wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.leaflet-popup-tip {
+  background: #00f3ff !important;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+}
+.leaflet-popup-close-button {
+  color: #00f3ff !important;
+  font-size: 18px !important;
+}
 
 /* ========================================================================== 
    VARIÁVEIS GLOBAIS - TEMA CIANO (CLEAN DARK)
