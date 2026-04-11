@@ -178,8 +178,8 @@
       transition: 0.3s;
 
       &:hover {
-        border-color: #ffffff;
-        color: #ffffff;
+        border-color: var(--cyan-neon);
+        color: var(--cyan-neon);
       }
     }
 
