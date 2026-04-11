@@ -157,3 +157,32 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--cyan-neon);
 }
+
+/* ==========================================================================
+   MOBILE STRUCTURAL FIX FOR INTERNAL PAGES
+   ========================================================================== */
+.internal-page-wrapper {
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden;
+  }
+}
+
+/* Ensure glassmorphism cards adapt properly to the mobile padding */
+@media (max-width: 768px) {
+  .internal-page-wrapper .card-dark,
+  .internal-page-wrapper .trip-card,
+  .internal-page-wrapper .country-card,
+  .internal-page-wrapper .empty-state {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}

@@ -154,6 +154,8 @@
     order: 2;
     margin: 0;
     max-width: none;
+    flex-wrap: wrap;
+    border-radius: 12px;
   }
 
   button {
@@ -324,6 +326,13 @@
     .section-title {
       margin: 0;
       flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      gap: 12px;
     }
 
     @media (max-width: 480px) {

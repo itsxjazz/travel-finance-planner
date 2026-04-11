@@ -1,14 +1,48 @@
 .itinerary-wrapper { // CONTAINER PRINCIPAL
   padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+
+  &.expanded {
+    .chevron-icon {
+      transform: rotate(180deg);
+    }
+    .accordion-content {
+      grid-template-rows: 1fr;
+      margin-top: 24px;
+    }
+  }
 }
 
 .itinerary-header { // CABEÇALHO COM TÍTULO E CONTADOR DE ITENS
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
   gap: 16px;
   flex-wrap: nowrap;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .chevron-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-secondary);
+  }
 
   .section-title {
     margin: 0;
@@ -24,6 +58,23 @@
     padding: 4px 12px;
     border-radius: 50px;
     box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+
+    &.empty {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--text-secondary);
+      box-shadow: none;
+    }
+  }
+}
+
+.accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s ease;
+
+  .accordion-inner {
+    overflow: hidden;
   }
 }
 
@@ -89,5 +140,27 @@
       color: #ff0055;
       box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
     }
+  }
+}
+
+/* --- ESTADOS VAZIOS (FEEDBACK VISUAL) --- */
+.empty-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  min-height: 180px;
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 80%;
   }
 }

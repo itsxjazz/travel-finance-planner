@@ -13,7 +13,7 @@
 }
 
 @if (!isLoading() && tripDetails) {
-<div class="planner-container">
+<div class="planner-container internal-page-wrapper">
 
   <header class="planner-header">
     <div class="header-info">
@@ -222,17 +222,8 @@
         </div>
 
         <aside class="itinerary-aside">
-          @if (itinerary().length > 0) {
           <app-trip-itinerary [items]="itinerary()" (removeRequested)="removeFromItinerary($event)">
           </app-trip-itinerary>
-          } @else {
-          <div class="card-dark empty-itinerary">
-            <h3 class="section-title">Roteiro Personalizado</h3>
-            <div class="empty-state-box">
-              <p>Seu roteiro está vazio. Explore a grade abaixo e adicione locais para visitar!</p>
-            </div>
-          </div>
-          }
         </aside>
       </div>
 

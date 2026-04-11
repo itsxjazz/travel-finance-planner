@@ -1,4 +1,4 @@
-import { Component, input, Output, EventEmitter } from '@angular/core';
+import { Component, input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,11 +9,14 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./trip-itinerary.scss']
 })
 export class TripItinerary {
-  // Signal Input para receber os itens do roteiro
   items = input<any[]>([]);
-
-  // Evento para avisar o Maestro que um item deve ser removido
   @Output() removeRequested = new EventEmitter<string>();
+
+  isExpanded = signal(false);
+
+  toggleAccordion() {
+    this.isExpanded.update(v => !v);
+  }
 
   // Lógica de tradução isolada
   translateCategory(category: string): string {

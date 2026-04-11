@@ -1,28 +1,39 @@
-@if (items().length > 0) {
-<div class="card-dark itinerary-wrapper">
-
-  <header class="itinerary-header">
-    <h3 class="section-title">Roteiro Personalizado</h3>
-    <span class="count-badge">
-      {{ items().length }} {{ items().length === 1 ? 'item' : 'itens' }}
-    </span>
+<div class="card-dark itinerary-wrapper" [class.expanded]="isExpanded()">
+  <header class="itinerary-header" (click)="toggleAccordion()">
+    <div class="header-left">
+      <h3 class="section-title">Roteiro Personalizado</h3>
+      <span class="count-badge" [class.empty]="items().length === 0">
+        {{ items().length }} {{ items().length === 1 ? 'item' : 'itens' }}
+      </span>
+    </div>
+    <div class="header-right">
+      <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
   </header>
 
-  <div class="items-list">
-    @for (item of items(); track item.id) {
-    <div class="itinerary-item">
-      <div class="item-info">
-        <span class="category-indicator" [attr.data-category]="item.category">
-          {{ translateCategory(item.category) }}
-        </span>
-        <p class="item-name">{{ item.name }}</p>
-      </div>
-
-      <button (click)="removeItem(item.id)" class="btn-remove">
-        Remover
-      </button>
+  <div class="accordion-content">
+    <div class="accordion-inner">
+      @if (items().length > 0) {
+        <div class="items-list">
+          @for (item of items(); track item.id) {
+          <div class="itinerary-item">
+            <div class="item-info">
+              <span class="category-indicator" [attr.data-category]="item.category">
+                {{ translateCategory(item.category) }}
+              </span>
+              <p class="item-name">{{ item.name }}</p>
+            </div>
+            <button (click)="removeItem(item.id)" class="btn-remove">Remover</button>
+          </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state-box">
+          <p>Seu roteiro está vazio. Explore a grade abaixo e adicione locais para visitar!</p>
+        </div>
+      }
     </div>
-    }
   </div>
 </div>
-}
