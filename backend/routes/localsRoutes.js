@@ -143,6 +143,8 @@ router.get('/pois', async (req, res) => {
                     };
                 });
             combinedData = [...combinedData, ...travelData];
+        } else if (travelResponse.status === 'rejected') {
+            console.error('[TRAVEL PLACES ERRO SILENCIOSO]:', travelResponse.reason?.message || travelResponse.reason);
         }
 
         // --- PROCESSANDO RESULTADOS DO GEOAPIFY ---
@@ -167,6 +169,9 @@ router.get('/pois', async (req, res) => {
                     };
                 });
             combinedData = [...combinedData, ...geoData];
+        } else if (geoResponse.status === 'rejected') {
+            const errReason = geoResponse.reason?.response?.data || geoResponse.reason?.message || geoResponse.reason;
+            console.error('[GEOAPIFY ERRO SILENCIOSO]:', errReason);
         }
 
         // 4. RETORNO PARA O FRONTEND

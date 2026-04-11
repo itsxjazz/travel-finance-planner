@@ -2,13 +2,20 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const SearchCache = require('../models/SearchCache');
+const rateLimit = require('express-rate-limit');
+
+const searchLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000, 
+    max: 10, 
+    message: { message: 'Muitas buscas originadas deste IP, por favor tente novamente em 30 minutos.' }
+});
 
 const HEADERS = {
     'x-rapidapi-host': 'booking-com.p.rapidapi.com',
     'x-rapidapi-key': process.env.RAPIDAPI_KEY
 };
 
-router.get('/:location', async (req, res) => {
+const checkCacheHotels = async (req, res, next) => {
     try {
         const { location } = req.params;
         const stars = req.query.stars || '3';
@@ -25,6 +32,17 @@ router.get('/:location', async (req, res) => {
             console.log(`[CACHE] Entregando busca de hotéis para ${location} sem gastar API.`);
             return res.json(cachedSearch.data);
         }
+
+        req.hotelData = { location, stars, checkinDateStr, checkoutDateStr, cacheKey };
+        next();
+    } catch (error) {
+        next(error);
+    }
+};
+
+router.get('/:location', checkCacheHotels, searchLimiter, async (req, res) => {
+    try {
+        const { location, stars, checkinDateStr, checkoutDateStr, cacheKey } = req.hotelData;
 
         const locResponse = await axios.get('https://booking-com.p.rapidapi.com/v1/hotels/locations', {
             params: { name: location, locale: 'pt-br' },
@@ -82,7 +100,7 @@ router.get('/:location', async (req, res) => {
     }
 });
 
-router.get('/details/:hotelId', async (req, res) => {
+const checkCacheDetails = async (req, res, next) => {
     try {
         const { hotelId } = req.params;
 
@@ -93,12 +111,22 @@ router.get('/details/:hotelId', async (req, res) => {
 
         const cacheKey = `HOTEL-DETAILS-${hotelId}-${checkinDateStr}`;
 
-        // 1. Verificação de Cache (Economia de R$) via MongoDB
         const cachedDetails = await SearchCache.findOne({ cacheKey });
         if (cachedDetails) {
             console.log(`[CACHE] Entregando hotel ${hotelId} sem gastar API.`);
             return res.json(cachedDetails.data);
         }
+
+        req.hotelDetails = { hotelId, checkinDateStr, checkoutDateStr, cacheKey };
+        next();
+    } catch (error) {
+        next(error);
+    }
+};
+
+router.get('/details/:hotelId', checkCacheDetails, searchLimiter, async (req, res) => {
+    try {
+        const { hotelId, checkinDateStr, checkoutDateStr, cacheKey } = req.hotelDetails;
 
         const [descRes, photosRes, roomsRes] = await Promise.all([
             axios.get('https://booking-com.p.rapidapi.com/v1/hotels/description', {
