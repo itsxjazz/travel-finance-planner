@@ -99,17 +99,13 @@ router.get('/pois', async (req, res) => {
         );
 
         // 2. CONFIGURAÇÃO: GEOAPIFY API (Foco: Restaurantes, Compras e Cultura)
-        const geoCategories = [
-            'catering.restaurant', 'catering.cafe', 'catering.bar', 'catering.pub',
-            'commercial.shopping_mall', 'commercial.marketplace', 'commercial.clothing',
-            'tourism', 'entertainment.culture'
-        ].join(',');
+        const geoCategories = 'tourism.attraction,tourism.sights,entertainment.museum,entertainment.culture,catering.restaurant,catering.cafe,catering.bar,catering.pub,catering.fast_food,commercial.clothing,commercial.shopping_mall,commercial.gift_and_souvenir,commercial.books,commercial.marketplace';
         
         const requestGeoapify = axios.get(`https://api.geoapify.com/v2/places`, {
             params: {
                 categories: geoCategories,
                 filter: `circle:${lngFloat},${latFloat},15000`, 
-                limit: 15, 
+                limit: 30, 
                 apiKey: process.env.GEOAPIFY_API_KEY
             },
             timeout: 10000
@@ -154,9 +150,15 @@ router.get('/pois', async (req, res) => {
                 .map(feature => {
                     const props = feature.properties;
                     const cats = props.categories || [];
-                    
-                    let category = 'RESTAURANT';
-                    if (cats.some(c => c.startsWith('commercial'))) category = 'SHOPPING';
+
+                    let category = 'CULTURA';
+                    if (cats.some(c => c.startsWith('catering'))) {
+                        category = 'RESTAURANT';
+                    } else if (cats.some(c => c.startsWith('commercial'))) {
+                        category = 'SHOPPING';
+                    } else if (cats.some(c => c.startsWith('tourism') || c.startsWith('entertainment') || c.startsWith('leisure'))) {
+                        category = 'CULTURA';
+                    }
 
                     return {
                         id: props.place_id,

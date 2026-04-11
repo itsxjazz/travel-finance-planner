@@ -12,6 +12,13 @@ const searchLimiter = rateLimit({
 
 const RAPIDAPI_HOST = 'kiwi-com-cheap-flights.p.rapidapi.com';
 
+function formatDuration(seconds) {
+    if (!seconds || isNaN(seconds)) return '0h 0m';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+}
+
 const checkCacheFlights = async (req, res, next) => {
     try {
         const { origin, destination, date } = req.query;
@@ -27,7 +34,7 @@ const checkCacheFlights = async (req, res, next) => {
         const cachedSearch = await SearchCache.findOne({ cacheKey });
         if (cachedSearch) {
             console.log(`[CACHE] Entregando voos de ${origin} para ${destination} sem gastar API.`);
-            return res.json(cachedSearch.data);
+            return res.json(cachedSearch.data); // Retornara exatamente { flights: [...] } armazenado no MongoDB
         }
 
         req.flightData = { origin, destination, departureDate, cacheKey };
@@ -44,7 +51,6 @@ router.get('/search', checkCacheFlights, searchLimiter, async (req, res) => {
         // Endpoint exato especificado
         const url = `https://${RAPIDAPI_HOST}/one-way`;
 
-        // Range fixo com restricoes rigorosas da querystring
         const params = {
             source: origin,
             destination: destination,
@@ -65,27 +71,62 @@ router.get('/search', checkCacheFlights, searchLimiter, async (req, res) => {
             timeout: 10000 
         });
 
-        const flightsData = response.data;
-        
+        // Acessível normalmente quando API funciona
+        const itineraries = response.data.itineraries || [];
+
+        // MAP: Convertendo Data Bruta pro formato Angular Amigavel (Limpo)
+        const mappedFlights = itineraries.map(itinerary => {
+            const sectors = itinerary.sectorSegments || [];
+            const firstSegment = sectors[0] || {};
+            const lastSegment = sectors[sectors.length - 1] || {};
+
+            const airline = firstSegment.segment?.carrier?.name || 'Companhia Desconhecida';
+            const price = parseFloat(itinerary.price?.amount || 0);
+            const duration = formatDuration(itinerary.duration);
+            const departureTime = firstSegment.segment?.departure?.localTime || 'Emissão Pendente';
+            const arrivalTime = lastSegment.segment?.arrival?.localTime || 'Emissão Pendente';
+
+            return {
+                id: itinerary.id || Math.random().toString(36).substring(7),
+                airline,
+                price,
+                currency: "BRL",
+                duration,
+                departureTime,
+                arrivalTime,
+                origin: origin.toUpperCase(),
+                destination: destination.toUpperCase()
+            };
+        });
+
+        // Garantia de precos crescentes
+        mappedFlights.sort((a, b) => a.price - b.price);
+
+        const resultStruct = { flights: mappedFlights };
+
+        // Save do objeto limpo
         await SearchCache.create({
             cacheKey,
             origin,
             destination,
             departureDate,
-            data: flightsData
+            data: resultStruct
         });
 
-        res.json(flightsData);
+        res.json(resultStruct);
 
     } catch (error) {
-        // Log para Debug especifico do backend (Render logs)
+        // Correcao de Cota Rate Limit Kiwi Localizada
+        if (error.response && error.response.status === 429) {
+            return res.status(429).json({ message: "Limite de buscas da API Kiwi atingido. Tente novamente em alguns minutos." });
+        }
+
+        // Log para Debug especifico do backend
         const apiErrorMsg = error.response && error.response.data 
             ? JSON.stringify(error.response.data) 
             : error.message;
 
         console.error('[ERRO KIWI AXIOS]:', apiErrorMsg);
-        
-        // JSON Seguro pro browser/cliente amigavel
         res.status(500).json({ error: "Falha na busca" });
     }
 });
