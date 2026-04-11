@@ -1,96 +1,92 @@
 const express = require('express');
 const router = express.Router();
-const Amadeus = require('amadeus');
+const axios = require('axios');
+const SearchCache = require('../models/SearchCache');
 
-const amadeus = new Amadeus({
-  clientId: process.env.AMADEUS_CLIENT_ID,
-  clientSecret: process.env.AMADEUS_CLIENT_SECRET
-});
- 
-function formatAirlineName(name) {
-  if (!name) return '';
-  return name.toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitaliza 1ª letra de cada palavra
-    .replace(/\bvoo\b/gi, '') 
-    .trim();
-}
+const RAPIDAPI_HOST = 'kiwicom-cheap-flights.p.rapidapi.com';
 
 router.get('/search', async (req, res) => {
-  try {
-    const { origin, destination, date } = req.query;
+    try {
+        const { origin, destination, departureDate, returnDate, currency = 'BRL' } = req.query;
 
-    if (!origin || !destination || !date) {
-      return res.status(400).json({ message: 'Origem, destino e data são obrigatórios.' });
-    }
+        if (!origin || !destination || !departureDate) {
+            return res.status(400).json({ message: 'Origem, destino e data (departureDate) são obrigatórios.' });
+        }
 
-    // 1. Busca as ofertas de voos
-    const flightOffers = await amadeus.shopping.flightOffersSearch.get({
-      originLocationCode: origin,
-      destinationLocationCode: destination,
-      departureDate: date,
-      adults: '1',
-      max: 10 
-    });
+        const cacheKeyDate = returnDate ? `${departureDate}-${returnDate}` : departureDate;
+        const cacheKey = `VOO-${origin.toUpperCase()}-${destination.toUpperCase()}-${cacheKeyDate}`;
 
-    if (!flightOffers.data || flightOffers.data.length === 0) {
-      return res.status(404).json({ message: 'Nenhum voo encontrado.' });
-    }
+        // Verificação no Cache (usando o recém criado schema TTL 24h)
+        const cachedSearch = await SearchCache.findOne({ cacheKey });
+        if (cachedSearch) {
+            console.log(`[CACHE] Entregando voos de ${origin} para ${destination} sem gastar API.`);
+            return res.json(cachedSearch.data);
+        }
 
-    // 2. Extrai códigos IATA para buscar nomes reais
-    const airlineCodes = new Set();
-    flightOffers.data.forEach(offer => {
-      offer.validatingAirlineCodes.forEach(code => airlineCodes.add(code));
-    });
+        // Endpoint Dinâmico base nas regras de negócio (One Way ou Round Trip)
+        const isRoundTrip = !!returnDate;
+        const endpoint = isRoundTrip ? '/round-trip' : '/one-way';
+        const url = `https://${RAPIDAPI_HOST}/v1/flights${endpoint}`;
 
-    // 3. Busca nomes das companhias
-    let airlineDictionary = {};
-    if (airlineCodes.size > 0) {
-      try {
-        const airlinesData = await amadeus.referenceData.airlines.get({
-          airlineCodes: Array.from(airlineCodes).join(',')
+        // Adequando a formatação específica da Kiwi.com para datas com Timezone Time
+        const params = {
+            source: origin,
+            destination: destination,
+            outboundDepartmentDateStart: `${departureDate}T00:00:00`,
+            currency: currency,
+            limit: 10,
+            sortBy: 'PRICE'
+        };
+
+        if (isRoundTrip) {
+            params.inboundDepartmentDateStart = `${returnDate}T00:00:00`;
+        }
+
+        // Requisição Externa usando infraestrutura do Axios e não mais client amadeus
+        const response = await axios.get(url, {
+            params,
+            headers: {
+                'x-rapidapi-host': RAPIDAPI_HOST,
+                'x-rapidapi-key': process.env.RAPIDAPI_KEY
+            },
+            timeout: 10000 
         });
-        airlinesData.data.forEach(airline => {
-          airlineDictionary[airline.iataCode] = airline.businessName || airline.commonName;
+
+        let flightsData = response.data;
+        
+        // Garante a ordenação exigida (ascendente por preço)
+        if (Array.isArray(flightsData)) {
+             flightsData = flightsData.sort((a, b) => {
+                 const priceA = parseFloat(a.price) || 0;
+                 const priceB = parseFloat(b.price) || 0;
+                 return priceA - priceB;
+             });
+        } else if (flightsData.data && Array.isArray(flightsData.data)) {
+             flightsData.data = flightsData.data.sort((a, b) => {
+                 const priceA = parseFloat(a.price) || parseFloat(a.min_price) || 0;
+                 const priceB = parseFloat(b.price) || parseFloat(b.min_price) || 0;
+                 return priceA - priceB;
+             });
+        }
+
+        // Salvamento do Sucesso no Cache MongoDB
+        await SearchCache.create({
+            cacheKey,
+            origin,
+            destination,
+            departureDate,
+            returnDate,
+            data: flightsData
         });
-      } catch (err) {
-        console.warn('Falha ao traduzir nomes de companhias.');
-      }
+
+        res.json(flightsData);
+
+    } catch (error) {
+        console.error('Erro na API da Kiwi.com (Voos):', error.message);
+        
+        // Regra de segurança/fallabck de retorno
+        res.status(500).json({ error: "Serviço de voos instável", code: "API_TIMEOUT" });
     }
-
-    // 4. Formatação (Padronizada)
-    const formattedFlights = flightOffers.data.map(offer => {
-      const itinerary = offer.itineraries[0];
-      const firstSegment = itinerary.segments[0];
-      const lastSegment = itinerary.segments[itinerary.segments.length - 1];
-      const carrierCode = offer.validatingAirlineCodes[0];
-
-      return {
-        id: offer.id,
-        airlineCode: carrierCode,
-        // Nome padronizado (Ex: "AIR EUROPA" -> "Air Europa")
-        airlineName: formatAirlineName(airlineDictionary[carrierCode] || carrierCode),
-        // Preço com 2 casas decimais garantidas
-        price: parseFloat(offer.price.total).toFixed(2),
-        currency: offer.price.currency,
-        departure: {
-          iataCode: firstSegment.departure.iataCode,
-          at: firstSegment.departure.at
-        },
-        arrival: {
-          iataCode: lastSegment.arrival.iataCode,
-          at: lastSegment.arrival.at
-        },
-        duration: itinerary.duration,
-        stops: itinerary.segments.length - 1
-      };
-    });
-
-    res.json(formattedFlights);
-
-  } catch (error) {
-    console.error('Erro na rota de voos:', error.message);
-    res.status(500).json({ message: 'Erro interno ao buscar voos.' });
-  }
 });
 
 module.exports = router;

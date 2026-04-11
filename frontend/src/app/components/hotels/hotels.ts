@@ -16,20 +16,20 @@ export class Hotels implements OnInit {
   private tripService = inject(TripService);
 
   hotelsList = signal<any[]>([]);
-  isLoading = signal<boolean>(true);
+  isLoading = signal<boolean>(false);
+  hasSearched = signal<boolean>(false);
   errorMessage = signal<string>('');
   selectedHotel = signal<any>(null);
   
   isLoadingDetails = signal<boolean>(false);
 
   ngOnInit() {
-    if (this.cityName) {
-      this.fetchHotels(); 
-    }
+    // Initial fetch removed to save API credits
   }
 
   fetchHotels() {
     this.isLoading.set(true);
+    this.hasSearched.set(true);
     
     this.tripService.getHotels(this.cityName).subscribe({
       next: (data) => {

@@ -45,24 +45,34 @@
   to { opacity: 1; }
 }
 
+.card-dark {
+  padding: 24px;
+  background: rgba(20, 20, 35, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .empty-state-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  padding: 2.5rem 1.5rem;
-  background: rgba(0, 243, 255, 0.04);
-  border: 1px solid rgba(0, 243, 255, 0.12);
-  border-radius: 1rem;
-  box-shadow: 0 12px 45px rgba(0, 243, 255, 0.05);
-  color: #e0f7ff;
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  min-height: 180px;
 
   p {
     margin: 0;
-    text-align: center;
     font-size: 0.95rem;
-    color: #b8f2ff;
+    line-height: 1.5;
+    max-width: 80%;
   }
 
   &.loading-state {

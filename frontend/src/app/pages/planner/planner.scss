@@ -259,6 +259,16 @@
   width: 100%;
   min-width: 0;
 
+  .section-header {
+    margin-bottom: 1.5rem;
+
+    .subtitle { 
+      color: #a0aab5; 
+      font-size: 0.9rem; 
+      margin-top: 0.2rem; 
+    }
+  }
+
   @media (max-width: 480px) {
     gap: 16px;
   }

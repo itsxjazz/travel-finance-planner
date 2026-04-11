@@ -55,6 +55,8 @@ export class Planner implements OnInit {
   tripDetails: any = null;
   isLoading = signal<boolean>(true);
   rawPointsOfInterest = signal<any[]>([]);
+  isLoadingPOIs = signal<boolean>(false);
+  hasSearchedPOIs = signal<boolean>(false);
 
   // Estados Financeiros
   localGoal = signal<number>(0);
@@ -131,7 +133,7 @@ export class Planner implements OnInit {
 
   this.fetchRate();
   this.fetchCDI();
-  this.loadPOIs();
+  // loadPOIs() removido para evitar gasto de créditos desnecessário na aba Exploração
   this.isLoading.set(false);
 }
 
@@ -149,16 +151,19 @@ export class Planner implements OnInit {
   loadPOIs() {
   if (!this.tripDetails?.destination) return;
 
+  this.isLoadingPOIs.set(true);
+  this.hasSearchedPOIs.set(true);
+
   const iataCode = this.destinationIataCode;
 
   this.tripService.getPointsOfInterest(iataCode).subscribe({
     next: (response: any) => {
       this.rawPointsOfInterest.set(response.data || []);
-      this.isLoading.set(false);
+      this.isLoadingPOIs.set(false);
     },
     error: (err) => {
       console.error('Erro ao buscar POIs:', err);
-      this.isLoading.set(false);
+      this.isLoadingPOIs.set(false);
     }
   });
 }

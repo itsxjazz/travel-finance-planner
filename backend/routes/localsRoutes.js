@@ -94,14 +94,15 @@ router.get('/pois', async (req, res) => {
                 'x-rapidapi-host': 'travel-places.p.rapidapi.com', 
                 'x-rapidapi-key': process.env.RAPIDAPI_KEY 
               },
-              timeout: 5000 
+              timeout: 10000 
             }
         );
 
-        // 2. CONFIGURAÇÃO: GEOAPIFY API (Foco: Restaurantes e Compras)
+        // 2. CONFIGURAÇÃO: GEOAPIFY API (Foco: Restaurantes, Compras e Cultura)
         const geoCategories = [
             'catering.restaurant', 'catering.cafe', 'catering.bar', 'catering.pub',
-            'commercial.shopping_mall', 'commercial.marketplace', 'commercial.clothing'
+            'commercial.shopping_mall', 'commercial.marketplace', 'commercial.clothing',
+            'leisure.sightseeing' // GARANTINDO CULTURA/PONTOS DE INTERESSE
         ].join(',');
         
         const requestGeoapify = axios.get(`https://api.geoapify.com/v2/places`, {
@@ -111,7 +112,7 @@ router.get('/pois', async (req, res) => {
                 limit: 15, 
                 apiKey: process.env.GEOAPIFY_API_KEY
             },
-            timeout: 5000
+            timeout: 10000
         });
 
         // 3. EXECUÇÃO PARALELA

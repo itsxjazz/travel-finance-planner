@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-
-const hotelCache = new Map();
+const SearchCache = require('../models/SearchCache');
 
 const HEADERS = {
     'x-rapidapi-host': 'booking-com.p.rapidapi.com',
@@ -13,6 +12,19 @@ router.get('/:location', async (req, res) => {
     try {
         const { location } = req.params;
         const stars = req.query.stars || '3';
+
+        const checkin = new Date(); checkin.setDate(checkin.getDate() + 14);
+        const checkout = new Date(checkin); checkout.setDate(checkout.getDate() + 1);
+        const checkinDateStr = checkin.toISOString().split('T')[0];
+        const checkoutDateStr = checkout.toISOString().split('T')[0];
+
+        const cacheKey = `HOTEL-${location.toUpperCase()}-${checkinDateStr}-${stars}`;
+        
+        const cachedSearch = await SearchCache.findOne({ cacheKey });
+        if (cachedSearch) {
+            console.log(`[CACHE] Entregando busca de hotéis para ${location} sem gastar API.`);
+            return res.json(cachedSearch.data);
+        }
 
         const locResponse = await axios.get('https://booking-com.p.rapidapi.com/v1/hotels/locations', {
             params: { name: location, locale: 'pt-br' },
@@ -26,16 +38,13 @@ router.get('/:location', async (req, res) => {
         const destId = locResponse.data[0].dest_id;
         const destType = locResponse.data[0].dest_type;
 
-        const checkin = new Date(); checkin.setDate(checkin.getDate() + 14);
-        const checkout = new Date(checkin); checkout.setDate(checkout.getDate() + 1);
-
         const hotelsRes = await axios.get('https://booking-com.p.rapidapi.com/v1/hotels/search', {
             params: {
                 locale: 'pt-br',
                 dest_id: destId,
                 dest_type: destType,
-                checkin_date: checkin.toISOString().split('T')[0],
-                checkout_date: checkout.toISOString().split('T')[0],
+                checkin_date: checkinDateStr,
+                checkout_date: checkoutDateStr,
                 adults_number: 2,
                 room_number: 1,
                 filter_by_currency: 'BRL',
@@ -58,6 +67,13 @@ router.get('/:location', async (req, res) => {
             distance: hotel.distance_to_cc ? parseFloat(hotel.distance_to_cc).toFixed(1) : '0'
         }));
 
+        await SearchCache.create({
+            cacheKey,
+            destination: location,
+            departureDate: checkinDateStr,
+            data: formattedHotels
+        });
+
         res.json(formattedHotels);
 
     } catch (error) {
@@ -70,14 +86,19 @@ router.get('/details/:hotelId', async (req, res) => {
     try {
         const { hotelId } = req.params;
 
-        // 1. Verificação de Cache (Economia de R$)
-        if (hotelCache.has(hotelId)) {
-            console.log(`[CACHE] Entregando hotel ${hotelId} sem gastar API.`);
-            return res.json(hotelCache.get(hotelId));
-        }
-
         const checkin = new Date(); checkin.setDate(checkin.getDate() + 14);
         const checkout = new Date(checkin); checkout.setDate(checkout.getDate() + 1);
+        const checkinDateStr = checkin.toISOString().split('T')[0];
+        const checkoutDateStr = checkout.toISOString().split('T')[0];
+
+        const cacheKey = `HOTEL-DETAILS-${hotelId}-${checkinDateStr}`;
+
+        // 1. Verificação de Cache (Economia de R$) via MongoDB
+        const cachedDetails = await SearchCache.findOne({ cacheKey });
+        if (cachedDetails) {
+            console.log(`[CACHE] Entregando hotel ${hotelId} sem gastar API.`);
+            return res.json(cachedDetails.data);
+        }
 
         const [descRes, photosRes, roomsRes] = await Promise.all([
             axios.get('https://booking-com.p.rapidapi.com/v1/hotels/description', {
@@ -91,8 +112,8 @@ router.get('/details/:hotelId', async (req, res) => {
             axios.get('https://booking-com.p.rapidapi.com/v1/hotels/room-list', {
                 params: { 
                     hotel_id: hotelId, 
-                    checkin_date: checkin.toISOString().split('T')[0], 
-                    checkout_date: checkout.toISOString().split('T')[0],
+                    checkin_date: checkinDateStr, 
+                    checkout_date: checkoutDateStr,
                     adults_number_by_rooms: '2',
                     units: 'metric',
                     locale: 'pt-br',
@@ -108,7 +129,12 @@ router.get('/details/:hotelId', async (req, res) => {
             realRoomName: roomsRes.data[0]?.block?.[0]?.room_name || 'Quarto Selecionado'
         };
 
-        hotelCache.set(hotelId, result);
+        await SearchCache.create({
+            cacheKey,
+            destination: `hotel-${hotelId}`,
+            data: result
+        });
+
         res.json(result);
 
     } catch (error) {
