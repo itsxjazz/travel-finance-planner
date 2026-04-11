@@ -10,21 +10,19 @@ const searchLimiter = rateLimit({
     message: { message: 'Muitas buscas originadas deste IP, por favor tente novamente em 30 minutos.' }
 });
 
-const RAPIDAPI_HOST = 'kiwicom-cheap-flights.p.rapidapi.com';
+const RAPIDAPI_HOST = 'kiwi-com-cheap-flights.p.rapidapi.com';
 
 const checkCacheFlights = async (req, res, next) => {
     try {
-        const { origin, destination, date, returnDate, currency = 'BRL' } = req.query;
+        const { origin, destination, date } = req.query;
 
-        // Aceita 'date' do frontend mapeando internamente
         const departureDate = req.query.departureDate || date;
 
         if (!origin || !destination || !departureDate) {
             return res.status(400).json({ message: 'Origem, destino e data são obrigatórios.' });
         }
 
-        const cacheKeyDate = returnDate ? `${departureDate}-${returnDate}` : departureDate;
-        const cacheKey = `VOO-${origin.toUpperCase()}-${destination.toUpperCase()}-${cacheKeyDate}`;
+        const cacheKey = `VOO-${origin.toUpperCase()}-${destination.toUpperCase()}-${departureDate}`;
 
         const cachedSearch = await SearchCache.findOne({ cacheKey });
         if (cachedSearch) {
@@ -32,8 +30,7 @@ const checkCacheFlights = async (req, res, next) => {
             return res.json(cachedSearch.data);
         }
 
-        // Passa adiante os parametros ja ajustados
-        req.flightData = { origin, destination, departureDate, returnDate, currency, cacheKey };
+        req.flightData = { origin, destination, departureDate, cacheKey };
         next();
     } catch (error) {
         next(error);
@@ -42,24 +39,22 @@ const checkCacheFlights = async (req, res, next) => {
 
 router.get('/search', checkCacheFlights, searchLimiter, async (req, res) => {
     try {
-        const { origin, destination, departureDate, returnDate, currency, cacheKey } = req.flightData;
+        const { origin, destination, departureDate, cacheKey } = req.flightData;
 
-        const isRoundTrip = !!returnDate;
-        const endpoint = isRoundTrip ? '/round-trip' : '/one-way';
-        const url = `https://${RAPIDAPI_HOST}/v1/flights${endpoint}`;
+        // Endpoint exato especificado
+        const url = `https://${RAPIDAPI_HOST}/one-way`;
 
+        // Range fixo com restricoes rigorosas da querystring
         const params = {
             source: origin,
             destination: destination,
             outboundDepartmentDateStart: `${departureDate}T00:00:00`,
-            currency: currency,
+            outboundDepartmentDateEnd: `${departureDate}T00:00:00`,
             limit: 10,
-            sortBy: 'PRICE'
+            sortBy: 'PRICE',
+            cabinClass: 'ECONOMY',
+            currency: 'BRL'
         };
-
-        if (isRoundTrip) {
-            params.inboundDepartmentDateStart = `${returnDate}T00:00:00`;
-        }
 
         const response = await axios.get(url, {
             params,
@@ -70,36 +65,28 @@ router.get('/search', checkCacheFlights, searchLimiter, async (req, res) => {
             timeout: 10000 
         });
 
-        let flightsData = response.data;
+        const flightsData = response.data;
         
-        if (Array.isArray(flightsData)) {
-             flightsData = flightsData.sort((a, b) => {
-                 const priceA = parseFloat(a.price) || 0;
-                 const priceB = parseFloat(b.price) || 0;
-                 return priceA - priceB;
-             });
-        } else if (flightsData.data && Array.isArray(flightsData.data)) {
-             flightsData.data = flightsData.data.sort((a, b) => {
-                 const priceA = parseFloat(a.price) || parseFloat(a.min_price) || 0;
-                 const priceB = parseFloat(b.price) || parseFloat(b.min_price) || 0;
-                 return priceA - priceB;
-             });
-        }
-
         await SearchCache.create({
             cacheKey,
             origin,
             destination,
             departureDate,
-            returnDate,
             data: flightsData
         });
 
         res.json(flightsData);
 
     } catch (error) {
-        console.error('Erro na API da Kiwi.com (Voos):', error.message);
-        res.status(500).json({ error: "Serviço de voos instável", code: "API_TIMEOUT" });
+        // Log para Debug especifico do backend (Render logs)
+        const apiErrorMsg = error.response && error.response.data 
+            ? JSON.stringify(error.response.data) 
+            : error.message;
+
+        console.error('[ERRO KIWI AXIOS]:', apiErrorMsg);
+        
+        // JSON Seguro pro browser/cliente amigavel
+        res.status(500).json({ error: "Falha na busca" });
     }
 });
 

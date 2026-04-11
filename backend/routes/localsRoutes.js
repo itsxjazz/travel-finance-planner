@@ -102,7 +102,7 @@ router.get('/pois', async (req, res) => {
         const geoCategories = [
             'catering.restaurant', 'catering.cafe', 'catering.bar', 'catering.pub',
             'commercial.shopping_mall', 'commercial.marketplace', 'commercial.clothing',
-            'leisure.sightseeing' // GARANTINDO CULTURA/PONTOS DE INTERESSE
+            'tourism', 'entertainment.culture'
         ].join(',');
         
         const requestGeoapify = axios.get(`https://api.geoapify.com/v2/places`, {

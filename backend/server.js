@@ -12,6 +12,8 @@ const flightRoutes = require('./routes/flightRoutes');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 // Middlewares
 app.use(cors({
     origin: '*',
