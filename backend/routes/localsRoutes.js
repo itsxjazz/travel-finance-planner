@@ -81,7 +81,7 @@ router.get('/pois', async (req, res) => {
         // 1. CONFIGURAÇÃO: TRAVEL PLACES API (Foco: Cultura e Natureza)
         const travelQuery = `
           query {
-            getPlaces(lat: ${latFloat}, lng: ${lngFloat}, maxDistMeters: 15000, limit: 15) {
+            getPlaces(lat: ${latFloat}, lng: ${lngFloat}, maxDistMeters: 15000, limit: 50) {
               id name categories distance lat lng
             }
           }
@@ -98,40 +98,42 @@ router.get('/pois', async (req, res) => {
             }
         );
 
-        // 2. CONFIGURAÇÃO: GEOAPIFY API (Foco: Restaurantes, Compras e Cultura)
-        const geoCategories = 'tourism.attraction,tourism.sights,entertainment.museum,entertainment.culture,catering.restaurant,catering.cafe,catering.bar,catering.pub,catering.fast_food,commercial.clothing,commercial.shopping_mall,commercial.gift_and_souvenir,commercial.books,commercial.marketplace';
+        // 2. CONFIGURAÇÃO: GEOAPIFY API (Separada por temas para garantir distribuição sem timeout)
+        const geoBaseParams = { filter: `circle:${lngFloat},${latFloat},15000`, limit: 50, apiKey: process.env.GEOAPIFY_API_KEY };
         
-        const requestGeoapify = axios.get(`https://api.geoapify.com/v2/places`, {
-            params: {
-                categories: geoCategories,
-                filter: `circle:${lngFloat},${latFloat},15000`, 
-                limit: 150, // Aumentando o limite para garantir restaurantes e compras
-                apiKey: process.env.GEOAPIFY_API_KEY
-            },
-            timeout: 12000 // Garantindo que tem tempo para responder
+        const requestGeoFood = axios.get(`https://api.geoapify.com/v2/places`, {
+            params: { ...geoBaseParams, categories: 'catering.restaurant,catering.cafe,catering.bar,catering.fast_food' },
+            timeout: 25000
         });
 
-        // 3. EXECUÇÃO PARALELA
-        const [travelResponse, geoResponse] = await Promise.allSettled([
-            requestTravelPlaces, 
-            requestGeoapify
+        const requestGeoShop = axios.get(`https://api.geoapify.com/v2/places`, {
+            params: { ...geoBaseParams, categories: 'commercial.clothing,commercial.shopping_mall,commercial.gift_and_souvenir,commercial.marketplace' },
+            timeout: 25000
+        });
+
+        const requestGeoCulture = axios.get(`https://api.geoapify.com/v2/places`, {
+            params: { ...geoBaseParams, categories: 'tourism.attraction,tourism.sights,entertainment.museum,entertainment.culture' },
+            timeout: 25000
+        });
+
+        // 3. EXECUÇÃO PARALELA (4 micro-requisições bem mais leves para as APIs)
+        const responses = await Promise.allSettled([
+            requestTravelPlaces, requestGeoFood, requestGeoShop, requestGeoCulture
         ]);
 
-        let combinedData = [];
+        let rawCombinedData = [];
         let travelCount = 0;
         let geoapifyCount = 0;
-        let categoryCounts = { CULTURA: 0, NATUREZA: 0, RESTAURANT: 0, SHOPPING: 0 };
 
         // --- PROCESSANDO RESULTADOS DA TRAVEL PLACES ---
-        if (travelResponse.status === 'fulfilled' && travelResponse.value.data?.data?.getPlaces) {
-            const travelData = travelResponse.value.data.data.getPlaces
+        if (responses[0].status === 'fulfilled' && responses[0].value.data?.data?.getPlaces) {
+            const travelData = responses[0].value.data.data.getPlaces
                 .filter(place => place.name)
                 .map(place => {
                     const cats = JSON.stringify(place.categories || []).toUpperCase();
                     let category = 'CULTURA';
                     if (cats.includes('BEACH') || cats.includes('NATURE') || cats.includes('PARK')) category = 'NATUREZA';
 
-                    categoryCounts[category]++;
                     return {
                         id: place.id,
                         name: place.name,
@@ -142,56 +144,74 @@ router.get('/pois', async (req, res) => {
                         mapUrl: `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
                     };
                 });
-            combinedData = [...combinedData, ...travelData];
+            rawCombinedData = [...rawCombinedData, ...travelData];
             travelCount = travelData.length;
-        } else if (travelResponse.status === 'rejected') {
-            console.error('[TRAVEL PLACES ERRO SILENCIOSO]:', travelResponse.reason?.message || travelResponse.reason);
+        } else if (responses[0].status === 'rejected') {
+            console.error('[TRAVEL PLACES ERRO SILENCIOSO]:', responses[0].reason?.message || responses[0].reason);
         }
 
         // --- PROCESSANDO RESULTADOS DO GEOAPIFY ---
-        if (geoResponse.status === 'fulfilled' && geoResponse.value.data?.features) {
-            const geoData = geoResponse.value.data.features
-                .filter(feature => feature.properties.name)
-                .map(feature => {
-                    const props = feature.properties;
-                    const cats = props.categories || [];
+        [1, 2, 3].forEach(index => {
+            const geoRes = responses[index];
+            if (geoRes.status === 'fulfilled' && geoRes.value.data?.features) {
+                const geoData = geoRes.value.data.features
+                    .filter(feature => feature.properties.name)
+                    .map(feature => {
+                        const props = feature.properties;
+                        const cats = props.categories || [];
 
-                    let category = 'CULTURA';
-                    if (cats.some(c => c.startsWith('catering'))) {
-                        category = 'RESTAURANT';
-                    } else if (cats.some(c => c.startsWith('commercial'))) {
-                        category = 'SHOPPING';
-                    } else if (cats.some(c => c.startsWith('tourism') || c.startsWith('entertainment') || c.startsWith('leisure'))) {
-                        category = 'CULTURA';
-                    }
+                        let category = 'CULTURA';
+                        if (cats.some(c => c.startsWith('catering'))) category = 'RESTAURANT';
+                        else if (cats.some(c => c.startsWith('commercial'))) category = 'SHOPPING';
+                        else if (cats.some(c => c.startsWith('tourism') || c.startsWith('entertainment'))) category = 'CULTURA';
 
-                    categoryCounts[category]++;
-                    return {
-                        id: props.place_id,
-                        name: props.name,
-                        category: category,
-                        address: props.formatted || `${(props.distance / 1000).toFixed(1)}km do centro`,
-                        lat: props.lat,
-                        lon: props.lon,
-                        mapUrl: `https://www.google.com/maps/search/?api=1&query=${props.lat},${props.lon}`
-                    };
-                });
-            combinedData = [...combinedData, ...geoData];
-            geoapifyCount = geoData.length;
-        } else if (geoResponse.status === 'rejected') {
-            const errReason = geoResponse.reason?.response?.data || geoResponse.reason?.message || geoResponse.reason;
-            console.error('[GEOAPIFY ERRO SILENCIOSO]:', errReason);
-        }
+                        return {
+                            id: props.place_id,
+                            name: props.name,
+                            category: category,
+                            address: props.formatted || `${(props.distance / 1000).toFixed(1)}km do centro`,
+                            lat: props.lat,
+                            lon: props.lon,
+                            mapUrl: `https://www.google.com/maps/search/?api=1&query=${props.lat},${props.lon}`
+                        };
+                    });
+                rawCombinedData = [...rawCombinedData, ...geoData];
+                geoapifyCount += geoData.length;
+            } else if (geoRes.status === 'rejected') {
+                const errReason = geoRes.reason?.response?.data || geoRes.reason?.message || geoRes.reason;
+                console.error(`[GEOAPIFY RQ${index} ERRO]:`, errReason);
+            }
+        });
 
-        // 4. RETORNO PARA O FRONTEND
-        combinedData = combinedData.sort(() => Math.random() - 0.5);
+        // 4. AGRUPAMENTO E LIMITAÇÃO POR CATEGORIA (Max 50 de cada)
+        const categoriesMap = { CULTURA: [], NATUREZA: [], RESTAURANT: [], SHOPPING: [] };
+        
+        rawCombinedData.forEach(item => {
+            if (categoriesMap[item.category] && categoriesMap[item.category].length < 50) {
+                // Previne duplicados sutis checando IDs
+                if (!categoriesMap[item.category].some(x => x.id === item.id)) {
+                    categoriesMap[item.category].push(item);
+                }
+            }
+        });
 
-        console.log(`[API STITCHING] Detalhes do retorno:
-        - Travel Places: ${travelCount} locais
-        - Geoapify: ${geoapifyCount} locais
-        - Categorias: Cultura(${categoryCounts.CULTURA}), Natureza(${categoryCounts.NATUREZA}), Restaurante(${categoryCounts.RESTAURANT}), Compras(${categoryCounts.SHOPPING})
-        - Total entregue: ${combinedData.length} locais`);
-        res.json({ data: combinedData });
+        const finalData = [
+            ...categoriesMap.CULTURA,
+            ...categoriesMap.NATUREZA,
+            ...categoriesMap.RESTAURANT,
+            ...categoriesMap.SHOPPING
+        ].sort(() => Math.random() - 0.5);
+
+        console.log(`[API STITCHING] Detalhes do retorno balanceado:
+        - Travel Places Base: ${travelCount} locais
+        - Geoapify Base: ${geoapifyCount} locais
+        - Entregue CULTURA: ${categoriesMap.CULTURA.length}/50
+        - Entregue NATUREZA: ${categoriesMap.NATUREZA.length}/50
+        - Entregue RESTAURANT: ${categoriesMap.RESTAURANT.length}/50
+        - Entregue SHOPPING: ${categoriesMap.SHOPPING.length}/50
+        - Total final entregue cruzado: ${finalData.length} locais`);
+        
+        res.json({ data: finalData });
 
     } catch (error) {
         console.error('Erro na agregação de POIs:', error.message);

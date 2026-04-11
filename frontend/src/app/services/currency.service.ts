@@ -11,6 +11,7 @@ export class CurrencyService {
 
   // 1. Busca a cotação atual (ex: ARS-BRL)
   getExchangeRate(currencyCode: string): Observable<number> {
+    if (currencyCode === 'BRL') return new Observable(obs => { obs.next(1); obs.complete(); });
     const pair = `${currencyCode}-BRL`;
     return this.http.get<any>(`${this.apiBase}/last/${pair}`).pipe(
       map(data => {
@@ -23,6 +24,7 @@ export class CurrencyService {
 
   // 2. Busca histórico dos últimos 360 dias
   getHistoricalRates(currencyCode: string): Observable<any[]> {
+    if (currencyCode === 'BRL') return new Observable(obs => { obs.next([]); obs.complete(); });
     const pair = `${currencyCode}-BRL`;
     return this.http.get<any[]>(`${this.apiBase}/daily/${pair}/360`);
   }

@@ -25,7 +25,7 @@ const checkCacheHotels = async (req, res, next) => {
         const checkinDateStr = checkin.toISOString().split('T')[0];
         const checkoutDateStr = checkout.toISOString().split('T')[0];
 
-        const cacheKey = `HOTEL-${location.toUpperCase()}-${checkinDateStr}-${stars}`;
+        const cacheKey = `HOTEL-V3-${location.toUpperCase()}-${checkinDateStr}-${stars}`;
         
         const cachedSearch = await SearchCache.findOne({ cacheKey });
         if (cachedSearch) {
@@ -108,7 +108,7 @@ const checkCacheDetails = async (req, res, next) => {
         const checkinDateStr = checkin.toISOString().split('T')[0];
         const checkoutDateStr = checkout.toISOString().split('T')[0];
 
-        const cacheKey = `HOTEL-DETAILS-${hotelId}-${checkinDateStr}`;
+        const cacheKey = `HOTEL-DETAILS-V3-${hotelId}-${checkinDateStr}`;
 
         const cachedDetails = await SearchCache.findOne({ cacheKey });
         if (cachedDetails) {

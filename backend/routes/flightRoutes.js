@@ -22,7 +22,7 @@ const checkCacheFlights = async (req, res, next) => {
             return res.status(400).json({ message: 'Origem, destino e data são obrigatórios.' });
         }
 
-        const cacheKey = `VOO-${origin.toUpperCase()}-${destination.toUpperCase()}-${departureDate}`;
+        const cacheKey = `VOO-V3-${origin.toUpperCase()}-${destination.toUpperCase()}-${departureDate}`;
 
         const cachedSearch = await SearchCache.findOne({ cacheKey });
         if (cachedSearch) {
