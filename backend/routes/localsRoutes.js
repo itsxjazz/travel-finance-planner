@@ -107,8 +107,7 @@ router.get('/pois', async (req, res) => {
                 filter: `circle:${lngFloat},${latFloat},15000`, 
                 limit: 30, 
                 apiKey: process.env.GEOAPIFY_API_KEY
-            },
-            timeout: 10000
+            }
         });
 
         // 3. EXECUÇÃO PARALELA

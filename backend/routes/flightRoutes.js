@@ -12,13 +12,6 @@ const searchLimiter = rateLimit({
 
 const RAPIDAPI_HOST = 'kiwi-com-cheap-flights.p.rapidapi.com';
 
-function formatDuration(seconds) {
-    if (!seconds || isNaN(seconds)) return '0h 0m';
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours}h ${minutes}m`;
-}
-
 const checkCacheFlights = async (req, res, next) => {
     try {
         const { origin, destination, date } = req.query;
@@ -74,26 +67,19 @@ router.get('/search', checkCacheFlights, searchLimiter, async (req, res) => {
         // Acessível normalmente quando API funciona
         const itineraries = response.data.itineraries || [];
 
-        // MAP: Convertendo Data Bruta pro formato Angular Amigavel (Limpo)
+        // MAP: Convertendo Data Bruta pro formato Angular (Básico focado em preço e cia)
         const mappedFlights = itineraries.map(itinerary => {
-            const sectors = itinerary.sectorSegments || [];
-            const firstSegment = sectors[0] || {};
-            const lastSegment = sectors[sectors.length - 1] || {};
+            const sectors = itinerary.sector?.sectorSegments || [];
+            const firstSegment = sectors[0]?.segment || {};
 
-            const airline = firstSegment.segment?.carrier?.name || 'Companhia Desconhecida';
+            const airline = firstSegment.carrier?.name || 'Companhia Desconhecida';
             const price = parseFloat(itinerary.price?.amount || 0);
-            const duration = formatDuration(itinerary.duration);
-            const departureTime = firstSegment.segment?.departure?.localTime || 'Emissão Pendente';
-            const arrivalTime = lastSegment.segment?.arrival?.localTime || 'Emissão Pendente';
 
             return {
-                id: itinerary.id || Math.random().toString(36).substring(7),
+                id: itinerary.id || itinerary.legacyId || Math.random().toString(36).substring(7),
                 airline,
                 price,
                 currency: "BRL",
-                duration,
-                departureTime,
-                arrivalTime,
                 origin: origin.toUpperCase(),
                 destination: destination.toUpperCase()
             };
