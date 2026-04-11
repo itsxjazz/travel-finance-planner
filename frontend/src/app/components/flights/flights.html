@@ -1,11 +1,12 @@
 <div class="flights-container fade-in">
   
-  <header class="section-header">
-    <h3 class="section-title">Voos de Ida</h3>
-    <p class="subtitle">Escolha seu ponto de partida e data para começar.</p>
-  </header>
+  <section class="card-dark" style="margin-bottom: 2rem;">
+    <header class="section-header">
+      <h3 class="section-title">Voos de Ida</h3>
+      <p class="subtitle">Escolha seu ponto de partida e data para começar.</p>
+    </header>
 
-  <section class="estimator-form card-dark search-box-styling">
+  <div class="estimator-form search-box-styling" style="padding: 0; background: transparent; border: none; margin-bottom: 2rem;">
     <div class="form-row flight-search-row">
       <div class="form-group">
         <label>Origem (IATA)</label>
@@ -25,7 +26,7 @@
         </button>
       </div>
     </div>
-  </section>
+  </div>
 
   <div class="flights-list">
     @if (isLoadingOut()) {
@@ -53,7 +54,14 @@
             </div>
             <div class="time-block"><span>{{ flight.arrival.at | date:'HH:mm' }}</span><small>{{ flight.arrival.iataCode }}</small></div>
           </div>
-          <div class="price-section"><div class="price-tag"><small>{{ flight.currency }}</small><strong>{{ flight.price }}</strong></div></div>
+          <div class="price-section" style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 4px;">
+            <div class="price-tag" style="white-space: nowrap;">
+              <small>{{ flight.currency }}</small><strong>{{ flight.price }}</strong>
+            </div>
+            <div class="converted-price" style="font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); text-align: right; width: 100%;">
+              <small>≈ {{ flight.price * currentExchangeRate() | currency:'BRL' }}</small>
+            </div>
+          </div>
         </div>
       }
     } @else if (hasSearchedOut()) {
@@ -61,12 +69,15 @@
     }
   </div>
 
-  <header class="section-header return-search">
-    <h3 class="section-title">Voos de Volta</h3>
-    <p class="subtitle">Escolha o voo ideal para o seu retorno.</p>
-  </header>
+  </section>
 
-  <section class="estimator-form card-dark search-box-styling">
+  <section class="card-dark" style="margin-bottom: 2rem;">
+    <header class="section-header return-search" style="margin-top: 0; padding-top: 0; border-top: none;">
+      <h3 class="section-title">Voos de Volta</h3>
+      <p class="subtitle">Escolha o voo ideal para o seu retorno.</p>
+    </header>
+
+  <div class="estimator-form search-box-styling" style="padding: 0; background: transparent; border: none; margin-bottom: 2rem;">
     <div class="form-row flight-search-row">
       <div class="form-group">
         <label>Origem (IATA)</label>
@@ -86,7 +97,7 @@
         </button>
       </div>
     </div>
-  </section>
+  </div>
 
   <div class="flights-list">
     @if (isLoadingIn()) {
@@ -114,11 +125,19 @@
             </div>
             <div class="time-block"><span>{{ flight.arrival.at | date:'HH:mm' }}</span><small>{{ flight.arrival.iataCode }}</small></div>
           </div>
-          <div class="price-section"><div class="price-tag"><small>{{ flight.currency }}</small><strong>{{ flight.price }}</strong></div></div>
+          <div class="price-section" style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 4px;">
+            <div class="price-tag" style="white-space: nowrap;">
+              <small>{{ flight.currency }}</small><strong>{{ flight.price }}</strong>
+            </div>
+            <div class="converted-price" style="font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); text-align: right; width: 100%;">
+              <small>≈ {{ flight.price * currentExchangeRate() | currency:'BRL' }}</small>
+            </div>
+          </div>
         </div>
       }
     } @else if (hasSearchedIn()) {
        <div class="empty-state-box"><p>Nenhum voo de volta encontrado para esta data.</p></div>
     }
   </div>
+  </section>
 </div>

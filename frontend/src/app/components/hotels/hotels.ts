@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TripService } from '../../services/trip.service';
+import { CurrencyService } from '../../services/currency.service';
 import { HotelDetails } from './hotel-details';
 
 @Component({
@@ -14,6 +15,7 @@ export class Hotels implements OnInit {
   @Input() cityName!: string; 
   
   private tripService = inject(TripService);
+  private currencyService = inject(CurrencyService);
 
   hotelsList = signal<any[]>([]);
   isLoading = signal<boolean>(false);
@@ -22,9 +24,10 @@ export class Hotels implements OnInit {
   selectedHotel = signal<any>(null);
   
   isLoadingDetails = signal<boolean>(false);
+  
+  currentExchangeRate = signal<number>(1);
 
   ngOnInit() {
-    // Initial fetch removed to save API credits
   }
 
   fetchHotels() {
@@ -35,6 +38,14 @@ export class Hotels implements OnInit {
       next: (data) => {
         this.hotelsList.set(data);
         this.isLoading.set(false);
+        
+        if (data && data.length > 0) {
+            const returnedCurrency = data[0].currency || 'EUR';
+            this.currencyService.getExchangeRate(returnedCurrency).subscribe({
+              next: (rate) => this.currentExchangeRate.set(rate),
+              error: () => this.currentExchangeRate.set(1)
+            });
+        }
       },
       error: (err) => {
         console.error('Erro ao buscar hotéis:', err);

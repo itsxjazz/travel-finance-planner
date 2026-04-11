@@ -2,6 +2,7 @@ import { Component, Input, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TripService } from '../../services/trip.service';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-flights',
@@ -12,6 +13,7 @@ import { TripService } from '../../services/trip.service';
 })
 export class Flights implements OnInit {
   private tripService = inject(TripService);
+  private currencyService = inject(CurrencyService);
 
   @Input() destinationIata!: string;
   @Input() departureDate!: string | Date | null;
@@ -34,6 +36,8 @@ export class Flights implements OnInit {
   hasSearchedIn = signal<boolean>(false); 
 
   errorMessage = signal<string>('');
+  
+  currentExchangeRate = signal<number>(1);
 
   ngOnInit() {
     // 1. APENAS inicializa os campos
@@ -66,6 +70,14 @@ export class Flights implements OnInit {
         next: (data) => {
           this.flightsOut.set(data);
           this.isLoadingOut.set(false);
+          
+          if (data && data.length > 0) {
+            const returnedCurrency = data[0].currency || 'EUR';
+            this.currencyService.getExchangeRate(returnedCurrency).subscribe({
+              next: (rate) => this.currentExchangeRate.set(rate),
+              error: () => this.currentExchangeRate.set(1)
+            });
+          }
         },
         error: () => {
           this.isLoadingOut.set(false);

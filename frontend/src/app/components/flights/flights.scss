@@ -3,7 +3,6 @@
 
 .section-header { 
   margin-bottom: 24px; 
-  .section-title { color: #fff; font-size: 1.4rem; margin: 0; font-weight: 800; }
   .subtitle { color: #a0aab5; font-size: 0.85rem; margin-top: 4px; }
 }
 
@@ -227,7 +226,10 @@
 .price-section {
   width: 150px;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 6px;
 
   .price-tag {
     display: flex; align-items: baseline; gap: 4px;
@@ -318,7 +320,6 @@
 
 .section-header { 
   margin-bottom: 20px; 
-  .section-title { color: #fff; font-size: 1.3rem; margin: 0; font-weight: 800; }
   .subtitle { color: #a0aab5; font-size: 0.85rem; margin-top: 4px; }
 }
 

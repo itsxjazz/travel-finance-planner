@@ -65,7 +65,6 @@ router.get('/:location', checkCacheHotels, searchLimiter, async (req, res) => {
                 checkout_date: checkoutDateStr,
                 adults_number: 2,
                 room_number: 1,
-                filter_by_currency: 'BRL',
                 order_by: 'popularity',
                 units: 'metric',
                 categories_filter_ids: `class::${stars}`
@@ -77,7 +76,7 @@ router.get('/:location', checkCacheHotels, searchLimiter, async (req, res) => {
             hotelId: hotel.hotel_id,
             name: hotel.hotel_name,
             price: hotel.min_total_price, 
-            currency: hotel.currencycode || 'BRL',
+            currency: hotel.currencycode || 'EUR',
             rating: parseInt(stars) || 3,
             photoUrl: hotel.max_photo_url || hotel.main_photo_url,
             roomType: hotel.accommodation_type_name || 'Quarto Standard', 
@@ -144,8 +143,7 @@ router.get('/details/:hotelId', checkCacheDetails, searchLimiter, async (req, re
                     checkout_date: checkoutDateStr,
                     adults_number_by_rooms: '2',
                     units: 'metric',
-                    locale: 'pt-br',
-                    currency: 'BRL'
+                    locale: 'pt-br'
                 },
                 headers: HEADERS
             })

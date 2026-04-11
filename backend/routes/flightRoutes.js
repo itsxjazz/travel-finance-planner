@@ -65,8 +65,7 @@ router.get('/search', checkCacheFlights, searchLimiter, async (req, res) => {
             outboundDepartmentDateEnd: `${departureDate}T00:00:00`,
             limit: 10,
             sortBy: 'PRICE',
-            cabinClass: 'ECONOMY',
-            currency: 'BRL'
+            cabinClass: 'ECONOMY'
         };
 
         const response = await axios.get(url, {
@@ -120,7 +119,7 @@ router.get('/search', checkCacheFlights, searchLimiter, async (req, res) => {
                     iataCode: arrivalIataCode
                 },
                 price,
-                currency: "BRL"
+                currency: itinerary.currency || itinerary.price?.currency || response.data.currency || 'EUR'
             };
         });
 
