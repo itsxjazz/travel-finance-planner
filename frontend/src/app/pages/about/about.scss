@@ -1,0 +1,247 @@
+.about-container {
+  padding-top: 40px;
+  padding-bottom: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- HERO SECTION --- */
+.hero-manifesto {
+  position: relative;
+  text-align: center;
+  padding: 100px 20px;
+  margin-bottom: 80px;
+  overflow: hidden;
+
+  .manifesto-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .manifesto-title {
+    font-family: var(--font-primary);
+    font-size: clamp(3rem, 6.5vw, 5rem);
+    font-weight: 500;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    letter-spacing: -2px;
+    color: #ffffff;
+
+    .text-cyan {
+      color: var(--cyan-neon);
+      text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      font-size: 2.8rem;
+    }
+  }
+
+  .manifesto-description {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+
+    .text-neon {
+      color: var(--cyan-neon);
+      font-weight: 600;
+    }
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+/* --- SECTION HEADINGS --- */
+.section-heading {
+  font-family: var(--font-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 40px;
+  text-align: center;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: var(--cyan-neon);
+    border-radius: 2px;
+  }
+}
+
+/* --- ARCHITECTURE CARDS --- */
+.architecture-section {
+  margin-bottom: 100px;
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    padding: 0 20px;
+  }
+
+  .tech-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 40px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+
+    &:hover {
+      transform: translateY(-8px);
+      border-color: var(--cyan-neon);
+      background: rgba(15, 23, 42, 0.6);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 243, 255, 0.05);
+
+      .card-icon {
+        color: var(--cyan-neon);
+        transform: scale(1.1);
+      }
+    }
+
+    .card-icon {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .card-title {
+      font-family: var(--font-primary);
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .card-text {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+  }
+}
+
+/* --- INTEGRATIONS TABLE --- */
+.integrations-section {
+  padding: 0 20px;
+  margin-bottom: 100px;
+
+  .integrations-table-wrapper {
+    overflow-x: auto;
+    padding: 0;
+    border: 1px solid var(--border-color);
+  }
+
+  .integrations-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+
+    th, td {
+      padding: 20px 24px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    th {
+      font-family: var(--font-primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    tbody tr {
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: rgba(0, 243, 255, 0.03);
+
+        .service-name svg {
+          color: var(--cyan-neon);
+          filter: drop-shadow(0 0 5px var(--cyan-neon));
+        }
+      }
+
+      &:last-child td {
+        border-bottom: none;
+      }
+    }
+
+    .service-name {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+
+      svg {
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+      }
+    }
+
+    .api-name {
+      color: var(--cyan-neon);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      min-width: 100%;
+      .hide-mobile {
+        display: none;
+      }
+    }
+  }
+}
+
+/* --- FOOTER --- */
+.about-footer {
+  text-align: center;
+  margin-top: 40px;
+  color: var(--text-muted);
+
+  p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  .fingo-brand-small {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 900;
+
+    .fin { color: var(--text-primary); }
+    .go { color: var(--cyan-neon); }
+
+    .version {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+  }
+}

@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,6 +8,7 @@ import { Router } from '@angular/router';
 import { CurrencyService } from '../../services/currency.service';
 import { TaxService } from '../../services/tax.service';
 import { TripService } from '../../services/trip.service';
+import { SearchStateService } from '../../services/search-state.service';
 
 // Constantes
 import { IATA_CODES } from '../../constants/iata-codes';
@@ -41,10 +43,12 @@ import { Flights } from '../../components/flights/flights';
   templateUrl: './planner.html',
   styleUrl: './planner.scss'
 })
-export class Planner implements OnInit {
+export class Planner implements OnInit, OnDestroy {
+  private subs: Subscription[] = [];
   private currencyService = inject(CurrencyService);
   private taxService = inject(TaxService);
   private tripService = inject(TripService);
+  private searchState = inject(SearchStateService);
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
 
@@ -54,9 +58,11 @@ export class Planner implements OnInit {
   // Dados da Viagem
   tripDetails: any = null;
   isLoading = signal<boolean>(true);
-  rawPointsOfInterest = signal<any[]>([]);
   isLoadingPOIs = signal<boolean>(false);
-  hasSearchedPOIs = signal<boolean>(false);
+
+  // Consumindo o estado do SearchStateService para persistencia perfeita
+  get rawPointsOfInterest() { return this.searchState.rawPointsOfInterest; }
+  get hasSearchedPOIs() { return this.searchState.hasSearchedPOIs; }
 
   // Estados Financeiros
   localGoal = signal<number>(0);
@@ -84,6 +90,10 @@ export class Planner implements OnInit {
 
   // Computeds
   brlGoal = computed(() => this.localGoal() * this.exchangeRate());
+
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
@@ -133,19 +143,25 @@ export class Planner implements OnInit {
 
   this.fetchRate();
   this.fetchCDI();
+  
+  const tripIdentifier = this.tripDetails._id || this.tripDetails.destination || 'unsaved';
+  this.searchState.initializeState(tripIdentifier);
+
   // loadPOIs() removido para evitar gasto de créditos desnecessário na aba Exploração
   this.isLoading.set(false);
 }
 
   fetchRate() { // Busca a cotação atual do destino para converter os valores
-    this.currencyService.getExchangeRate(this.tripDetails.countryCode).subscribe(rate => {
+    const sub = this.currencyService.getExchangeRate(this.tripDetails.countryCode).subscribe(rate => {
       // Mantém a precisão total para moedas desvalorizadas
       this.exchangeRate.set(rate);
     });
+    this.subs.push(sub);
   }
 
   fetchCDI() { // Busca a taxa CDI atual para os cálculos financeiros
-    this.taxService.getRate('CDI').subscribe((rate: number) => this.cdiRate.set(rate));
+    const sub = this.taxService.getRate('CDI').subscribe((rate: number) => this.cdiRate.set(rate));
+    this.subs.push(sub);
   }
 
   loadPOIs() {
@@ -156,17 +172,19 @@ export class Planner implements OnInit {
 
   const iataCode = this.destinationIataCode;
 
-  this.tripService.getPointsOfInterest(iataCode).subscribe({
+  const sub = this.tripService.getPointsOfInterest(iataCode).subscribe({
     next: (response: any) => {
-      this.rawPointsOfInterest.set(response.data || []);
-      this.isLoadingPOIs.set(false);
-    },
-    error: (err) => {
-      console.error('Erro ao buscar POIs:', err);
-      this.isLoadingPOIs.set(false);
-    }
-  });
-}
+        this.rawPointsOfInterest.set(response.data || []);
+        this.isLoadingPOIs.set(false);
+        this.searchState.saveToStorage();
+      },
+      error: (err) => {
+        console.error('Erro ao buscar POIs:', err);
+        this.isLoadingPOIs.set(false);
+      }
+    });
+    this.subs.push(sub);
+  }
 
   handleInput(event: any, signalRef: any) { // Formata os inputs financeiros para aceitar apenas números e vírgula
     let value = event.target.value;
@@ -193,11 +211,11 @@ export class Planner implements OnInit {
       estimatedTravelDate: this.estimatedTravelDate()
     };
 
-    const action = this.isEditing() && this.tripId()
+    const action$ = this.isEditing() && this.tripId()
       ? this.tripService.updateTrip(this.tripId()!, payload)
       : this.tripService.saveTripPlan(payload);
 
-    action.subscribe({
+    const sub = action$.subscribe({
       next: (response: any) => {
         if (!this.isEditing() && response?._id) {
           this.tripId.set(response._id);
@@ -212,6 +230,7 @@ export class Planner implements OnInit {
         alert('Erro ao salvar no banco de dados.');
       }
     });
+    this.subs.push(sub);
   }
 
   generateBudget(preferences: any) { // Envia as preferências para o backend, recebe o orçamento detalhado e atualiza os sinais correspondentes
@@ -220,7 +239,7 @@ export class Planner implements OnInit {
     const destCurrency = this.tripDetails?.countryCode;
     const payload = { ...preferences, cityName: this.tripDetails?.destination, destinationCode: destCurrency };
 
-    this.tripService.calculateSmartBudget(payload).subscribe({
+    const sub = this.tripService.calculateSmartBudget(payload).subscribe({
       next: (response) => {
         const usdBreakdown = response.breakdown;
         this.currencyService.getExchangeRateFromUSD(destCurrency).subscribe({
@@ -242,6 +261,7 @@ export class Planner implements OnInit {
       },
       error: () => this.isCalculating.set(false)
     });
+    this.subs.push(sub);
   }
 
   addToItinerary(poi: any) { // Adiciona um ponto de interesse ao roteiro, evitando duplicatas

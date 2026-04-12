@@ -11,12 +11,12 @@
       <div *ngIf="userData(); else loadingData" class="user-info">
         <div class="info-group">
           <label>Nome Completo</label>
-          <p class="highlight">{{ userData().name }}</p>
+          <p class="highlight">{{ userData().name | titlecase }}</p>
         </div>
 
         <div class="info-group">
           <label>E-mail de Acesso</label>
-          <p class="highlight">{{ userData().email }}</p>
+          <p class="highlight">{{ userData().email | lowercase }}</p>
         </div>
       </div>
 

@@ -15,7 +15,7 @@ export class DiscoveryGrid {
 
   activeFilter = signal<string>('Todos');
   currentPage = signal<number>(1);
-  itemsPerPage = 10;
+  itemsPerPage = 12;
 
   // Filtra os POIs antes de paginar
   private allFilteredPOIs = computed(() => {

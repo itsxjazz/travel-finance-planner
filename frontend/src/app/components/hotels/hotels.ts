@@ -1,4 +1,5 @@
-import { Component, Input, OnInit, signal, inject } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { TripService } from '../../services/trip.service';
 import { CurrencyService } from '../../services/currency.service';
@@ -12,8 +13,9 @@ import { HotelDetails } from './hotel-details';
   templateUrl: './hotels.html',
   styleUrl: './hotels.scss'
 })
-export class Hotels implements OnInit {
+export class Hotels implements OnInit, OnDestroy {
   @Input() cityName!: string;
+  private subs: Subscription[] = [];
 
   private tripService     = inject(TripService);
   private currencyService = inject(CurrencyService);
@@ -30,6 +32,10 @@ export class Hotels implements OnInit {
   get hasSearched()       { return this.searchState.hasSearchedHotels; }
   get currentExchangeRate() { return this.searchState.exchangeRateHotels; }
 
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
   ngOnInit() {
     // Se já há resultados no service, exibe diretamente sem nova chamada à API
     // Nenhuma ação necessária — o template lê o signal do service
@@ -39,16 +45,23 @@ export class Hotels implements OnInit {
     this.isLoading.set(true);
     this.searchState.hasSearchedHotels.set(true);
 
-    this.tripService.getHotels(this.cityName).subscribe({
+    const sub = this.tripService.getHotels(this.cityName).subscribe({
       next: (data) => {
         this.searchState.hotelsList.set(data);
         this.isLoading.set(false);
+        this.searchState.saveToStorage();
 
         if (data && data.length > 0) {
           const returnedCurrency = data[0].currency || 'EUR';
           this.currencyService.getExchangeRate(returnedCurrency).subscribe({
-            next: (rate) => this.searchState.exchangeRateHotels.set(rate),
-            error: () => this.searchState.exchangeRateHotels.set(1)
+            next: (rate) => {
+                this.searchState.exchangeRateHotels.set(rate);
+                this.searchState.saveToStorage();
+            },
+            error: () => {
+                this.searchState.exchangeRateHotels.set(1);
+                this.searchState.saveToStorage();
+            }
           });
         }
       },
@@ -58,12 +71,13 @@ export class Hotels implements OnInit {
         this.isLoading.set(false);
       }
     });
+    this.subs.push(sub);
   }
 
   showDetails(hotel: any) {
     this.isLoadingDetails.set(true);
 
-    this.tripService.getHotelDetails(hotel.hotelId).subscribe({
+    const sub = this.tripService.getHotelDetails(hotel.hotelId).subscribe({
       next: (realData) => {
         const hotelCompleto = {
           ...hotel,
@@ -82,5 +96,6 @@ export class Hotels implements OnInit {
         this.isLoadingDetails.set(false);
       }
     });
+    this.subs.push(sub);
   }
 }

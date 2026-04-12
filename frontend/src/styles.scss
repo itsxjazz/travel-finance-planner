@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Playfair+Display:ital@1&family=Inter:wght@300;400;500;600;700&display=swap');
 @import 'leaflet/dist/leaflet.css';
 @import 'leaflet.markercluster/dist/MarkerCluster.css';
 @import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -36,9 +36,14 @@
    VARIÁVEIS GLOBAIS - TEMA CIANO (CLEAN DARK)
    ========================================================================== */
 :root {
+  /* Tipografia (Sincronizada com Home) */
+  --font-primary: 'Inter', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+
   /* Cores de Fundo - Tons de Azul Profundo */
   --bg-main: #020617;
-  --bg-card: rgba(15, 23, 42, 0.4);
+  --bg-card: rgba(255, 255, 255, 0.03);
   --bg-input: #0f172a;
 
   /* Cores Neon (Estritamente Ciano) */
@@ -77,7 +82,7 @@ html, body {
   padding: 0;
   background-color: var(--bg-main);
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-primary);
 }
 
 body {
@@ -132,6 +137,20 @@ body {
   color: var(--text-primary);
   margin: 0 0 16px;
   letter-spacing: 0.01em;
+}
+
+.fingo-brand {
+  font-weight: 600;
+  letter-spacing: 0;
+  white-space: nowrap;
+
+  .fin {
+    color: #ffffff;
+  }
+
+  .go {
+    color: var(--cyan-neon, #00f3ff);
+  }
 }
 
 .global-topbar .topbar-brand-name {

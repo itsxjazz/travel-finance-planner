@@ -7,11 +7,13 @@ import { Planner } from './pages/planner/planner';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Profile } from './pages/profile/profile';
+import { About } from './pages/about/about';
 
 export const routes: Routes = [
   // --- ROTAS PÚBLICAS ---
   { path: 'login', component: Login },
   { path: 'register', component: Register },
+  { path: 'sobre', component: About },
   { path: '', component: Home },
 
   // --- ROTAS PROTEGIDAS ---

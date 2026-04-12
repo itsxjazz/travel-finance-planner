@@ -1,4 +1,5 @@
-import { Component, Input, OnInit, signal, inject } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TripService } from '../../services/trip.service';
@@ -12,7 +13,8 @@ import { SearchStateService } from '../../services/search-state.service';
   templateUrl: './flights.html',
   styleUrl: './flights.scss'
 })
-export class Flights implements OnInit {
+export class Flights implements OnInit, OnDestroy {
+  private subs: Subscription[] = [];
   private tripService    = inject(TripService);
   private currencyService = inject(CurrencyService);
   private searchState    = inject(SearchStateService);
@@ -41,6 +43,10 @@ export class Flights implements OnInit {
   get destIn()    { return this.searchState.destIn; }
   get dateIn()    { return this.searchState.dateIn; }
 
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
   ngOnInit() {
     // Só inicializa os campos com props se a aba nunca foi usada antes
     if (!this.searchState.hasSearchedOut() && !this.searchState.hasSearchedIn()) {
@@ -53,13 +59,16 @@ export class Flights implements OnInit {
             ? this.departureDate.toISOString().split('T')[0]
             : this.departureDate
         );
+      } else {
+        // Fallback para hoje caso não haja data estimada na viagem
+        this.searchState.dateOut.set(new Date().toISOString().split('T')[0]);
       }
 
       // Sugestão de volta (campos invertidos)
       this.searchState.originIn.set(this.searchState.destOut() || 'PAR');
       this.searchState.destIn.set(this.searchState.originOut() || 'GRU');
 
-      const returnDate = new Date(this.searchState.dateOut() || new Date());
+      const returnDate = new Date(this.searchState.dateOut());
       returnDate.setDate(returnDate.getDate() + 7);
       this.searchState.dateIn.set(returnDate.toISOString().split('T')[0]);
     }
@@ -73,7 +82,7 @@ export class Flights implements OnInit {
     this.searchState.hasSearchedOut.set(true);
     this.searchState.flightsOut.set([]);
 
-    this.tripService.getFlights(
+    const sub = this.tripService.getFlights(
       this.searchState.originOut().toUpperCase(),
       this.searchState.destOut().toUpperCase(),
       this.searchState.dateOut()
@@ -81,12 +90,19 @@ export class Flights implements OnInit {
       next: (data) => {
         this.searchState.flightsOut.set(data);
         this.isLoadingOut.set(false);
+        this.searchState.saveToStorage();
 
         if (data && data.length > 0) {
           const returnedCurrency = data[0].currency || 'EUR';
           this.currencyService.getExchangeRate(returnedCurrency).subscribe({
-            next: (rate) => this.searchState.exchangeRateFlight.set(rate),
-            error: () => this.searchState.exchangeRateFlight.set(1)
+            next: (rate) => { 
+                this.searchState.exchangeRateFlight.set(rate); 
+                this.searchState.saveToStorage(); 
+            },
+            error: () => { 
+                this.searchState.exchangeRateFlight.set(1);
+                this.searchState.saveToStorage();
+            }
           });
         }
       },
@@ -95,6 +111,7 @@ export class Flights implements OnInit {
         this.errorMessage.set('Erro ao buscar voos de ida.');
       }
     });
+    this.subs.push(sub);
   }
 
   fetchInbound() {
@@ -104,7 +121,7 @@ export class Flights implements OnInit {
     this.searchState.hasSearchedIn.set(true);
     this.searchState.flightsIn.set([]);
 
-    this.tripService.getFlights(
+    const sub = this.tripService.getFlights(
       this.searchState.originIn().toUpperCase(),
       this.searchState.destIn().toUpperCase(),
       this.searchState.dateIn()
@@ -112,12 +129,14 @@ export class Flights implements OnInit {
       next: (data) => {
         this.searchState.flightsIn.set(data);
         this.isLoadingIn.set(false);
+        this.searchState.saveToStorage();
       },
       error: () => {
         this.isLoadingIn.set(false);
         this.errorMessage.set('Erro ao buscar voos de volta.');
       }
     });
+    this.subs.push(sub);
   }
 
   formatDuration(duration: string): string {
