@@ -1,8 +1,12 @@
 const axios = require('axios');
 
-const searchFlightsKiwi = async (origin, destination, departureDate) => {
+const searchFlightsKiwi = async (origin, destination, departureDate, cabinClass = 'ECONOMY') => {
     const RAPIDAPI_HOST = 'kiwi-com-cheap-flights.p.rapidapi.com';
     const url = `https://${RAPIDAPI_HOST}/one-way`;
+
+    // Mapeamento de segurança para garantir classes válidas
+    const validClasses = ['ECONOMY', 'PREMIUM_ECONOMY', 'BUSINESS', 'FIRST'];
+    const selectedClass = validClasses.includes(cabinClass) ? cabinClass : 'ECONOMY';
 
     const params = {
         source: origin,
@@ -11,7 +15,7 @@ const searchFlightsKiwi = async (origin, destination, departureDate) => {
         outboundDepartmentDateEnd: `${departureDate}T00:00:00`,
         limit: 10,
         sortBy: 'PRICE',
-        cabinClass: 'ECONOMY'
+        cabinClass: selectedClass
     };
 
     const response = await axios.get(url, {

@@ -12,8 +12,8 @@ const tripSchema = new mongoose.Schema({
     estimatedTravelDate: { type: Date }, // Data calculada pela lógica do front,
     itinerary: { type: Array, default: [] }, // Lista de atrações planejadas
     budgetResult: { type: Object, default: null }, // Resultado detalhado do orçamento
-    budgetPreferences: { type: Object, default: null } // Preferências usadas para gerar o orçamento
-
+    budgetPreferences: { type: Object, default: null }, // Preferências usadas para gerar o orçamento
+    lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Trip', tripSchema);

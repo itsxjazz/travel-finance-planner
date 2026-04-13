@@ -48,8 +48,6 @@ export class Search {
           this.verifiedCountries.includes(country.cca3)
         );
 
-        console.log('Países encontrados e filtrados:', filteredResults);
-
         this.searchResults.set(filteredResults);
         this.isSearching.set(false);
         this.hasSearched.set(true);

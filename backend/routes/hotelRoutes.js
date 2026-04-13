@@ -5,8 +5,8 @@ const hotelController = require('../controllers/hotelController');
 
 const searchLimiter = rateLimit({
     windowMs: 30 * 60 * 1000, 
-    max: 10, 
-    message: { message: 'Muitas buscas originadas deste IP, por favor tente novamente em 30 minutos.' }
+    max: 5, 
+    message: { message: 'Limite de busca de hotéis atingido (5 a cada 30 min). Por favor, aguarde.' }
 });
 
 router.get('/:location', hotelController.checkCacheHotels, searchLimiter, hotelController.searchHotels);

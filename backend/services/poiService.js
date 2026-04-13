@@ -121,11 +121,6 @@ const getCombinedPois = async (lat, lng) => {
         ...categoriesMap.SHOPPING
     ].sort(() => Math.random() - 0.5);
 
-    console.log(`[API STITCHING] Detalhes do retorno balanceado:
-    - Travel Places Base: ${travelCount} locais
-    - Geoapify Base: ${geoapifyCount} locais
-    - Total final entregue cruzado: ${finalData.length} locais`);
-
     return finalData;
 };
 

@@ -1,4 +1,5 @@
 const Amadeus = require('amadeus');
+const { searchHotelsByLocation } = require('./bookingService');
 
 // Inicializado apenas se configurado para evitar crash no boot, mas será usado no calculateBudget
 let amadeus;
@@ -40,6 +41,43 @@ const getDefaultFlightsAndHotels = async (iataCode, targetDate, numAdults, hotel
     const [flightResponse, hotelResponse] = await Promise.all([fetchFlight, fetchHotels]);
     
     return { flightResponse, hotelResponse };
+};
+
+const searchFlightsDetailed = async (origin, destination, departureDate, cabinClass = 'ECONOMY') => {
+    const api = initAmadeus();
+    if (!api) return [];
+
+    try {
+        const response = await api.shopping.flightOffersSearch.get({
+            originLocationCode: origin,
+            destinationLocationCode: destination,
+            departureDate: departureDate,
+            adults: '1',
+            travelClass: cabinClass,
+            max: 15
+        });
+
+        return response.data.map(offer => ({
+            id: offer.id,
+            airlineCode: offer.validatingAirlineCodes[0],
+            airlineName: offer.validatingAirlineCodes[0],
+            stops: offer.itineraries[0].segments.length - 1,
+            departure: {
+                at: offer.itineraries[0].segments[0].departure.at,
+                iataCode: offer.itineraries[0].segments[0].departure.iataCode
+            },
+            arrival: {
+                at: offer.itineraries[0].segments[offer.itineraries[0].segments.length - 1].arrival.at,
+                iataCode: offer.itineraries[0].segments[offer.itineraries[0].segments.length - 1].arrival.iataCode
+            },
+            duration: offer.itineraries[0].duration,
+            price: parseFloat(offer.price.total),
+            currency: offer.price.currency
+        }));
+    } catch (err) {
+        console.error('Erro na busca detalhada Amadeus:', err.message);
+        return [];
+    }
 };
 
 const calculateBudgetBreakdown = async (params) => {
@@ -98,18 +136,37 @@ const calculateBudgetBreakdown = async (params) => {
         [flightResponse, hotelResponse] = await Promise.all([fetchFlight, fetchHotels]);
     }
 
-    if (flightResponse.data && flightResponse.data.length > 0) {
-        console.log(`SUCESSO AMADEUS: Voo encontrado por $${flightResponse.data[0].price.total} USD (Total para ${parsedAdults} adultos).`);
-    } else {
-        console.log(`FALLBACK ATIVADO: Voo não encontrado no cache da Amadeus. Usando estimativa de $${1200 * parsedAdults} USD.`);
-    }
-
     let flightBase = flightResponse.data.length > 0
         ? parseFloat(flightResponse.data[0].price.total)
         : (1200 * parsedAdults);
 
-    let dailyHotelBase = hotelStars * 45;
-    let dailyFoodBase = (dailyHotelBase * 0.60) * parsedAdults;
+    // --- NOVA LÓGICA DE HOTEL REAL (BOOKING.COM) ---
+    // Diária base estimada (fallback se o Booking falhar ou não encontrar resultados)
+    let dailyHotelBase = hotelStars * 45; 
+    
+    try {
+        const checkout = new Date(targetDate);
+        checkout.setDate(checkout.getDate() + parseInt(days));
+        const checkoutStr = checkout.toISOString().split('T')[0];
+
+        // Busca hotéis reais para o número de adultos e padrão de estrelas
+        console.log(`[DEBUG-AMADEUS] Solicitando preco real ao Booking: Destino=${cityName}, Estrelas=${hotelStars}, Adultos=${parsedAdults}`);
+        const realHotels = await searchHotelsByLocation(cityName, hotelStars, targetDate, checkoutStr, parsedAdults);
+        
+        if (realHotels && realHotels.length > 0) {
+            console.log(`[DEBUG-AMADEUS] Booking retornou preco real: ${realHotels[0].price} ${realHotels[0].currency}`);
+            // Pega o preço total do primeiro hotel encontrado e divide pelos dias para ter a média da diária
+            const totalPrice = realHotels[0].price;
+            dailyHotelBase = totalPrice / days;
+        } else {
+            console.log('[DEBUG-AMADEUS] Booking nao retornou resultados. Usando fallback de stars * 45.');
+        }
+    } catch (err) {
+        console.error('Aviso Booking (Orçamento): Usando fallback fixo.', err.message);
+    }
+
+    // Gasto diário (alimentação etc) continua sendo proporcional ao padrão do hotel selecionado
+    let dailyFoodBase = (dailyHotelBase * 0.60); 
 
     return {
         flightBase,
@@ -122,5 +179,6 @@ const calculateBudgetBreakdown = async (params) => {
 };
 
 module.exports = {
-    calculateBudgetBreakdown
+    calculateBudgetBreakdown,
+    searchFlightsDetailed
 };

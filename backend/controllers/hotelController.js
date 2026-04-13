@@ -15,7 +15,6 @@ const checkCacheHotels = async (req, res, next) => {
         
         const cachedSearch = await SearchCache.findOne({ cacheKey });
         if (cachedSearch) {
-            console.log(`[CACHE] Entregando busca de hotéis para ${location} sem gastar API.`);
             return res.json(cachedSearch.data);
         }
 
@@ -66,7 +65,6 @@ const checkCacheDetails = async (req, res, next) => {
 
         const cachedDetails = await SearchCache.findOne({ cacheKey });
         if (cachedDetails) {
-            console.log(`[CACHE] Entregando hotel ${hotelId} sem gastar API.`);
             return res.json(cachedDetails.data);
         }
 

@@ -12,10 +12,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const isBackendUrl = req.url.startsWith(environment.apiUrl);
 
-  if (isBackendUrl) {
-    console.log(`[Interceptor] Verificando rota: ${req.url} | Token presente: ${!!token}`);
-  }
-
   if (token && isBackendUrl) {
     const authReq = req.clone({
       setHeaders: {

@@ -59,6 +59,8 @@ export class Planner implements OnInit, OnDestroy {
   tripDetails: any = null;
   isLoading = signal<boolean>(true);
   isLoadingPOIs = signal<boolean>(false);
+  showStaleDataBanner = signal<boolean>(false);
+  lastUpdatedDate = signal<string>('');
 
   // Consumindo o estado do SearchStateService para persistencia perfeita
   get rawPointsOfInterest() { return this.searchState.rawPointsOfInterest; }
@@ -147,6 +149,27 @@ export class Planner implements OnInit, OnDestroy {
   const tripIdentifier = this.tripDetails._id || this.tripDetails.destination || 'unsaved';
   this.searchState.initializeState(tripIdentifier);
 
+  // Verificação de dados estáticos (> 24h)
+  const lastUpdateRaw = this.tripDetails.lastUpdated || this.tripDetails.updatedAt || this.tripDetails.createdAt;
+  
+  if (lastUpdateRaw) {
+    const lastUpdate = new Date(lastUpdateRaw);
+    const now = new Date();
+    const diffInHours = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60);
+
+    // DEBUG: Se houver 'forceStale' no localStorage, ignora o tempo para teste visual
+    const forceStale = localStorage.getItem('forceStale') === 'true';
+    
+    if (diffInHours > 24 || forceStale) {
+      this.showStaleDataBanner.set(true);
+      this.lastUpdatedDate.set(lastUpdate.toLocaleDateString('pt-BR'));
+    }
+  } else if (this.tripId()) {
+    // Se a viagem tem ID mas não tem data nenhuma (caso raro), tratamos como antiga por segurança
+    this.showStaleDataBanner.set(true);
+    this.lastUpdatedDate.set('data desconhecida');
+  }
+
   // loadPOIs() removido para evitar gasto de créditos desnecessário na aba Exploração
   this.isLoading.set(false);
 }
@@ -217,12 +240,20 @@ export class Planner implements OnInit, OnDestroy {
 
     const sub = action$.subscribe({
       next: (response: any) => {
+        // Atualiza os dados locais com a resposta do servidor (incluindo _id e lastUpdated)
+        this.tripDetails = { ...this.tripDetails, ...response };
+        localStorage.setItem('activeTrip', JSON.stringify(this.tripDetails));
+
         if (!this.isEditing() && response?._id) {
           this.tripId.set(response._id);
           this.isEditing.set(true);
           localStorage.setItem('isEditing', 'true');
           localStorage.setItem('tripId', response._id);
         }
+
+        // Se salvou com sucesso, os dados não estão mais "estáticos/velhos"
+        this.showStaleDataBanner.set(false);
+
         this.handleSaveSuccess();
       },
       error: () => {

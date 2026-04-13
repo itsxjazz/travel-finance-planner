@@ -1,5 +1,5 @@
 const SearchCache = require('../models/SearchCache');
-const { searchFlightsKiwi } = require('../services/kiwiService');
+const { searchFlightsDetailed } = require('../services/amadeusService');
 
 const checkCacheFlights = async (req, res, next) => {
     try {
@@ -7,13 +7,12 @@ const checkCacheFlights = async (req, res, next) => {
         const destination = req.query.destination || (req.flightData && req.flightData.destination);
         const date = req.query.date;
         const departureDate = req.query.departureDate || date || (req.flightData && req.flightData.departureDate);
+        const cabinClass = req.query.cabinClass || 'ECONOMY';
 
-        const cacheKey = `VOO-V3-${origin.toUpperCase()}-${destination.toUpperCase()}-${departureDate}`;
+        const cacheKey = `VOO-V4-${origin.toUpperCase()}-${destination.toUpperCase()}-${departureDate}-${cabinClass}`;
 
         const cachedSearch = await SearchCache.findOne({ cacheKey });
         if (cachedSearch) {
-            console.log(`[CACHE] Entregando voos de ${origin} para ${destination} sem gastar API.`);
-            
             let returnData = [];
             if (Array.isArray(cachedSearch.data)) {
                 returnData = cachedSearch.data;
@@ -28,7 +27,7 @@ const checkCacheFlights = async (req, res, next) => {
             return res.json(returnData);
         }
 
-        req.flightData = { origin, destination, departureDate, cacheKey };
+        req.flightData = { origin, destination, departureDate, cabinClass, cacheKey };
         next();
     } catch (error) {
         next(error);
@@ -37,9 +36,9 @@ const checkCacheFlights = async (req, res, next) => {
 
 const searchFlights = async (req, res, next) => {
     try {
-        const { origin, destination, departureDate, cacheKey } = req.flightData;
+        const { origin, destination, departureDate, cabinClass, cacheKey } = req.flightData;
 
-        const mappedFlights = await searchFlightsKiwi(origin, destination, departureDate);
+        const mappedFlights = await searchFlightsDetailed(origin, destination, departureDate, cabinClass);
 
         await SearchCache.create({
             cacheKey,

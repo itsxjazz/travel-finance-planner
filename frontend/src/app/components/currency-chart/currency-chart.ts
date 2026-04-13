@@ -1,7 +1,8 @@
-import { Component, Input, ElementRef, ViewChild, PLATFORM_ID, inject, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, PLATFORM_ID, inject, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { CurrencyService } from '../../services/currency.service';
 import { Chart, registerables } from 'chart.js';
+import { Subscription } from 'rxjs';
 
 Chart.register(...registerables); // Registro global dos componentes do Chart.js para evitar erros de renderização
 
@@ -12,14 +13,19 @@ Chart.register(...registerables); // Registro global dos componentes do Chart.js
   templateUrl: './currency-chart.html',
   styleUrl: './currency-chart.scss'
 })
-export class CurrencyChart implements OnChanges {
+export class CurrencyChart implements OnChanges, OnDestroy {
   @Input() countryCode!: string;
   @ViewChild('currencyChart') chartCanvas!: ElementRef;
 
   private currencyService = inject(CurrencyService);
   private platformId = inject(PLATFORM_ID);
+  private subs: Subscription[] = [];
 
   chart: any;
+
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
 
   ngOnChanges(changes: SimpleChanges) { // Escuta mudanças no código do país para atualizar o gráfico
     if (changes['countryCode'] && this.countryCode) {
@@ -29,7 +35,7 @@ export class CurrencyChart implements OnChanges {
 
   loadHistoricalData() { // Busca os dados históricos e prepara o gráfico
     if (isPlatformBrowser(this.platformId)) {
-      this.currencyService.getHistoricalRates(this.countryCode).subscribe(data => {
+      const sub = this.currencyService.getHistoricalRates(this.countryCode).subscribe(data => {
         const historyData = [...data].reverse();
 
         const labels = historyData.map((d: any) => {
@@ -47,6 +53,7 @@ export class CurrencyChart implements OnChanges {
           this.createChart(filteredLabels, filteredValues);
         }, 0);
       });
+      this.subs.push(sub);
     }
   }
 

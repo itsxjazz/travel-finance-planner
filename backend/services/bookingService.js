@@ -5,7 +5,7 @@ const getHeaders = () => ({
     'x-rapidapi-key': process.env.RAPIDAPI_KEY
 });
 
-const searchHotelsByLocation = async (location, stars, checkinDateStr, checkoutDateStr) => {
+const searchHotelsByLocation = async (location, stars, checkinDateStr, checkoutDateStr, adults = 1) => {
     const locResponse = await axios.get('https://booking-com.p.rapidapi.com/v1/hotels/locations', {
         params: { name: location, locale: 'pt-br' },
         headers: getHeaders()
@@ -25,8 +25,8 @@ const searchHotelsByLocation = async (location, stars, checkinDateStr, checkoutD
             dest_type: destType,
             checkin_date: checkinDateStr,
             checkout_date: checkoutDateStr,
-            adults_number: 2,
-            room_number: 1,
+            adults_number: adults,
+            room_number: Math.ceil(adults / 2),
             filter_by_currency: 'EUR',
             order_by: 'popularity',
             units: 'metric',

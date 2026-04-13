@@ -2,11 +2,11 @@
   <header class="dashboard-header">
     <h1 class="neon-title">Central de <span>viagens</span></h1>
     <p class="subtitle">Acompanhe os planejamentos das suas viagens.</p>
+    
+    <div *ngIf="isLoading()" class="loading-state">
+      <div class="spinner-neon"></div>
+    </div>
   </header>
-
-  <div *ngIf="isLoading()" class="loading-state">
-    <div class="neon-spinner"></div>
-  </div>
 
   <div *ngIf="!isLoading() && savedTrips().length === 0" class="empty-state card-dark">
     <p>Você ainda não tem nenhum planejamento salvo.</p>
