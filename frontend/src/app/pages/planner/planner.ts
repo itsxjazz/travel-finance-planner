@@ -267,6 +267,10 @@ export class Planner implements OnInit, OnDestroy {
   generateBudget(preferences: any) { // Envia as preferências para o backend, recebe o orçamento detalhado e atualiza os sinais correspondentes
     this.budgetPreferences.set(preferences);
     this.isCalculating.set(true);
+    
+    // Se o usuário está gerando um novo orçamento, os dados não são mais "antigos"
+    this.showStaleDataBanner.set(false);
+
     const destCurrency = this.tripDetails?.countryCode;
     const payload = { ...preferences, cityName: this.tripDetails?.destination, destinationCode: destCurrency };
 

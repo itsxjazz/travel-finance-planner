@@ -124,7 +124,8 @@ const calculateBudgetBreakdown = async (params) => {
             travelClass: flightClass,
             max: 1
         }).catch((err) => {
-            console.error('Aviso Amadeus (Voo):', err.message);
+            const errorDetail = err.response?.data?.errors?.[0]?.detail || err.message || 'Erro desconhecido';
+            console.error('Aviso Amadeus (Voo):', errorDetail);
             return { data: [] };
         });
 
