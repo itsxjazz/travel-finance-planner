@@ -12,8 +12,7 @@ const getTrips = async (req, res, next) => {
 const createTrip = async (req, res, next) => {
     const trip = new Trip({
         ...req.body,
-        userId: req.user.id,
-        lastUpdated: new Date()
+        userId: req.user.id
     });
 
     try {
@@ -28,7 +27,7 @@ const updateTrip = async (req, res, next) => {
     try {
         const updatedTrip = await Trip.findOneAndUpdate(
             { _id: req.params.id, userId: req.user.id },
-            { ...req.body, lastUpdated: new Date() },
+            req.body,
             { returnDocument: 'after' }
         );
 

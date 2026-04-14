@@ -120,7 +120,7 @@
           @if (isCalculating()) {
           <div class="empty-state-box">
             <div class="spinner-neon small" style="color: var(--cyan-neon); text-shadow: var(--glow-cyan);"></div>
-            <p>Analisando voos e hotéis no Amadeus...</p>
+            <p>Analisando voos e hotéis via Booking e Kiwi...</p>
           </div>
           } @else if (budgetResult()) {
           <app-budget-visualizer [budgetBreakdown]="budgetResult().breakdown" [currencyCode]="tripDetails.countryCode"

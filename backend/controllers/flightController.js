@@ -1,5 +1,5 @@
 const SearchCache = require('../models/SearchCache');
-const { searchFlightsDetailed } = require('../services/amadeusService');
+const { searchFlightsKiwi } = require('../services/kiwiService');
 
 const checkCacheFlights = async (req, res, next) => {
     try {
@@ -38,7 +38,7 @@ const searchFlights = async (req, res, next) => {
     try {
         const { origin, destination, departureDate, cabinClass, cacheKey } = req.flightData;
 
-        const mappedFlights = await searchFlightsDetailed(origin, destination, departureDate, cabinClass);
+        const mappedFlights = await searchFlightsKiwi(origin, destination, departureDate, cabinClass);
 
         await SearchCache.create({
             cacheKey,

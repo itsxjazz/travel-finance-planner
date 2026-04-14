@@ -81,7 +81,7 @@ export class Planner implements OnInit, OnDestroy {
   isEditing = signal<boolean>(false);
   tripId = signal<string | null>(null);
 
-  // Resultados Amadeus
+  // Resultados da busca inteligente (Booking & Kiwi)
   budgetResult = signal<any>(null);
   budgetPreferences = signal<any>(null);
   isCalculating = signal<boolean>(false);
@@ -115,8 +115,7 @@ export class Planner implements OnInit, OnDestroy {
   private restoreSession() { // Restaura os dados da viagem do estado de navegação ou do localStorage
     if (history.state && history.state.tripData) {
       this.tripDetails = history.state.tripData;
-      localStorage.setItem('activeTrip', JSON.stringify(this.tripDetails));
-      this.isEditing.set(!!history.state.isEditing);
+      localStorage.setItem('activeTrip', JSON.stringify(this.tripDetails));      this.isEditing.set(!!history.state.isEditing);
       if (this.isEditing()) {
         this.tripId.set(this.tripDetails._id);
         localStorage.setItem('isEditing', 'true');
@@ -150,24 +149,26 @@ export class Planner implements OnInit, OnDestroy {
   this.searchState.initializeState(tripIdentifier);
 
   // Verificação de dados estáticos (> 24h)
-  const lastUpdateRaw = this.tripDetails.lastUpdated || this.tripDetails.updatedAt || this.tripDetails.createdAt;
+  // Usando updatedAt (ou createdAt se nunca foi editado) como fonte da verdade
+  const lastUpdateRaw = this.tripDetails.updatedAt || this.tripDetails.createdAt;
   
   if (lastUpdateRaw) {
     const lastUpdate = new Date(lastUpdateRaw);
     const now = new Date();
-    const diffInHours = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60);
-
-    // DEBUG: Se houver 'forceStale' no localStorage, ignora o tempo para teste visual
-    const forceStale = localStorage.getItem('forceStale') === 'true';
     
-    if (diffInHours > 24 || forceStale) {
-      this.showStaleDataBanner.set(true);
-      this.lastUpdatedDate.set(lastUpdate.toLocaleDateString('pt-BR'));
+    if (!isNaN(lastUpdate.getTime())) {
+      const diffInHours = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60);
+      const forceStale = localStorage.getItem('forceStale') === 'true';
+
+      if (diffInHours > 24 || forceStale) {
+        this.showStaleDataBanner.set(true);
+        this.lastUpdatedDate.set(lastUpdate.toLocaleDateString('pt-BR'));
+      }
     }
   } else if (this.tripId()) {
-    // Se a viagem tem ID mas não tem data nenhuma (caso raro), tratamos como antiga por segurança
+    // Caso de segurança para registros sem data no banco
     this.showStaleDataBanner.set(true);
-    this.lastUpdatedDate.set('data desconhecida');
+    this.lastUpdatedDate.set('mais de 24h');
   }
 
   // loadPOIs() removido para evitar gasto de créditos desnecessário na aba Exploração

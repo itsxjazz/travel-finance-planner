@@ -29,7 +29,7 @@ export class CurrencyService {
     return this.http.get<any[]>(`${this.apiBase}/daily/${pair}/360`);
   }
 
-  // 3. Busca cotação USD -> Moeda Estrangeira (para o Amadeus)
+  // 3. Busca cotação USD -> Moeda Estrangeira (para cálculos baseados em USD)
   getExchangeRateFromUSD(currencyCode: string): Observable<number> {
     if (currencyCode === 'USD') return new Observable(obs => { obs.next(1); obs.complete(); });
 

@@ -3,7 +3,7 @@
   <div class="estimator-header">
     <div class="text">
       <h3 class="section-title">Gerador de Orçamento Inteligente</h3>
-      <p class="subtitle">Nossos motores buscarão valores reais de voos e hotéis via Amadeus.</p>
+      <p class="subtitle">Nossos motores buscarão valores reais de hotéis e voos via Booking e Kiwi.</p>
     </div>
   </div>
 
@@ -11,12 +11,8 @@
     <div class="form-row iata-row">
       <div class="form-group">
         <label>Origem (IATA)</label>
-        <input type="text"
-               [ngModel]="originCode()"
-               (ngModelChange)="originCode.set($event)"
-               placeholder="Ex: GRU"
-               maxlength="3"
-               class="neon-input iata-input">
+        <input type="text" [ngModel]="originCode()" (ngModelChange)="originCode.set($event)" placeholder="Ex: GRU"
+          maxlength="3" class="neon-input iata-input">
       </div>
       <div class="form-group">
         <label>Destino (IATA)</label>
@@ -27,18 +23,12 @@
     <div class="form-row date-row">
       <div class="form-group">
         <label>Ida</label>
-        <input type="date"
-               [ngModel]="departureDate()"
-               (ngModelChange)="departureDate.set($event)"
-               class="neon-input">
+        <input type="date" [ngModel]="departureDate()" (ngModelChange)="departureDate.set($event)" class="neon-input">
       </div>
       <div class="form-group">
         <label>Dias</label>
-        <input type="number"
-               [ngModel]="tripDays()"
-               (ngModelChange)="tripDays.set($event)"
-               min="1"
-               class="neon-input centered no-spin">
+        <input type="number" [ngModel]="tripDays()" (ngModelChange)="tripDays.set($event)" min="1"
+          class="neon-input centered no-spin">
       </div>
       <div class="form-group">
         <label>Volta</label>
@@ -49,17 +39,12 @@
     <div class="form-row passengers-row">
       <div class="form-group">
         <label>Adultos</label>
-        <input type="number"
-               [ngModel]="adultsCount()"
-               (ngModelChange)="adultsCount.set($event)"
-               min="1"
-               class="neon-input centered no-spin">
+        <input type="number" [ngModel]="adultsCount()" (ngModelChange)="adultsCount.set($event)" min="1"
+          class="neon-input centered no-spin">
       </div>
       <div class="form-group">
         <label>Classe do Voo</label>
-        <select [ngModel]="flightClass()"
-                (ngModelChange)="flightClass.set($event)"
-                class="neon-select">
+        <select [ngModel]="flightClass()" (ngModelChange)="flightClass.set($event)" class="neon-select">
           <option value="ECONOMY">Econômica</option>
           <option value="PREMIUM_ECONOMY">Econômica Premium</option>
           <option value="BUSINESS">Executiva</option>
@@ -71,10 +56,8 @@
     <div class="stars-section">
       <label class="stars-label">Padrão de Hospedagem</label>
       <div class="stars-group">
-        <button *ngFor="let star of [1, 2, 3, 4, 5]"
-                (click)="setStars(star)"
-                [class.active]="hotelStars() >= star"
-                class="star-btn">
+        <button *ngFor="let star of [1, 2, 3, 4, 5]" (click)="setStars(star)" [class.active]="hotelStars() >= star"
+          class="star-btn">
           ★
         </button>
       </div>

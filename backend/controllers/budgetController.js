@@ -1,4 +1,4 @@
-const { calculateBudgetBreakdown } = require('../services/amadeusService');
+const { calculateBudgetBreakdown } = require('../services/budgetService');
 const SearchCache = require('../models/SearchCache');
 
 const calculateBudget = async (req, res, next) => {

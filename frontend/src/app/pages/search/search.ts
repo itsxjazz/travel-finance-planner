@@ -20,7 +20,7 @@ export class Search {
   isSearching = signal<boolean>(false);
   hasSearched = signal<boolean>(false);
 
-  // Países que Amadeus e AwesomeAPI suportam perfeitamente
+  // Países que o sistema de busca inteligente e AwesomeAPI suportam perfeitamente
   private verifiedCountries = [
     // Américas
     'BRA', 'USA', 'CAN', 'MEX', 'ARG', 'CHL', 'COL', 'PER', 'URY',
