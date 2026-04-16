@@ -173,6 +173,12 @@ export class Planner implements OnInit, OnDestroy {
 
   // loadPOIs() removido para evitar gasto de créditos desnecessário na aba Exploração
   this.isLoading.set(false);
+
+  // Se a viagem já tem preferências salvas e ainda não buscou hotéis (novo acesso), 
+  // dispara as buscas em segundo plano automaticamente para popular as abas.
+  if (this.budgetPreferences() && !this.searchState.hasSearchedHotels()) {
+    this.triggerBackgroundSearches(this.budgetPreferences());
+  }
 }
 
   fetchRate() { // Busca a cotação atual do destino para converter os valores
@@ -272,10 +278,12 @@ export class Planner implements OnInit, OnDestroy {
     // Se o usuário está gerando um novo orçamento, os dados não são mais "antigos"
     this.showStaleDataBanner.set(false);
 
+    const cityName = this.tripDetails?.destination;
     const destCurrency = this.tripDetails?.countryCode;
-    const payload = { ...preferences, cityName: this.tripDetails?.destination, destinationCode: destCurrency };
+    const payload = { ...preferences, cityName, destinationCode: destCurrency };
 
-    const sub = this.tripService.calculateSmartBudget(payload).subscribe({
+    // 1. Orçamento Inteligente (Estimativa baseada em médias)
+    const budgetSub = this.tripService.calculateSmartBudget(payload).subscribe({
       next: (response) => {
         const usdBreakdown = response.breakdown;
         this.currencyService.getExchangeRateFromUSD(destCurrency).subscribe({
@@ -297,7 +305,82 @@ export class Planner implements OnInit, OnDestroy {
       },
       error: () => this.isCalculating.set(false)
     });
-    this.subs.push(sub);
+    this.subs.push(budgetSub);
+
+    // 2. Dispara as buscas em tempo real (Hotéis e Voos)
+    this.triggerBackgroundSearches(preferences);
+  }
+
+  /**
+   * Dispara as buscas reais de hotéis e voos em segundo plano para popular as abas
+   * @param preferences As preferências de viagem (origem, datas, dias, etc)
+   */
+  private triggerBackgroundSearches(preferences: any) {
+    const cityName = this.tripDetails?.destination;
+
+    // 1. Busca Real de Hotéis (Popula a aba de Hospedagem)
+    this.searchState.hasSearchedHotels.set(true);
+    const hotelsSub = this.tripService.getHotels(cityName).subscribe({
+      next: (data) => {
+        this.searchState.hotelsList.set(data);
+        if (data && data.length > 0) {
+          const returnedCurrency = data[0].currency || 'EUR';
+          this.currencyService.getExchangeRate(returnedCurrency).subscribe(rate => {
+            this.searchState.exchangeRateHotels.set(rate);
+            this.searchState.saveToStorage();
+          });
+        }
+        this.searchState.saveToStorage();
+      }
+    });
+    this.subs.push(hotelsSub);
+
+    // 2. Busca Real de Voos (Ida e Volta - Popula a aba de Voos)
+    const origin = preferences.originCode;
+    const destination = this.destinationIataCode;
+    const depDate = preferences.departureDate;
+
+    if (origin && destination && destination !== '???') {
+      // Configura os campos de ida no estado global
+      this.searchState.originOut.set(origin);
+      this.searchState.destOut.set(destination);
+      this.searchState.dateOut.set(depDate);
+      this.searchState.hasSearchedOut.set(true);
+
+      const flightsOutSub = this.tripService.getFlights(origin, destination, depDate).subscribe({
+        next: (data) => {
+          this.searchState.flightsOut.set(data || []);
+          if (data && data.length > 0) {
+            const returnedCurrency = data[0].currency || 'EUR';
+            this.currencyService.getExchangeRate(returnedCurrency).subscribe(rate => {
+              this.searchState.exchangeRateFlight.set(rate);
+              this.searchState.saveToStorage();
+            });
+          }
+          this.searchState.saveToStorage();
+        }
+      });
+      this.subs.push(flightsOutSub);
+
+      // Calcula a data de volta baseada nos dias de viagem do orçamento
+      const returnDt = new Date(depDate);
+      returnDt.setDate(returnDt.getDate() + (preferences.days || 7));
+      const returnDateStr = returnDt.toISOString().split('T')[0];
+
+      // Configura os campos de volta no estado global
+      this.searchState.originIn.set(destination);
+      this.searchState.destIn.set(origin);
+      this.searchState.dateIn.set(returnDateStr);
+      this.searchState.hasSearchedIn.set(true);
+
+      const flightsInSub = this.tripService.getFlights(destination, origin, returnDateStr).subscribe({
+        next: (data) => {
+          this.searchState.flightsIn.set(data || []);
+          this.searchState.saveToStorage();
+        }
+      });
+      this.subs.push(flightsInSub);
+    }
   }
 
   addToItinerary(poi: any) { // Adiciona um ponto de interesse ao roteiro, evitando duplicatas
