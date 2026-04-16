@@ -9,19 +9,16 @@ const calculateBudget = async (req, res, next) => {
         const cacheKey = `BUDGET-V2-${cityName}-${days}-${flightClass}-${hotelStars}-${originCode || 'GRU'}-${departureDate}-${adults}`;
 
         // Verifica se já existe um orçamento idêntico no banco de dados
-        console.log('[DEBUG-BUDGET] Verificando existencia de cache para key:', cacheKey);
         const cachedSearch = await SearchCache.findOne({ cacheKey });
         if (cachedSearch) {
-            console.log('[DEBUG-BUDGET] Cache encontrado. Retornando dados persistidos.');
             return res.json({
                 success: true,
                 breakdown: cachedSearch.data,
                 fromCache: true,
-                message: `Orçamento recuperado via cache inteligente.`
+                message: 'Orçamento recuperado via cache inteligente.'
             });
         }
 
-        console.log('[DEBUG-BUDGET] Cache nao encontrado. Iniciando calculo real via APIs.');
         const data = await calculateBudgetBreakdown(req.body);
 
         const breakdown = {

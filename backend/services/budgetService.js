@@ -34,16 +34,13 @@ const calculateBudgetBreakdown = async (params) => {
     // --- LÓGICA DE VOO VIA KIWI ---
     let flightBase = (1200 * parsedAdults); // Fallback padrão
     try {
-        console.log(`[DEBUG-KIWI] Buscando Voo para o Orçamento: ${departureAirport} -> ${iataCode} (${flightClass})`);
         const flights = await searchFlightsKiwi(departureAirport, iataCode, targetDate, flightClass);
         
         if (flights && flights.length > 0) {
             // A Kiwi retorna o valor por pessoa, então multiplicamos pelos adultos
             const pricePerPerson = flights[0].price;
             flightBase = pricePerPerson * parsedAdults;
-            console.log(`[DEBUG-KIWI] Preço Real Encontrado: ${pricePerPerson} por pessoa (Total ${flightBase})`);
-        } else {
-            console.log('[DEBUG-KIWI] Nenhum voo encontrado na Kiwi. Usando Fallback.');
+
         }
     } catch (err) {
         console.error('[DEBUG-KIWI] Falha na API Kiwi:', err.message);
@@ -57,16 +54,13 @@ const calculateBudgetBreakdown = async (params) => {
         checkout.setDate(checkout.getDate() + parseInt(days));
         const checkoutStr = checkout.toISOString().split('T')[0];
 
-        console.log(`[DEBUG-BOOKING] Solicitando preco real: Destino=${cityName}, Estrelas=${hotelStars}, Adultos=${parsedAdults}`);
         const realHotels = await searchHotelsByLocation(cityName, hotelStars, targetDate, checkoutStr, parsedAdults);
         
         if (realHotels && realHotels.length > 0) {
-            console.log(`[DEBUG-BOOKING] Booking retornou preco real: ${realHotels[0].price} ${realHotels[0].currency}`);
+
             // Pega o preço total do primeiro hotel encontrado e divide pelos dias para ter a média da diária
             const totalPrice = realHotels[0].price;
             dailyHotelBase = totalPrice / days;
-        } else {
-            console.log('[DEBUG-BOOKING] Booking nao retornou resultados. Usando fallback de stars * 45.');
         }
     } catch (err) {
         console.error('Aviso Booking (Orçamento): Usando fallback fixo.', err.message);

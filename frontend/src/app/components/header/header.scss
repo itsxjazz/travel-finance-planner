@@ -255,18 +255,4 @@
 
 .menu-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(4px); z-index: 1500; }
 
-/* --- ÍCONE FINGO (CSS Mask) --- */
-.fingo-brand-icon {
-  width: 40px;
-  height: 40px;
-  background-color: var(--cyan-neon);
-  -webkit-mask-image: url("/assets/fingo-icon.svg");
-  mask-image: url("/assets/fingo-icon.svg");
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  filter: drop-shadow(0 0 5px rgba(0, 243, 255, 0.6));
-}
+

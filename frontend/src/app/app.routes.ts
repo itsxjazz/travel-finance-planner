@@ -13,7 +13,7 @@ export const routes: Routes = [
   // --- ROTAS PÚBLICAS ---
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'sobre', component: About },
+  { path: 'about', component: About },
   { path: '', component: Home },
 
   // --- ROTAS PROTEGIDAS ---

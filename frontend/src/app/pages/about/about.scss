@@ -9,8 +9,8 @@
 .hero-manifesto {
   position: relative;
   text-align: center;
-  padding: 100px 20px;
-  margin-bottom: 80px;
+  padding: 100px 20px 0;
+  margin-bottom: 60px;
   overflow: hidden;
 
   .manifesto-content {
@@ -20,11 +20,10 @@
 
   .manifesto-title {
     font-family: var(--font-primary);
-    font-size: clamp(3rem, 6.5vw, 5rem);
-    font-weight: 500;
-    line-height: 1.05;
-    margin-bottom: 24px;
-    letter-spacing: -2px;
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
     color: #ffffff;
 
     .text-cyan {
@@ -32,21 +31,80 @@
       text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
     }
 
-    @media (max-width: 768px) {
-      font-size: 2.8rem;
+    @media (max-width: 480px) {
+      font-size: 2.2rem;
     }
   }
 
   .manifesto-description {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     color: var(--text-secondary);
     max-width: 700px;
-    margin: 0 auto;
+    margin: 16px auto 0;
     line-height: 1.6;
 
     .text-neon {
       color: var(--cyan-neon);
       font-weight: 600;
+    }
+  }
+}
+
+/* --- GUIDE SECTION --- */
+.guide-section {
+  max-width: 1000px;
+  margin: 0 auto 100px;
+  padding: 0 20px;
+
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+
+  .guide-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    text-align: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      border-color: var(--cyan-neon);
+      background: rgba(0, 243, 255, 0.03);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+      .guide-icon {
+        color: var(--cyan-neon);
+        filter: drop-shadow(0 0 8px var(--cyan-neon));
+      }
+    }
+
+    .guide-icon {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    h3 {
+      font-family: var(--font-primary);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
     }
   }
 }
@@ -336,17 +394,23 @@
     }
   }
 
-  .fingo-brand-small {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    font-weight: 900;
+  .fingo-footer-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 
-    .fin {
-      color: var(--text-primary);
+    .fingo-brand-icon {
+      width: 48px;
+      height: 48px;
     }
 
-    .go {
-      color: var(--cyan-neon);
+    .fingo-brand {
+      font-size: 1.5rem;
+      font-weight: 800; // Um pouco mais forte para o footer
+      
+      .fin { color: var(--text-primary); }
+      .go { color: var(--cyan-neon); text-shadow: var(--glow-cyan); }
     }
 
     .version {
@@ -354,8 +418,9 @@
       font-size: 0.75rem;
       font-weight: 400;
       letter-spacing: 0.2em;
-      margin-top: 8px;
+      margin-top: 4px;
       text-transform: uppercase;
+      color: var(--text-muted);
     }
   }
 }
