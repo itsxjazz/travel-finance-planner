@@ -1,0 +1,166 @@
+.itinerary-wrapper { // CONTAINER PRINCIPAL
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+
+  &.expanded {
+    .chevron-icon {
+      transform: rotate(180deg);
+    }
+    .accordion-content {
+      grid-template-rows: 1fr;
+      margin-top: 24px;
+    }
+  }
+}
+
+.itinerary-header { // CABEÇALHO COM TÍTULO E CONTADOR DE ITENS
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .chevron-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-secondary);
+  }
+
+  .section-title {
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .count-badge {
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--cyan-neon, #00f3ff);
+    color: var(--cyan-neon, #00f3ff);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 50px;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+
+    &.empty {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--text-secondary);
+      box-shadow: none;
+    }
+  }
+}
+
+.accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s ease;
+
+  .accordion-inner {
+    overflow: hidden;
+  }
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.itinerary-item { // CADA ITEM DO ITINERÁRIO
+  background: rgba(255, 255, 255, 0.02);
+  padding: 16px 20px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--border-color, #2a2a3d);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: rgba(0, 243, 255, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateX(5px);
+  }
+
+  .item-info {
+    .category-indicator {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 4px;
+
+      &[data-category="CULTURA"] { color: #00f3ff; }
+      &[data-category="RESTAURANT"], &[data-category="GASTRONOMIA"] { color: #00b8c4; }
+      &[data-category="SHOPPING"] { color: #007a82; }
+    }
+
+    .item-name {
+      margin: 0;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+  }
+
+  /* --- BOTÃO REMOVER --- */
+  .btn-remove {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 140, 140, 0.15);
+      border-color: #ff8c8c;
+      color: #ff8c8c;
+      box-shadow: 0 0 15px rgba(255, 140, 140, 0.2);
+    }
+  }
+}
+
+/* --- ESTADOS VAZIOS (FEEDBACK VISUAL) --- */
+.empty-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  min-height: 180px;
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 80%;
+  }
+}
