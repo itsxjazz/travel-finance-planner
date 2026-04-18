@@ -1,0 +1,426 @@
+.about-container {
+  padding-top: 40px;
+  padding-bottom: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- HERO SECTION --- */
+.hero-manifesto {
+  position: relative;
+  text-align: center;
+  padding: 100px 20px 0;
+  margin-bottom: 60px;
+  overflow: hidden;
+
+  .manifesto-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .manifesto-title {
+    font-family: var(--font-primary);
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: #ffffff;
+
+    .text-cyan {
+      color: var(--cyan-neon);
+      text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+    }
+
+    @media (max-width: 480px) {
+      font-size: 2.2rem;
+    }
+  }
+
+  .manifesto-description {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 16px auto 0;
+    line-height: 1.6;
+
+    .text-neon {
+      color: var(--cyan-neon);
+      font-weight: 600;
+    }
+  }
+}
+
+/* --- GUIDE SECTION --- */
+.guide-section {
+  max-width: 1000px;
+  margin: 0 auto 100px;
+  padding: 0 20px;
+
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+
+  .guide-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    text-align: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      border-color: var(--cyan-neon);
+      background: rgba(0, 243, 255, 0.03);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+      .guide-icon {
+        color: var(--cyan-neon);
+        filter: drop-shadow(0 0 8px var(--cyan-neon));
+      }
+    }
+
+    .guide-icon {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    h3 {
+      font-family: var(--font-primary);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+  }
+}
+
+/* --- SECTION HEADINGS --- */
+.section-heading {
+  font-family: var(--font-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 40px;
+  text-align: center;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: var(--cyan-neon);
+    border-radius: 2px;
+  }
+}
+
+/* --- ARCHITECTURE CARDS --- */
+.architecture-section {
+  margin-bottom: 100px;
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    padding: 0 20px;
+  }
+
+  .tech-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 40px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+
+    &:hover {
+      transform: translateY(-8px);
+      border-color: var(--cyan-neon);
+      background: rgba(15, 23, 42, 0.6);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 243, 255, 0.05);
+
+      .card-icon {
+        color: var(--cyan-neon);
+        transform: scale(1.1);
+      }
+    }
+
+    .card-icon {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .card-title {
+      font-family: var(--font-primary);
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .card-text {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+  }
+}
+
+/* --- METHODOLOGY SECTION --- */
+.methodology-section {
+  margin-bottom: 100px;
+  padding: 0 20px;
+
+  .methodology-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr;
+    }
+
+    @media (max-width: 480px) {
+      min-width: 0;
+      gap: 20px;
+    }
+  }
+
+  .methodology-info {
+    padding: 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .section-heading {
+      text-align: left;
+      font-size: clamp(1.4rem, 4vw, 1.75rem);
+      margin-bottom: 24px;
+      
+      &::after {
+        left: 0;
+        transform: none;
+      }
+    }
+
+    .description-text {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 24px;
+
+      strong {
+        color: var(--text-primary);
+      }
+    }
+
+    .cdi-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: rgba(0, 243, 255, 0.08);
+      border: 1px solid rgba(0, 243, 255, 0.2);
+      border-radius: var(--radius-md);
+      
+      @media (max-width: 480px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+      }
+      
+      span {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.4;
+      }
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+
+    .fingo-brand-inline {
+      font-weight: 700;
+      color: var(--cyan-neon);
+    }
+  }
+}
+
+/* --- INTEGRATIONS TABLE --- */
+.integrations-section {
+  padding: 0 20px;
+  margin-bottom: 100px;
+
+  .integrations-table-wrapper {
+    overflow-x: auto;
+    padding: 0;
+    border: 1px solid var(--border-color);
+  }
+
+  .integrations-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+
+    th,
+    td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+      @media (max-width: 480px) {
+        padding: 12px 14px;
+      }
+    }
+
+    th {
+      font-family: var(--font-primary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: normal;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    tbody tr {
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: rgba(0, 243, 255, 0.03);
+
+        .service-name svg {
+          color: var(--cyan-neon);
+          filter: drop-shadow(0 0 5px var(--cyan-neon));
+        }
+      }
+
+      &:last-child td {
+        border-bottom: none;
+      }
+    }
+
+    .service-name {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+
+      svg {
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+      }
+    }
+
+    .api-name {
+      color: var(--cyan-neon);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      min-width: 100%;
+
+      .hide-mobile {
+        display: none;
+      }
+    }
+  }
+}
+
+/* --- FOOTER --- */
+.about-footer {
+  text-align: center;
+  margin-top: 40px;
+  color: var(--text-muted);
+
+  p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  .repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 40px;
+    transition: all 0.3s ease;
+
+    svg {
+      transition: all 0.3s ease;
+    }
+
+    &:hover {
+      background: rgba(0, 243, 255, 0.05);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+
+      svg {
+        transform: rotate(12deg) scale(1.1);
+      }
+    }
+  }
+
+  .fingo-footer-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    .fingo-brand-icon {
+      width: 48px;
+      height: 48px;
+    }
+
+    .fingo-brand {
+      font-size: 1.5rem;
+      font-weight: 800; // Um pouco mais forte para o footer
+      
+      .fin { color: var(--text-primary); }
+      .go { color: var(--cyan-neon); text-shadow: var(--glow-cyan); }
+    }
+
+    .version {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      margin-top: 4px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+  }
+}

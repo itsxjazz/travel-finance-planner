@@ -1,0 +1,11 @@
+.currency-chart-wrapper { // CONTAINER PRINCIPAL
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container { // CONTAINER DO GRÁFICO
+  height: 180px;
+  position: relative;
+  width: 100%;
+}

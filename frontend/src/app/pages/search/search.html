@@ -1,0 +1,60 @@
+<div class="search-container internal-page-wrapper">
+  <header class="search-header">
+    <h1 class="neon-title">Para onde <span>vamos?</span></h1>
+    <p class="subtitle">Busque o país que será o palco da sua próxima aventura.</p>
+  </header>
+
+  <div class="search-group">
+    <input
+      type="text"
+      class="search-input"
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+      (keyup.enter)="searchCountry()"
+      placeholder="Ex: França, Estados Unidos, Japão...">
+
+    <button
+      class="btn-neon"
+      (click)="searchCountry()"
+      [disabled]="isSearching()">
+      {{ isSearching() ? 'Buscando...' : 'Buscar' }}
+    </button>
+  </div>
+
+  <div *ngIf="hasSearched() && searchResults().length === 0" class="error-card">
+    <div class="error-content">
+      <h2 class="error-title">Destino não localizado</h2>
+      <p class="error-text">
+        Verifique a ortografia ou tente a busca em inglês.
+        Nosso radar cobre atualmente os 27 destinos globais mais procurados.
+      </p>
+
+      <div class="suggestion-footer">
+        <p>Seu destino dos sonhos ainda não está na lista?</p>
+        <a href="mailto:devjessicarodrigues@gmail.com?subject=Sugestão de Destino - FinGo"
+           class="btn-action btn-small">
+           Sugerir Novo Destino
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="searchResults().length > 0" class="results-grid">
+    <div *ngFor="let country of searchResults()" class="country-card">
+      <div class="flag-container">
+        <img [src]="country.flags.svg" [alt]="country.name.common" class="flag-img">
+      </div>
+
+      <div class="card-info">
+        <h3>{{ country.translations?.por?.common || country.name.common }}</h3>
+        <span class="currency">
+          Moeda local: <strong class="text-cyan">{{ getCurrencyCode(country) }}</strong>
+        </span>
+
+        <button (click)="selectCountry(country)" class="btn-action">
+          Planejar Viagem
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
