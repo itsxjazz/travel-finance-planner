@@ -27,14 +27,18 @@ const calculateBudget = async (req, res, next) => {
             dailyExpenses: data.dailyFoodBase * data.days
         };
 
-        // Salva o resultado no banco de dados para futuras consultas idênticas
-        await SearchCache.create({
-            cacheKey,
-            origin: originCode || 'GRU',
-            destination: cityName,
-            departureDate: departureDate || '2026-10-15',
-            data: breakdown
-        });
+        // Salva ou atualiza o resultado no banco de dados para evitar erros de chave duplicada (race condition)
+        await SearchCache.findOneAndUpdate(
+            { cacheKey },
+            {
+                cacheKey,
+                origin: originCode || 'GRU',
+                destination: cityName,
+                departureDate: departureDate || '2026-10-15',
+                data: breakdown
+            },
+            { upsert: true, new: true }
+        );
 
         res.json({
             success: true,

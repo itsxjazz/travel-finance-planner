@@ -40,13 +40,17 @@ const searchFlights = async (req, res, next) => {
 
         const mappedFlights = await searchFlightsKiwi(origin, destination, departureDate, cabinClass);
 
-        await SearchCache.create({
-            cacheKey,
-            origin,
-            destination,
-            departureDate,
-            data: mappedFlights
-        });
+        await SearchCache.findOneAndUpdate(
+            { cacheKey },
+            {
+                cacheKey,
+                origin,
+                destination,
+                departureDate,
+                data: mappedFlights
+            },
+            { upsert: true, new: true }
+        );
 
         res.json(mappedFlights);
 

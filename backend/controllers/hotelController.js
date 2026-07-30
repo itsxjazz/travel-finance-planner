@@ -35,12 +35,16 @@ const searchHotels = async (req, res, next) => {
             return res.status(404).json({ message: 'Destino não encontrado.' });
         }
 
-        await SearchCache.create({
-            cacheKey,
-            destination: location,
-            departureDate: checkinDateStr,
-            data: formattedHotels
-        });
+        await SearchCache.findOneAndUpdate(
+            { cacheKey },
+            {
+                cacheKey,
+                destination: location,
+                departureDate: checkinDateStr,
+                data: formattedHotels
+            },
+            { upsert: true, new: true }
+        );
 
         res.json(formattedHotels);
 
@@ -81,11 +85,15 @@ const getHotelDetails = async (req, res, next) => {
 
         const result = await getHotelDetailsExhaustive(hotelId, checkinDateStr, checkoutDateStr);
 
-        await SearchCache.create({
-            cacheKey,
-            destination: `hotel-${hotelId}`,
-            data: result
-        });
+        await SearchCache.findOneAndUpdate(
+            { cacheKey },
+            {
+                cacheKey,
+                destination: `hotel-${hotelId}`,
+                data: result
+            },
+            { upsert: true, new: true }
+        );
 
         res.json(result);
 
