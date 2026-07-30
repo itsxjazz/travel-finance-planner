@@ -6,7 +6,7 @@ const budgetController = require('../controllers/budgetController');
 // Limite de segurança: 5 orçamentos a cada 30 minutos por IP
 const budgetLimiter = rateLimit({
     windowMs: 30 * 60 * 1000, 
-    max: 5, 
+    max: 20, 
     message: { message: 'Muitas solicitações seguidas. Você pode gerar até 5 orçamentos a cada 30 minutos.' }
 });
 

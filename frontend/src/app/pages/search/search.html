@@ -42,11 +42,11 @@
   <div *ngIf="searchResults().length > 0" class="results-grid">
     <div *ngFor="let country of searchResults()" class="country-card">
       <div class="flag-container">
-        <img [src]="country.flags.svg" [alt]="country.name.common" class="flag-img">
+        <img [src]="country.flag?.url_svg || country.flag?.url_png" [alt]="country.names?.common" class="flag-img">
       </div>
 
       <div class="card-info">
-        <h3>{{ country.translations?.por?.common || country.name.common }}</h3>
+        <h3>{{ country.names?.translations?.por?.common || country.names?.common }}</h3>
         <span class="currency">
           Moeda local: <strong class="text-cyan">{{ getCurrencyCode(country) }}</strong>
         </span>

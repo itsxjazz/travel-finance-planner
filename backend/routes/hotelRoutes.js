@@ -5,7 +5,7 @@ const hotelController = require('../controllers/hotelController');
 
 const searchLimiter = rateLimit({
     windowMs: 30 * 60 * 1000, 
-    max: 5, 
+    max: 500, 
     message: { message: 'Limite de busca de hotéis atingido (5 a cada 30 min). Por favor, aguarde.' }
 });
 
