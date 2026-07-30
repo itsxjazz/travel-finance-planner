@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
+
 @Component({
   selector: 'app-search',
   standalone: true,
@@ -38,14 +40,15 @@ export class Search {
     this.isSearching.set(true);
     this.hasSearched.set(false);
 
-    const url = `https://restcountries.com/v3.1/translation/${this.searchQuery()}`;
+    const url = `${environment.apiUrl}/countries/search?q=${encodeURIComponent(this.searchQuery().trim())}`;
 
-    this.http.get<any[]>(url).subscribe({
-      next: (data) => {
+    this.http.get<any>(url).subscribe({
+      next: (response) => {
+        const data = response?.data?.objects || [];
         // FILTRO ESTRATÉGICO:
-        // Filtra o array 'data' para manter apenas países cujos códigos (cca3) estão na lista.
-        const filteredResults = data.filter(country =>
-          this.verifiedCountries.includes(country.cca3)
+        // Filtra o array 'data' para manter apenas países cujos códigos (alpha_3) estão na lista.
+        const filteredResults = data.filter((country: any) =>
+          country.codes?.alpha_3 && this.verifiedCountries.includes(country.codes.alpha_3)
         );
 
         this.searchResults.set(filteredResults);
@@ -63,12 +66,12 @@ export class Search {
 
   selectCountry(apiCountry: any) { // Quando o usuário clica em um país da lista de resultados
     const currencyCode = this.getCurrencyCode(apiCountry);
-    const countryName = apiCountry.translations?.por?.common || apiCountry.name.common;
+    const countryName = apiCountry.names?.translations?.por?.common || apiCountry.names?.common;
 
     const tripData = {
       destination: countryName,
       countryCode: currencyCode,
-      flagUrl: apiCountry.flags.svg
+      flagUrl: apiCountry.flag?.url_svg || apiCountry.flag?.url_png
     };
 
     this.router.navigate(['/planner'], { state: { tripData: tripData } });
@@ -76,6 +79,13 @@ export class Search {
 
   getCurrencyCode(country: any): string { // Retorna o código da moeda local
     if (!country || !country.currencies) return 'N/A';
+    
+    // Formato v5: Array de moedas
+    if (Array.isArray(country.currencies) && country.currencies.length > 0) {
+      return country.currencies[0].code || 'N/A';
+    }
+    
+    // Fallback para formato antigo v3.1 por segurança
     const keys = Object.keys(country.currencies);
     return keys.length > 0 ? keys[0] : 'N/A';
   }

@@ -9,7 +9,7 @@ const localsRoutes = require('./routes/localsRoutes');
 const currencyRoutes = require('./routes/currencyRoutes');
 const hotelRoutes = require('./routes/hotelRoutes');
 const flightRoutes = require('./routes/flightRoutes');
-
+const countryRoutes = require('./routes/countryRoutes');
 const app = express();
 
 app.set('trust proxy', 1);
@@ -30,6 +30,7 @@ app.use('/api/currency', currencyRoutes);
 app.use('/api/locals', localsRoutes);
 app.use('/api/hotels', hotelRoutes);
 app.use('/api/flights', flightRoutes);
+app.use('/api/countries', countryRoutes);
 
 const errorHandler = require('./middleware/errorHandler');
 
