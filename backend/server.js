@@ -22,6 +22,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Healthcheck endpoint leve para o UptimeRobot
+app.get('/health', (req, res) => res.status(200).json({ status: 'OK' }));
+
 // Rotas
 app.use('/api/trips', tripRoutes);
 app.use('/api/budget', budgetRoutes);
